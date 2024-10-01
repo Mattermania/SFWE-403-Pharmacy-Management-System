@@ -3,28 +3,32 @@ package com._5guys;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class Main {
-    public static Connection connect() {
-        Connection conn = null;
+    public static void main(String[] args) {
+        // Database URL
+        String url = "jdbc:sqlite:user_accounts.db"; // Specify the database file name here
+
+        // SQL statement for creating a new table
+        String sql = "CREATE TABLE IF NOT EXISTS users (" +
+                     "username TEXT PRIMARY KEY," +
+                     "password TEXT NOT NULL," +
+                     "email TEXT NOT NULL" +
+                     ");";
+
+        // Establish a connection
         try {
-            // db parameters
-            String url = "jdbc:sqlite:C:\\Users\\mdnol\\SFWE-403-Pharmacy-Management-System\\sfwe403\\src\\main\\java\\com\\_5guys\\user_accounts.db";
-            // create a connection to the database
-            conn = DriverManager.getConnection(url);
-            System.out.println("Connection to SQLite has been established.");
+            Class.forName("org.sqlite.JDBC");
+            Connection conn = DriverManager.getConnection(url); 
+            Statement stmt = conn.createStatement();
+            // Create a new table
+            stmt.execute(sql);
+            System.out.println("Table created successfully");
+        } catch (ClassNotFoundException e) {
+            System.out.println(e.getMessage());
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return conn;
-    }
-
-    public static void main(String[] args) {
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        connect();
     }
 }
