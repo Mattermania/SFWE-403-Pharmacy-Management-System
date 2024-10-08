@@ -1,3 +1,5 @@
+package com._5guys;
+
 public class CustomerAccount extends Account {
 
     public CustomerAccount(String username, String password, String name, String email, String phoneNumber, String address) {

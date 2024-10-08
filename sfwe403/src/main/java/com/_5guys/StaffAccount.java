@@ -1,3 +1,5 @@
+package com._5guys;
+
 public class StaffAccount extends Account {
 
     public StaffAccount(String username, String password, String name, String email, String phoneNumber, String address) {

@@ -1,3 +1,5 @@
+package com._5guys;
+
 public abstract class Account {
     protected String username;
     protected String password;

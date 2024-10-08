@@ -1,3 +1,5 @@
+package com._5guys;
+
 public class PharmacistAccount extends Account {
 
     public PharmacistAccount(String username, String password, String name, String email, String phoneNumber, String address) {
