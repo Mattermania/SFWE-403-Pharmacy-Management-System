@@ -13,5 +13,6 @@
             "database": "user_accounts",
             "username": "Mattermania"
         }
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

@@ -5,7 +5,7 @@
             "type": "java",
             "name": "Run My Java Program",
             "request": "launch",
-            "mainClass": "com._5guys.Main",  // Update to your main class
+            "mainClass": "com._5guys.Application",  // Update to your main class
             "vmArgs": "-DmyProperty=myValue"  // JVM arguments (optional)
         }
     ]
