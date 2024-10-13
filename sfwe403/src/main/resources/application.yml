@@ -1,0 +1,54 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:./testdatabase.db
+    username: postgresuser
+    password: securepassword
+  jpa:
+    database-platform: org.sqlite.JDBC
+    generate-ddl: true
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+        dialect: com._5guys.SQLiteDialect
+        jakarta:
+          persistence:
+            sharedCache:
+              mode: ALL
+        format_sql: true
+  thymeleaf:
+    check-template-location: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1000MB
+      max-request-size: 1000MB
+  mvc:
+    throw-exception-if-no-handler-found: true
+    async:
+      request-timeout: 3600000
+server:
+  port: 8080
+  error:
+    path: /user/error
+    whitelabel:
+      enabled: false
+
+
+# spring:
+#   datasource:
+#     url: jdbc:sqlite:./testdatabase.db
+#     driver-class-name: org.sqlite.JDBC
+#   jpa:
+#     hibernate:
+#       ddl-auto: update
+#     properties:
+#       hibernate:
+#         dialect: com._5guys.SQLiteDialect
+#         jakarta:
+#           persistence:
+#             sharedCache:
+#               mode: ALL

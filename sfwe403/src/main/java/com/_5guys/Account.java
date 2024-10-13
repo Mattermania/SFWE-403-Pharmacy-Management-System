@@ -1,6 +1,31 @@
 package com._5guys;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
+
+import org.hibernate.annotations.UuidGenerator;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(NON_DEFAULT)
+@Table(name = "accounts")
 public abstract class Account {
+    @Id
+    @UuidGenerator
+    @Column(name = "id", unique = true, updatable = false)
+    private String id;
     protected String username;
     protected String password;
     protected String name;
