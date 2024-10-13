@@ -45,11 +45,15 @@ public class AccountResource {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Account> searchAccountByUsernameAndPassword(
+    public ResponseEntity<Account> searchAccountByUsernameEmailAndPassword(
             @RequestParam("username") String username,
+            @RequestParam("username") String email,
             @RequestParam("password") String password) {
         
         Account account = accountService.findByUsernameAndPassword(username, password);
+        if (account == null) {
+            account = accountService.findByEmailAndPassword(email, password);
+        }
         return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
     }
     

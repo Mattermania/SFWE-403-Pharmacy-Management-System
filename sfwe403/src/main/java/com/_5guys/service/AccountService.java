@@ -42,6 +42,10 @@ public class AccountService {
         return accountRepo.findByUsernameAndPassword(username, password);
     }
 
+    public Account findByEmailAndPassword(String email, String password) {
+        return accountRepo.findByEmailAndPassword(email, password);
+    }
+
     public Page<Account> getAllAccounts(int page, int size) {
         return accountRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
     }

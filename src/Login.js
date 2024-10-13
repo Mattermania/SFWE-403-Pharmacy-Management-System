@@ -18,6 +18,7 @@ const LoginForm = () => {
             const response = await axios.get('http://localhost:8080/accounts/search', { 
                 params: { 
                     username: username, 
+                    email: username, 
                     password: password 
                 }
             });
