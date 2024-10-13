@@ -14,17 +14,17 @@ const LoginForm = () => {
         event.preventDefault();
 
         try {
-            // Send GET request with query parameters for name and email
-            const response = await axios.get('http://localhost:8080/contacts/search', { 
+            // Send GET request with query parameters for username and password
+            const response = await axios.get('http://localhost:8080/accounts/search', { 
                 params: { 
-                    name: username, 
-                    email: password 
+                    username: username, 
+                    password: password 
                 }
             });
             // If the response is successful, you can handle it accordingly
             if (response.status === 200 && response.data) {
                 // Here, you might want to handle successful login, for example:
-                setLoginMessage('Login successful!' + ' ' + response.data.name);
+                setLoginMessage('Login successful!'); // + ' ' + response.data.id);
                 setErrorMessage(''); // Clear any previous error message
             } else {
                 // If the response does not contain valid user data

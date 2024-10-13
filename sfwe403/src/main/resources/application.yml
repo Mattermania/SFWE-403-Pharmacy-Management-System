@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:sqlite:./testdatabase.db
+    url: jdbc:sqlite:./user_accounts.db
     username: postgresuser
     password: securepassword
   jpa:
@@ -13,7 +13,7 @@ spring:
     properties:
       hibernate:
         globally_quoted_identifiers: true
-        dialect: com._5guys.SQLiteDialect
+        dialect: org.hibernate.dialect.MySQLDialect
         jakarta:
           persistence:
             sharedCache:

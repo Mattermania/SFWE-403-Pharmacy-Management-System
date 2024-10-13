@@ -1,7 +1,9 @@
-package com._5guys;
+package com._5guys.repo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com._5guys.domain.Account;
 
 import java.util.Optional;
 
@@ -14,7 +16,7 @@ import java.util.Optional;
  */
 
 @Repository
-public interface ContactRepo extends JpaRepository<Contact, String> {
-    Optional<Contact> findById(String id);
-    Contact findByNameAndEmail(String name, String email);
+public interface AccountRepo extends JpaRepository<Account, String> {
+    Optional<Account> findById(String id);
+    Account findByUsernameAndPassword(String username, String password);
 }

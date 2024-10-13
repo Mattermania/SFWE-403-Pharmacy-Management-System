@@ -62,10 +62,18 @@
             <version>2.15.2</version>
         </dependency>
 
+        <!-- Hibernate Core -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>6.0.0.Final</version>
+            <version>6.0.0.Final</version> <!-- or the latest version -->
+        </dependency>
+
+        <!-- Hibernate Community Dialects -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-community-dialects</artifactId>
+            <version>6.0.0.Final</version> <!-- or the latest version -->
         </dependency>
 
         <dependency>

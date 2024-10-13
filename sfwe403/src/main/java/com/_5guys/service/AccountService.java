@@ -1,4 +1,4 @@
-package com._5guys;
+package com._5guys.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com._5guys.domain.Account;
+import com._5guys.repo.AccountRepo;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,7 +20,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com._5guys.Constant.PHOTO_DIRECTORY;
+import static com._5guys.constant.Constant.PHOTO_DIRECTORY;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
@@ -32,35 +35,35 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 @Slf4j
 @Transactional(rollbackOn = Exception.class)
 @RequiredArgsConstructor
-public class ContactService {
-    private final ContactRepo contactRepo;
+public class AccountService {
+    private final AccountRepo accountRepo;
 
-    public Contact findByNameAndEmail(String name, String email) {
-        return contactRepo.findByNameAndEmail(name, email);
+    public Account findByUsernameAndPassword(String username, String password) {
+        return accountRepo.findByUsernameAndPassword(username, password);
     }
 
-    public Page<Contact> getAllContacts(int page, int size) {
-        return contactRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
+    public Page<Account> getAllAccounts(int page, int size) {
+        return accountRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
     }
 
-    public Contact getContact(String id) {
-        return contactRepo.findById(id).orElseThrow(() -> new RuntimeException("Contact not found"));
+    public Account getAccount(String id) {
+        return accountRepo.findById(id).orElseThrow(() -> new RuntimeException("Account not found"));
     }
 
-    public Contact createContact(Contact contact) {
-        return contactRepo.save(contact);
+    public Account createAccount(Account account) {
+        return accountRepo.save(account);
     }
 
-    public void deleteContact(Contact contact) {
+    public void deleteAccount(Account account) {
         // Assignment
     }
 
     public String uploadPhoto(String id, MultipartFile file) {
         log.info("Saving picture for user ID: {}", id);
-        Contact contact = getContact(id);
+        Account account = getAccount(id);
         String photoUrl = photoFunction.apply(id, file);
-        contact.setPhotoUrl(photoUrl);
-        contactRepo.save(contact);
+        account.setPhotoUrl(photoUrl);
+        accountRepo.save(account);
         return photoUrl;
     }
 
@@ -75,7 +78,7 @@ public class ContactService {
             Files.copy(image.getInputStream(), fileStorageLocation.resolve(filename), REPLACE_EXISTING);
             return ServletUriComponentsBuilder
                     .fromCurrentContextPath()
-                    .path("/contacts/image/" + filename).toUriString();
+                    .path("/accounts/image/" + filename).toUriString();
         }catch (Exception exception) {
             throw new RuntimeException("Unable to save image");
         }

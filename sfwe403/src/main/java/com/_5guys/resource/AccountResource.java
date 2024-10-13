@@ -1,4 +1,4 @@
-package com._5guys;
+package com._5guys.resource;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -6,48 +6,51 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com._5guys.domain.Account;
+import com._5guys.service.AccountService;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static com._5guys.Constant.PHOTO_DIRECTORY;
+import static com._5guys.constant.Constant.PHOTO_DIRECTORY;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/contacts")
+@RequestMapping("/accounts")
 @RequiredArgsConstructor
-public class ContactResource {
-    private final ContactService contactService;
+public class AccountResource {
+    private final AccountService accountService;
 
     @PostMapping
-    public ResponseEntity<Contact> createContact(@RequestBody Contact contact) {
-        Contact createdContact = contactService.createContact(contact);
-        URI location = URI.create(String.format("/contacts/%s", createdContact.getId())); // Corrected the URI creation
-        return ResponseEntity.created(location).body(createdContact);
+    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
+        Account createdAccount = accountService.createAccount(account);
+        URI location = URI.create(String.format("/accounts/%s", createdAccount.getId())); // Corrected the URI creation
+        return ResponseEntity.created(location).body(createdAccount);
     }
 
     @GetMapping
-    public ResponseEntity<Page<Contact>> getContacts(@RequestParam(value = "page", defaultValue = "0") int page,
+    public ResponseEntity<Page<Account>> getAccounts(@RequestParam(value = "page", defaultValue = "0") int page,
                                                      @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok(contactService.getAllContacts(page, size));
+        return ResponseEntity.ok(accountService.getAllAccounts(page, size));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Contact> getContact(@PathVariable(value = "id") String id) {
-        Contact contact = contactService.getContact(id);
-        return contact != null ? ResponseEntity.ok(contact) : ResponseEntity.notFound().build();
+    public ResponseEntity<Account> getAccount(@PathVariable(value = "id") String id) {
+        Account account = accountService.getAccount(id);
+        return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Contact> searchContactByNameAndEmail(
-            @RequestParam("name") String name,
-            @RequestParam("email") String email) {
+    public ResponseEntity<Account> searchAccountByUsernameAndPassword(
+            @RequestParam("username") String username,
+            @RequestParam("password") String password) {
         
-        Contact contact = contactService.findByNameAndEmail(name, email);
-        return contact != null ? ResponseEntity.ok(contact) : ResponseEntity.notFound().build();
+        Account account = accountService.findByUsernameAndPassword(username, password);
+        return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
     }
     
 
@@ -55,7 +58,7 @@ public class ContactResource {
     public ResponseEntity<String> uploadPhoto(@RequestParam("id") String id, @RequestParam("file") MultipartFile file) {
         // Consider adding error handling here (e.g., invalid file type, size too large)
         try {
-            String responseMessage = contactService.uploadPhoto(id, file);
+            String responseMessage = accountService.uploadPhoto(id, file);
             return ResponseEntity.ok(responseMessage);
         } catch (Exception e) {
             return ResponseEntity.badRequest()

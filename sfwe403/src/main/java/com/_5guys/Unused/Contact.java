@@ -1,4 +1,4 @@
-package com._5guys;
+package com._5guys.Unused;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
@@ -28,7 +28,7 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(NON_DEFAULT)
-@Table(name = "contacts")
+@Table(name = "accounts")
 public class Contact {
     @Id
     @UuidGenerator

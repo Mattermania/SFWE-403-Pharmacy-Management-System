@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const USERS_REST_API_URL = 'http://localhost:8080/contacts';
+const USERS_REST_API_URL = 'http://localhost:8080/accounts';
 
 class UserService {
     getUsers() {
