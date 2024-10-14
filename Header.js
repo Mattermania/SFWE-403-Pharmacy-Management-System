@@ -1,9 +1,11 @@
+import { Heading } from "./styles/LoginFormStyles"
+
 const Header = () => {
     return(
         <header>
-            <h1>
+            <Heading style={{color: 'white'}}>
                 2024 Pharmacy Management System
-            </h1>
+            </Heading>
         </header>
     )
 }

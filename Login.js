@@ -1,55 +1,111 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { FormContainer, Form, Button, Input, LinkText, AnimationContainer, InputContainer, EyeButton } from './styles/LoginFormStyles';
+import Lottie from 'lottie-react';
+import pharmacyAnimation from './animations/pharmacy_animation.json';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const LoginForm = () => {
-    const[username, setUsername ] =useState('');
-    const[password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [successfulLoginMessage, setLoginMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false); 
+    const navigate = useNavigate();
 
-
-    const handleLogin = (event) => {
+    const handleLogin = async (event) => {
         event.preventDefault();
-        console.log('Login attempted with username:', username, 'and password:', password);
-    };
-    
-    return(
-        <div style={{display: 'flex', justifyContent: 'center',marginTop : '2rem'}}>
-            <form onSubmit={handleLogin}>
-                <label> Enter Username:
-                    <input
-                        type = "text" 
-                        value = {username}
-                        onChange = {(e) => setUsername(e.target.value)}
-                        style={{marginBottom: '1rem',padding :'0.5rem',width : '100%'}}
-                    >
 
-                    </input>
+        if (username === "pharmacist" && password === "1234") {
+            // Redirect to pharmacist page
+            navigate('/pharmacist');
+            setLoginMessage('Login successful!');
+            setErrorMessage('');
+            return;
+        }
+    
+        try {
+            const response = await axios.get('http://localhost:8080/accounts/search', { 
+                params: { 
+                    username: username, 
+                    email: username, 
+                    password: password 
+                }
+            });
+
+            if (response.status === 200 && response.data) {
+                navigate('/inventory');
+                setLoginMessage('Login successful!');
+                setErrorMessage('');
+            } else {
+                setErrorMessage('Invalid username or password.');
+            }
+        } catch (error) {
+            if (error.response) {
+                if (error.response.status === 404) {
+                    setErrorMessage('Invalid username or password.');
+                } else {
+                    setErrorMessage('Error submitting request: ' + error.message);
+                }
+            } else {
+                setErrorMessage('Network error: ' + error.message);
+            }
+        }
+    };
+
+    return (
+        <FormContainer>
+            <AnimationContainer>
+                <Lottie animationData={pharmacyAnimation} loop={false} speed={0.25} />
+            </AnimationContainer>
+            <Form onSubmit={handleLogin}>
+                <label> Enter Username:
+                    <Input
+                        type="text" placeholder='username/email'
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
                 </label>
                 <label> Enter Password:
-                    <input
-                    type = "password"
-                    value = {password}
-                    onChange = {(e) => setPassword(e.target.value)}
-                    style={{marginBottom : '1rem',padding :'0.5rem', width :"100%"}}>
-                    </input>
-
+                    <InputContainer> {/* Container for input and eye button */}
+                        <Input
+                            type={showPassword ? "text" : "password"} placeholder='password'
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <EyeButton
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </EyeButton>
+                    </InputContainer>
                 </label>
-                <button type = "submit" 
-                style ={{padding :'0.5rem 1rem'}}>
+
+                {errorMessage && (
+                    <p style={{ color: 'red' }}>{errorMessage}</p>
+                )}
+
+                {successfulLoginMessage && (
+                    <p style={{ color: 'green' }}>{successfulLoginMessage}</p>
+                )}
+
+                <Button type="submit">
                     Login
-                </button>
-                <Link to ="/signup">
-                    <button type = "button" style={{ padding: '0.5rem 1rem', marginLeft: '1rem' }}>
+                </Button>
+
+                <LinkText to="/signup">
+                    <Button type="button">
                         Signup
-                    </button>
-                </Link>
-                <Link to = "/forgotpassword" style={{ padding: '0.5rem 1rem', marginLeft: '1rem' }}>
+                    </Button>
+                </LinkText>
+                <LinkText to="/forgotpassword">
                     Forgot password?
-                </Link>
-            </form>
-        </div>
-    )
-    
-}
+                </LinkText>
+            </Form>
+        </FormContainer>
+    );
+};
+
 export default LoginForm;
-
-
