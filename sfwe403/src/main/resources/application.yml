@@ -1,10 +1,11 @@
 spring:
   datasource:
-    url: jdbc:sqlite:./user_accounts.db
-    username: postgresuser
-    password: securepassword
+    url: jdbc:h2:file:./user_accounts
+    driver-class-name: org.h2.Driver # SQLite JDBC driver
+    username: sa
+    password: password
   jpa:
-    database-platform: org.sqlite.JDBC
+    database-platform: org.hibernate.dialect.H2Dialect
     generate-ddl: true
     show-sql: true
     open-in-view: false
@@ -13,7 +14,8 @@ spring:
     properties:
       hibernate:
         globally_quoted_identifiers: true
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.H2Dialect
+        hbm2ddl.auto: update  # Use 'update' or 'create' as needed
         jakarta:
           persistence:
             sharedCache:
@@ -36,19 +38,3 @@ server:
     path: /user/error
     whitelabel:
       enabled: false
-
-
-# spring:
-#   datasource:
-#     url: jdbc:sqlite:./testdatabase.db
-#     driver-class-name: org.sqlite.JDBC
-#   jpa:
-#     hibernate:
-#       ddl-auto: update
-#     properties:
-#       hibernate:
-#         dialect: com._5guys.SQLiteDialect
-#         jakarta:
-#           persistence:
-#             sharedCache:
-#               mode: ALL
