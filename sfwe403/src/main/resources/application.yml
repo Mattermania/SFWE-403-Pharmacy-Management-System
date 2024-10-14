@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:./user_accounts
+    driver-class-name: org.h2.Driver # SQLite JDBC driver
+    username: sa
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+        dialect: org.hibernate.dialect.H2Dialect
+        hbm2ddl.auto: update  # Use 'update' or 'create' as needed
+        jakarta:
+          persistence:
+            sharedCache:
+              mode: ALL
+        format_sql: true
+  thymeleaf:
+    check-template-location: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1000MB
+      max-request-size: 1000MB
+  mvc:
+    throw-exception-if-no-handler-found: true
+    async:
+      request-timeout: 3600000
+server:
+  port: 8080
+  error:
+    path: /user/error
+    whitelabel:
+      enabled: false
