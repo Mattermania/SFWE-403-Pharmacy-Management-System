@@ -1,20 +1,23 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
+
 // Light blue color scheme with complementary colors
 const primaryColor = '#ADD8E6'; // Light Blue
 const secondaryColor = '#4F74BF'; // Darker Blue for accents
 const borderColor = '#CCCCCC'; // Light grey for borders
 const textColor = '#333333'; // Dark grey for text
 
+export const PharmacistContainer = styled.div`
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+`;
 
-/*export const LoginPageBackground = styled.div`
-  display: flex;
-  height: 100vh;
-  background-image: url('/images/login.jpg'); 
-  background-size: cover;
-  box-shadow: inset 0 0 0 2000px rgba(0,0,0,0.7);
-`;*/
+export const Title = styled.h1`
+  color: #333;
+`;
 
 export const AnimationContainer = styled.div`
   display: flex;
@@ -83,3 +86,42 @@ export const Heading = styled.h1`
   padding: 1rem;
 `;
 
+export const EyeButton = styled.button`
+  position: absolute;
+  right: 10px; /* Position it closer to the right edge of the input */
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: ${secondaryColor};
+  padding: 0; /* Adjust padding to fit inside the input */
+  margin: 0; /* Remove default margin */
+  z-index: 1; /* Ensure it's above the input field */
+  &:hover {
+    color: #365B93; /* Change color on hover */
+  }
+`;
+
+export const InputContainer = styled.div`
+  position: relative; /* Needed for EyeButton positioning */
+  display: flex;
+`;
+
+export const InventoryList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+export const InventoryItem = styled.li`
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+`;
+
+export const WarningText = styled.span`
+  color: red;
+  font-weight: bold;
+`;

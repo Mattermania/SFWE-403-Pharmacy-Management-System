@@ -1,20 +1,31 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {FormContainer,Form,Button,Input,LinkText,AnimationContainer} from './styles/LoginFormStyles';
+import { FormContainer, Form, Button, Input, LinkText, AnimationContainer, InputContainer, EyeButton } from './styles/LoginFormStyles';
 import Lottie from 'lottie-react';
-import pharmacyAnimation from './animations/pharmacy_animation.json'; 
+import pharmacyAnimation from './animations/pharmacy_animation.json';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const LoginForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [successfulLoginMessage, setLoginMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false); 
+    const navigate = useNavigate();
 
     const handleLogin = async (event) => {
         event.preventDefault();
 
+        if (username === "pharmacist" && password === "1234") {
+            // Redirect to pharmacist page
+            navigate('/pharmacist');
+            setLoginMessage('Login successful!');
+            setErrorMessage('');
+            return;
+        }
+    
         try {
-            // Send GET request with query parameters for username and password
             const response = await axios.get('http://localhost:8080/accounts/search', { 
                 params: { 
                     username: username, 
@@ -22,27 +33,22 @@ const LoginForm = () => {
                     password: password 
                 }
             });
-            // If the response is successful, you can handle it accordingly
+
             if (response.status === 200 && response.data) {
-                // Here, you might want to handle successful login, for example:
-                setLoginMessage('Login successful!'); // + ' ' + response.data.id);
-                setErrorMessage(''); // Clear any previous error message
+                navigate('/inventory');
+                setLoginMessage('Login successful!');
+                setErrorMessage('');
             } else {
-                // If the response does not contain valid user data
                 setErrorMessage('Invalid username or password.');
             }
         } catch (error) {
-            // Check if the error response exists
             if (error.response) {
-                // Handle the case where the resource was not found (404)
                 if (error.response.status === 404) {
-                    setErrorMessage('Invalid username or password.'); // Inform the user
+                    setErrorMessage('Invalid username or password.');
                 } else {
-                    // Handle other server errors
                     setErrorMessage('Error submitting request: ' + error.message);
                 }
             } else {
-                // Handle network errors or other non-response related issues
                 setErrorMessage('Network error: ' + error.message);
             }
         }
@@ -62,17 +68,25 @@ const LoginForm = () => {
                     />
                 </label>
                 <label> Enter Password:
-                    <Input
-                        type="password" placeholder='password'
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                    <InputContainer> {/* Container for input and eye button */}
+                        <Input
+                            type={showPassword ? "text" : "password"} placeholder='password'
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <EyeButton
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </EyeButton>
+                    </InputContainer>
                 </label>
 
                 {errorMessage && (
                     <p style={{ color: 'red' }}>{errorMessage}</p>
                 )}
-                
+
                 {successfulLoginMessage && (
                     <p style={{ color: 'green' }}>{successfulLoginMessage}</p>
                 )}

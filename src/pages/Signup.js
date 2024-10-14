@@ -1,67 +1,71 @@
 import React, { useState } from 'react';
-import { FormContainer,Form,Input,Button } from '../styles/LoginFormStyles';
+import { FormContainer, Form, Input, Button, EyeButton, InputContainer } from '../styles/LoginFormStyles';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const SignUpForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [email,setEmail] = useState('')
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('customer'); 
+  const [showPassword, setShowPassword] = useState(false); 
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSignUp = (event) => {
     event.preventDefault();
-
-    if(password.length < 8){
-      alert("Password is not fit NIST standard. Must be 8");
-    }
-    if (password === confirmPassword) {
-      console.log('Sign up attempted with username:', username, 'and password:', password);
-    } else {
-      alert('Passwords do not match');
-    }
+    // Add your sign-up logic here
   };
 
   return (
-    <FormContainer >
-      <Form onSubmit={handleSignUp} >
+    <FormContainer>
+      <Form onSubmit={handleSignUp}>
         <label>
           Username:
           <Input
-            type="text" 
+            type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-          </label>
+        </label>
 
-          <label>
-            Email:
-            <Input
-            type = "text"
+        <label>
+          Email:
+          <Input
+            type="email"
             value={email}
-            onChange ={(e) =>setEmail(e.target.value)}
-            />
-            
-          </label>
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </label>
+
         <label>
           Password:
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+            <Input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
         </label>
+
         <label>
           Confirm Password:
-          <Input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            style={{ marginBottom: '1rem', padding: '0.5rem', width: '100%' }}
-          />
+            <Input
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
         </label>
-        <Button 
-        type="submit" style={{ padding: '0.5rem 1rem' }}>
-          Sign Up
-        </Button>
+
+        <label>
+          Role:
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="customer">Customer</option>
+            <option value="pharmacist">Pharmacist</option>
+            <option value="staff">Staff Member</option>
+            <option value="manager">Manager</option>
+          </select>
+        </label>
+
+        <Button type="submit">Sign Up</Button>
       </Form>
     </FormContainer>
   );
