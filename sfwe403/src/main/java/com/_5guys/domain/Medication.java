@@ -27,18 +27,18 @@ public class Medication {
     private String id;
     @Column(name = "name", unique = true, updatable = true, nullable = false)
     protected String name;
-    @Column(name = "dosage", unique = false, updatable = true, nullable = false)
-    protected int dosage;
-    @Column(name = "dosage_type", unique = false, updatable = true, nullable = false)
-    protected int dosageType;
-    @Column(name = "frequency", unique = false, updatable = true, nullable = false)
-    protected int frequency;
-    @Column(name = "frequency_type", unique = false, updatable = true, nullable = false)
-    protected int frequencyType;
-    @Column(name = "manufacturer", unique = true, updatable = true, nullable = false)
-    protected String manufacturer;
+    // @Column(name = "dosage", unique = false, updatable = true, nullable = false)
+    // protected int dosage;
+    // @Column(name = "dosage_type", unique = false, updatable = true, nullable = false)
+    // protected String dosageType;
+    // @Column(name = "frequency", unique = false, updatable = true, nullable = false)
+    // protected int frequency;
+    // @Column(name = "frequency_type", unique = false, updatable = true, nullable = false)
+    // protected String frequencyType;
+    // @Column(name = "manufacturer", unique = true, updatable = true, nullable = false)
+    // protected String manufacturer;
     @Column(name = "quantity", unique = true, updatable = true, nullable = false)
     protected int quantity;
-    @Column(name = "expiration_date", unique = true, updatable = true, nullable = false)
-    protected String expirationDate;
+    // @Column(name = "expiration_date", unique = true, updatable = true, nullable = false)
+    // protected String expirationDate;
 }

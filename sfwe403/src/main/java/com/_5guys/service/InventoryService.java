@@ -3,8 +3,9 @@ package com._5guys.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+
+import java.util.List;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +27,8 @@ import com._5guys.repo.InventoryRepo;
 public class InventoryService {
     private final InventoryRepo inventoryRepo;
 
-    public Page<Medication> getAllMedications(int page, int size) {
-        return inventoryRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
+    public List<Medication> getAllMedications() {
+        return inventoryRepo.findAll(Sort.by("name"));
     }
 
     public Medication getInventory(String id) {

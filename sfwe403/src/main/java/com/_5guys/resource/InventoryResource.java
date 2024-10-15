@@ -1,7 +1,6 @@
 package com._5guys.resource;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +8,7 @@ import com._5guys.domain.Medication;
 import com._5guys.service.InventoryService;
 
 import java.net.URI;
+import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -25,9 +25,8 @@ public class InventoryResource {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Medication>> getMedications(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                     @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok(inventoryService.getAllMedications(page, size));
+    public ResponseEntity<List<Medication>> getMedications() {
+        return ResponseEntity.ok(inventoryService.getAllMedications());
     }
 
     @GetMapping("/{id}")
