@@ -30,12 +30,25 @@ const LoginForm = () => {
                 setLoginMessage('Login successful!');
                 setErrorMessage('');
 
-                if (response.data.role == "PHARMACIST") {
+                if (response.data.role == "CUSTOMER") {
+                    // Redirect to customer page
+                    
+                }
+                else if (response.data.role == "STAFF") {
+                    // Redirect to staff page
+                    
+                }
+                else if (response.data.role == "PHARMACIST") {
                     // Redirect to pharmacist page
                     navigate('/pharmacist');
                 }
+                else if (response.data.role == "MANAGER") {
+                    // Redirect to manager page
+                    //navigate('/inventory');
+                }
                 else {
-                    navigate('/inventory');
+                    // Account wasn't initialized with a role
+                    setErrorMessage('Invalid user account.');
                 }
             } else {
                 setErrorMessage('Invalid username or password.');
