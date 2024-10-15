@@ -8,7 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com._5guys.domain.Inventory;
+import com._5guys.domain.Medication;
 import com._5guys.repo.InventoryRepo;
 
 /**
@@ -26,19 +26,19 @@ import com._5guys.repo.InventoryRepo;
 public class InventoryService {
     private final InventoryRepo inventoryRepo;
 
-    public Page<Inventory> getAllInventorys(int page, int size) {
+    public Page<Medication> getAllMedications(int page, int size) {
         return inventoryRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
     }
 
-    public Inventory getInventory(String id) {
-        return inventoryRepo.findById(id).orElseThrow(() -> new RuntimeException("Inventory not found"));
+    public Medication getInventory(String id) {
+        return inventoryRepo.findById(id).orElseThrow(() -> new RuntimeException("Medication not found"));
     }
 
-    public Inventory createInventory(Inventory inventory) {
-        return inventoryRepo.save(inventory);
+    public Medication createMedication(Medication medication) {
+        return inventoryRepo.save(medication);
     }
 
-    public void deleteInventory(Inventory inventory) {
+    public void deleteMedication(Medication medication) {
         // Assignment
     }
 }

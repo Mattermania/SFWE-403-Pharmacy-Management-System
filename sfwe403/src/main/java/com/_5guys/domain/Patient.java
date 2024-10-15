@@ -25,18 +25,16 @@ public class Patient {
     @UuidGenerator
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private String id;
-    @Column(name = "username", unique = true, updatable = true, nullable = false)
-    protected String username;
-    @Column(name = "password", unique = false, updatable = true, nullable = false)
-    protected String password;
     @Column(name = "name", unique = false, updatable = true, nullable = false)
     protected String name;
-    @Column(name = "email", unique = true, updatable = true, nullable = false)
-    protected String email;
-    @Column(name = "phone_number", unique = false, updatable = true, nullable = false)
-    protected String phoneNumber;
+    @Column(name = "date_of_birth", unique = false, updatable = true, nullable = false)
+    protected String dateOfBirth;
     @Column(name = "address", unique = false, updatable = true, nullable = false)
     protected String address;
-    
-    private String photoUrl;
+    @Column(name = "phone_number", unique = false, updatable = true, nullable = false)
+    protected String phoneNumber;
+    @Column(name = "email", unique = true, updatable = true, nullable = false)
+    protected String email;
+    @Column(name = "insurance", unique = false, updatable = true, nullable = false)
+    protected String insurance;
 }
