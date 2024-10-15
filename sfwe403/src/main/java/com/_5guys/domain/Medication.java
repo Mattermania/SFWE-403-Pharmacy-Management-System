@@ -35,10 +35,10 @@ public class Medication {
     // protected int frequency;
     // @Column(name = "frequency_type", unique = false, updatable = true, nullable = false)
     // protected String frequencyType;
-    // @Column(name = "manufacturer", unique = true, updatable = true, nullable = false)
+    // @Column(name = "manufacturer", unique = false, updatable = true, nullable = false)
     // protected String manufacturer;
-    @Column(name = "quantity", unique = true, updatable = true, nullable = false)
+    @Column(name = "quantity", unique = false, updatable = true, nullable = false)
     protected int quantity;
-    // @Column(name = "expiration_date", unique = true, updatable = true, nullable = false)
+    // @Column(name = "expiration_date", unique = false, updatable = true, nullable = false)
     // protected String expirationDate;
 }
