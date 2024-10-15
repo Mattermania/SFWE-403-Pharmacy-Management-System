@@ -30,12 +30,12 @@ const LoginForm = () => {
                 setLoginMessage('Login successful!');
                 setErrorMessage('');
 
-                if (response.data.role == "CUSTOMER") {
-                    // Redirect to customer page
+                if (response.data.role == "CASHIER") {
+                    // Redirect to cashier page
                     
                 }
-                else if (response.data.role == "STAFF") {
-                    // Redirect to staff page
+                else if (response.data.role == "TECHNICIAN") {
+                    // Redirect to technician page
                     
                 }
                 else if (response.data.role == "PHARMACIST") {
