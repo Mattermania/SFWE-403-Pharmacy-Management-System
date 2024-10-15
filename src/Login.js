@@ -17,14 +17,6 @@ const LoginForm = () => {
     const handleLogin = async (event) => {
         event.preventDefault();
 
-        if (username === "pharmacist" && password === "1234") {
-            // Redirect to pharmacist page
-            navigate('/pharmacist');
-            setLoginMessage('Login successful!');
-            setErrorMessage('');
-            return;
-        }
-    
         try {
             const response = await axios.get('http://localhost:8080/accounts/search', { 
                 params: { 
@@ -35,9 +27,16 @@ const LoginForm = () => {
             });
 
             if (response.status === 200 && response.data) {
-                navigate('/inventory');
                 setLoginMessage('Login successful!');
                 setErrorMessage('');
+
+                if (response.data.role == "PHARMACIST") {
+                    // Redirect to pharmacist page
+                    navigate('/pharmacist');
+                }
+                else {
+                    navigate('/inventory');
+                }
             } else {
                 setErrorMessage('Invalid username or password.');
             }

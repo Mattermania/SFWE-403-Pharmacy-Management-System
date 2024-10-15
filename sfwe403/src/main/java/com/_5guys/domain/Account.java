@@ -3,6 +3,8 @@ package com._5guys.domain;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,7 +22,14 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 @AllArgsConstructor
 @JsonInclude(NON_DEFAULT)
 @Table(name = "accounts")
-public class Account {   
+public class Account {
+    public enum Role {
+        CUSTOMER,
+        STAFF,
+        PHARMACIST,
+        MANAGER
+    }
+
     @Id
     @UuidGenerator
     @Column(name = "id", unique = true, updatable = false, nullable = false)
@@ -37,6 +46,9 @@ public class Account {
     protected String phoneNumber;
     @Column(name = "address", unique = false, updatable = true, nullable = false)
     protected String address;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", unique = false, updatable = false, nullable = false)
+    protected Role role;
     
     private String photoUrl;
 
