@@ -39,8 +39,6 @@ public class Medication {
     protected String name;
     // @Column(name = "dosage", unique = false, updatable = true, nullable = false)
     // protected int dosage;
-    // @Column(name = "dosage_type", unique = false, updatable = true, nullable = false)
-    // protected String dosageType;
     // @Column(name = "frequency", unique = false, updatable = true, nullable = false)
     // protected int frequency;
     // @Column(name = "frequency_type", unique = false, updatable = true, nullable = false)
