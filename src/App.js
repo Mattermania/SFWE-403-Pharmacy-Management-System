@@ -1,24 +1,24 @@
-import './App.css';
-import Header from './Header';
+// src/App.js
+import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import SignupForm from './pages/Signup';
-import LoginForm from './Login';
-import ForgotForm from './pages/Forgot';
-import Pharmacist from './pages/Pharmacist';
-// /import { GlobalStyle } from './GlobalStyles';
+import HomePage from "./pages/HomePage";
+import AddCustomer from "./pages/AddCustomer";
+import Login from "./Login"; // Updated
+import Forgot from "./pages/Forgot"; // Updated
+import Signup from "./pages/Signup"; // Updated
+import Pharmacist from "./pages/Pharmacist";
 
 function App() {
   return (
     <BrowserRouter>
-    <div>
-      <Header/>
       <Routes>
-        <Route path="/" element={<LoginForm />}/>
-        <Route path="/signup" element={<SignupForm/>}/>
-        <Route path= "/forgotpassword" element={<ForgotForm/>}/>
+        <Route path="/" element={<Login />} />
+        <Route path="/forgotpassword" element={<Forgot />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/beforepharm" element={<HomePage />} />
         <Route path="/pharmacist" element={<Pharmacist />} />
+        <Route path="/add-customer" element={<AddCustomer />} />
       </Routes>
-    </div>
     </BrowserRouter>
   );
 }
