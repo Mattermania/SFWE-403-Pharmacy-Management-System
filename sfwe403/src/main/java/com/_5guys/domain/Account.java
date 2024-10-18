@@ -24,8 +24,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 @Table(name = "accounts")
 public class Account {
     public enum Role {
-        CUSTOMER,
-        STAFF,
+        CASHIER,
+        TECHNICIAN,
         PHARMACIST,
         MANAGER
     }
@@ -44,8 +44,6 @@ public class Account {
     protected String email;
     @Column(name = "phone_number", unique = false, updatable = true, nullable = false)
     protected String phoneNumber;
-    @Column(name = "address", unique = false, updatable = true, nullable = false)
-    protected String address;
     @Enumerated(EnumType.STRING)
     @Column(name = "role", unique = false, updatable = false, nullable = false)
     protected Role role;
