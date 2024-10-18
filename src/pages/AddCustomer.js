@@ -1,13 +1,30 @@
 // src/pages/AddCustomer.js
 import React, { useState } from "react";
+import axios from 'axios';
 import { FormContainer, Form, Input, Button } from "../styles/LoginFormStyles";
 
 const AddCustomer = () => {
+  // State for customer information
+  const [name, setName] = useState("");
+  const [dob, setDob] = useState("");
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [insurance, setInsurance] = useState("");
+  const [policyNumber, setPolicyNumber] = useState("");
+  const [memberId, setMemberId] = useState("");
+  const [groupNumber, setGroupNumber] = useState("");
+  const [planType, setPlanType] = useState("");
+  const [copay, setCopay] = useState("");
+  const [policyStartDate, setPolicyStartDate] = useState("");
+  const [policyEndDate, setPolicyEndDate] = useState("");
+  const [noInsurance, setNoInsurance] = useState(false);
+
+  // State for prescriptions
   const [prescriptions, setPrescriptions] = useState([
     { id: 1, name: "", dosage: "", frequency: "" },
   ]);
-  const [noInsurance, setNoInsurance] = useState(false);
 
+  // Function to add another prescription field
   const handleAddPrescription = () => {
     setPrescriptions([
       ...prescriptions,
@@ -15,6 +32,7 @@ const AddCustomer = () => {
     ]);
   };
 
+  // Function to handle prescription input change
   const handleInputChange = (index, field, value) => {
     const newPrescriptions = prescriptions.map((prescription, i) =>
       i === index ? { ...prescription, [field]: value } : prescription
@@ -22,9 +40,99 @@ const AddCustomer = () => {
     setPrescriptions(newPrescriptions);
   };
 
-  const handleFormSubmit = (event) => {
+  // Function to handle form submission
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
-    // Add your form submission logic here
+
+    // Gather all customer information
+    const customerData = {
+      name,
+      dob,
+      address,
+      email,
+      insurance: noInsurance ? null : insurance,
+      policyNumber: noInsurance ? null : policyNumber,
+      memberId: noInsurance ? null : memberId,
+      groupNumber: noInsurance ? null : groupNumber,
+      planType: noInsurance ? null : planType,
+      copay: noInsurance ? null : copay,
+      policyStartDate: noInsurance ? null : policyStartDate,
+      policyEndDate: noInsurance ? null : policyEndDate,
+      prescriptions,
+      noInsurance,
+    };
+
+    try {
+      const response = await axios.post('http://localhost:8080/accounts', { 
+          params: {
+            name: name,
+            dateOfBirth: dob,
+            address: address,
+            email: email,
+            insurance: {
+                policyNumber: policyNumber,
+                insuranceProvider: insurance,
+                memberId: memberId,
+                groupNumber: groupNumber,
+                planType: planType,
+                coPayAmount: copay,
+                policyStartDate: policyStartDate,
+                policyEndDate: policyEndDate
+            },
+            prescriptions: prescriptions
+          }
+      });
+
+      if (response.status === 200 && response.data) {
+          setLoginMessage('Login successful!');
+          setErrorMessage('');
+
+          if (response.data.role == "CASHIER") {
+              // Redirect to cashier page
+              userRole = "staff";
+              navigate("/beforepharm", { state: { role: userRole } });
+          }
+          else if (response.data.role == "TECHNICIAN") {
+              // Redirect to technician page
+              navigate("/beforepharm/staff");
+              userRole = "staff";
+              navigate("/beforepharm", { state: { role: userRole } });
+          }
+          else if (response.data.role == "PHARMACIST") {
+              // Redirect to pharmacist page
+              userRole = "pharmacist";
+              navigate("/beforepharm", { state: { role: userRole } });
+          }
+          else if (response.data.role == "MANAGER") {
+              // Redirect to manager page
+              userRole = "manager";
+              navigate("/beforepharm", { state: { role: userRole } });
+          }
+          else {
+              // Account wasn't initialized with a role
+              setErrorMessage('Invalid user account.');
+          }
+      } else {
+          setErrorMessage('Invalid username or password.');
+      }
+    } catch (error) {
+        if (error.response) {
+            if (error.response.status === 404) {
+                setErrorMessage('Invalid username or password.');
+            } else {
+                setErrorMessage('Error submitting request: ' + error.message);
+            }
+        } else {
+            setErrorMessage('Network error: ' + error.message);
+        }
+    }
+
+
+
+    // Log the customer data to the console (or send it to a server)
+    console.log("Customer Data Submitted:", customerData);
+
+    // You can now use customerData to perform any action, such as sending to a backend
   };
 
   return (
@@ -50,16 +158,40 @@ const AddCustomer = () => {
         >
           <h2 style={{ textAlign: "center" }}>Add New Customer</h2>
           <label>
-            Name: <Input type="text" required />
+            Name:{" "}
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
           </label>
           <label>
-            Date of Birth: <Input type="date" required />
+            Date of Birth:{" "}
+            <Input
+              type="date"
+              value={dob}
+              onChange={(e) => setDob(e.target.value)}
+              required
+            />
           </label>
           <label>
-            Address: <Input type="text" required />
+            Address:{" "}
+            <Input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
+            />
           </label>
           <label>
-            Email: <Input type="email" required />
+            Email:{" "}
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </label>
 
           <label>
@@ -74,28 +206,76 @@ const AddCustomer = () => {
           {!noInsurance && (
             <>
               <label>
-                Insurance: <Input type="text" required />
+                Insurance:{" "}
+                <Input
+                  type="text"
+                  value={insurance}
+                  onChange={(e) => setInsurance(e.target.value)}
+                  required
+                />
               </label>
               <label>
-                Policy Number: <Input type="text" required />
+                Policy Number:{" "}
+                <Input
+                  type="text"
+                  value={policyNumber}
+                  onChange={(e) => setPolicyNumber(e.target.value)}
+                  required
+                />
               </label>
               <label>
-                Member ID: <Input type="text" required />
+                Member ID:{" "}
+                <Input
+                  type="text"
+                  value={memberId}
+                  onChange={(e) => setMemberId(e.target.value)}
+                  required
+                />
               </label>
               <label>
-                Group Number: <Input type="text" required />
+                Group Number:{" "}
+                <Input
+                  type="text"
+                  value={groupNumber}
+                  onChange={(e) => setGroupNumber(e.target.value)}
+                  required
+                />
               </label>
               <label>
-                Plan Type: <Input type="text" required />
+                Plan Type:{" "}
+                <Input
+                  type="text"
+                  value={planType}
+                  onChange={(e) => setPlanType(e.target.value)}
+                  required
+                />
               </label>
               <label>
-                Co-Pay Amount: <Input type="number" required />
+                Co-Pay Amount:{" "}
+                <Input
+                  type="number"
+                  value={copay}
+                  onChange={(e) => setCopay(e.target.value)}
+                  required
+                />
               </label>
               <label>
-                Policy Start Date: <Input type="date" required />
+                Policy Start Date:{" "}
+                <Input
+                  type="date"
+                  value={policyStartDate}
+                  onChange={(e) => setPolicyStartDate(e.target.value)}
+                  required
+                />
               </label>
               <label>
-                Policy End Date: <Input type="date" required />
+                Policy End Date:{" "}
+                <Input
+                  type="date"
+                  value={policyEndDate}
+                  onChange={(e) => setPolicyEndDate(e.target.value)}
+                  required
+                />
               </label>
             </>
           )}
