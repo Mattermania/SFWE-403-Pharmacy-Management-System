@@ -45,9 +45,13 @@ public class Medication {
     // protected String frequencyType;
     // @Column(name = "manufacturer", unique = false, updatable = true, nullable = false)
     // protected String manufacturer;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "medication_inventory", joinColumns = @JoinColumn(name = "medication_id"))//could this be medication id ?? for the join column not sure if patient_id
     @MapKeyColumn(name = "expiration_date")
     @Column(name = "quantity")
     private Map<LocalDate, Integer> medicationInventory = new HashMap<>();
+
+    @Column(name = "quantity", unique = false, updatable = true, nullable = false)
+    protected int quantity;
 }
