@@ -56,7 +56,12 @@ public class AccountResource {
         }
         return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
     }
-    
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAccount(@PathVariable(value = "id") String id) {
+        accountService.deleteAccount(id);
+        return ResponseEntity.noContent().build(); // Returns 204 No Content
+    }
 
     @PutMapping("/photo")
     public ResponseEntity<String> uploadPhoto(@RequestParam("id") String id, @RequestParam("file") MultipartFile file) {

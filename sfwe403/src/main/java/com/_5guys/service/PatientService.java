@@ -38,7 +38,9 @@ public class PatientService {
         return patientRepo.save(patient);
     }
 
-    public void deletePatient(Patient patient) {
-        // Assignment
+    public void deletePatient(String id) {
+        Patient patient = patientRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+            patientRepo.delete(patient);
     }
 }

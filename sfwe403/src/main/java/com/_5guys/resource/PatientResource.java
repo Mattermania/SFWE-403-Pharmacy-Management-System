@@ -35,4 +35,10 @@ public class PatientResource {
         Patient patient = patientService.getPatient(id);
         return patient != null ? ResponseEntity.ok(patient) : ResponseEntity.notFound().build();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePatient(@PathVariable(value = "id") String id) {
+        patientService.deletePatient(id);
+        return ResponseEntity.noContent().build(); // Returns 204 No Content
+    }
 }

@@ -1,4 +1,3 @@
-// src/pages/AddCustomer.js
 import React, { useState } from "react";
 import axios from 'axios';
 import { FormContainer, Form, Input, Button } from "../styles/LoginFormStyles";
@@ -9,6 +8,7 @@ const AddCustomer = () => {
   const [dob, setDob] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [insurance, setInsurance] = useState("");
   const [policyNumber, setPolicyNumber] = useState("");
   const [memberId, setMemberId] = useState("");
@@ -23,6 +23,10 @@ const AddCustomer = () => {
   const [prescriptions, setPrescriptions] = useState([
     { id: 1, name: "", dosage: "", frequency: "" },
   ]);
+
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Function to add another prescription field
   const handleAddPrescription = () => {
@@ -43,97 +47,55 @@ const AddCustomer = () => {
   // Function to handle form submission
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-
-    // Gather all customer information
+  
+    // Gather all customer data (including insurance and prescriptions)
     const customerData = {
       name,
-      dob,
+      dateOfBirth: dob,
       address,
+      phoneNumber,
       email,
-      insurance: noInsurance ? null : insurance,
-      policyNumber: noInsurance ? null : policyNumber,
-      memberId: noInsurance ? null : memberId,
-      groupNumber: noInsurance ? null : groupNumber,
-      planType: noInsurance ? null : planType,
-      copay: noInsurance ? null : copay,
-      policyStartDate: noInsurance ? null : policyStartDate,
-      policyEndDate: noInsurance ? null : policyEndDate,
-      prescriptions,
-      noInsurance,
+      insurance: noInsurance ? {
+        policyNumber: null,
+        insuranceProvider: null,
+        memberId: null,
+        groupNumber: null,
+        planType: null,
+        coPayAmount: null,
+        policyStartDate: null,
+        policyEndDate: null
+      } : {
+        policyNumber: policyNumber,
+        insuranceProvider: insurance,
+        memberId: memberId,
+        groupNumber: groupNumber,
+        planType: planType,
+        coPayAmount: copay,
+        policyStartDate: policyStartDate,
+        policyEndDate: policyEndDate
+      },
+      prescriptionStatus: "AVAILABLE",
+      prescriptions: prescriptions.reduce((acc, prescription) => {
+        acc[prescription.name] = parseInt(prescription.quantity || 0); // assuming the prescription 'name' is unique and 'quantity' is stored
+        return acc;
+      }, {}),
+      noInsurance
     };
-
+  
     try {
-      const response = await axios.post('http://localhost:8080/accounts', { 
-          params: {
-            name: name,
-            dateOfBirth: dob,
-            address: address,
-            email: email,
-            insurance: {
-                policyNumber: policyNumber,
-                insuranceProvider: insurance,
-                memberId: memberId,
-                groupNumber: groupNumber,
-                planType: planType,
-                coPayAmount: copay,
-                policyStartDate: policyStartDate,
-                policyEndDate: policyEndDate
-            },
-            prescriptions: prescriptions
-          }
-      });
-
-      if (response.status === 200 && response.data) {
-          setLoginMessage('Login successful!');
-          setErrorMessage('');
-
-          if (response.data.role == "CASHIER") {
-              // Redirect to cashier page
-              userRole = "staff";
-              navigate("/beforepharm", { state: { role: userRole } });
-          }
-          else if (response.data.role == "TECHNICIAN") {
-              // Redirect to technician page
-              navigate("/beforepharm/staff");
-              userRole = "staff";
-              navigate("/beforepharm", { state: { role: userRole } });
-          }
-          else if (response.data.role == "PHARMACIST") {
-              // Redirect to pharmacist page
-              userRole = "pharmacist";
-              navigate("/beforepharm", { state: { role: userRole } });
-          }
-          else if (response.data.role == "MANAGER") {
-              // Redirect to manager page
-              userRole = "manager";
-              navigate("/beforepharm", { state: { role: userRole } });
-          }
-          else {
-              // Account wasn't initialized with a role
-              setErrorMessage('Invalid user account.');
-          }
+      const response = await axios.post('http://localhost:8080/patients', customerData);
+  
+      if (response.status === 200) {
+        // Handle success
+        console.log("Account created:", response.data);
       } else {
-          setErrorMessage('Invalid username or password.');
+        // Handle error
+        console.error("Error:", response.status);
       }
     } catch (error) {
-        if (error.response) {
-            if (error.response.status === 404) {
-                setErrorMessage('Invalid username or password.');
-            } else {
-                setErrorMessage('Error submitting request: ' + error.message);
-            }
-        } else {
-            setErrorMessage('Network error: ' + error.message);
-        }
+      console.error("Error submitting request:", error);
     }
-
-
-
-    // Log the customer data to the console (or send it to a server)
-    console.log("Customer Data Submitted:", customerData);
-
-    // You can now use customerData to perform any action, such as sending to a backend
-  };
+  };  
 
   return (
     <div
@@ -157,6 +119,10 @@ const AddCustomer = () => {
           style={{ display: "flex", flexDirection: "column", gap: "10px" }}
         >
           <h2 style={{ textAlign: "center" }}>Add New Customer</h2>
+          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+          {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+          {loading && <p>Loading...</p>}
+
           <label>
             Name:{" "}
             <Input
@@ -190,6 +156,15 @@ const AddCustomer = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+          <label>
+            Phone Number:{" "}
+            <Input
+              type="phoneNumber"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               required
             />
           </label>

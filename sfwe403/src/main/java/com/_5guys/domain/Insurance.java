@@ -26,7 +26,7 @@ public class Insurance {
     private String memberId;                // Member ID, often used in pharmacy claims
     private String groupNumber;             // Group number for insurance plan
     private String planType;                // Type of plan (e.g., HMO, PPO, etc.)
-    private double coPayAmount;             // Amount of co-pay the customer must pay
+    private Double coPayAmount;             // Amount of co-pay the customer must pay
     private LocalDate policyStartDate;      // Date when insurance coverage starts
     private LocalDate policyEndDate;        // Date when insurance coverage ends
 }

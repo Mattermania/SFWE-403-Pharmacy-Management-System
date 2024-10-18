@@ -58,8 +58,10 @@ public class AccountService {
         return accountRepo.save(account);
     }
 
-    public void deleteAccount(Account account) {
-        // Assignment
+    public void deleteAccount(String id) {
+        Account account = accountRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        accountRepo.delete(account);
     }
 
     public String uploadPhoto(String id, MultipartFile file) {

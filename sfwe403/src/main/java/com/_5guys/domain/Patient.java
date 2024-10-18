@@ -32,6 +32,13 @@ import java.util.Map;
 @JsonInclude(NON_DEFAULT)
 @Table(name = "patients")
 public class Patient {
+    public enum STATUS {
+        FILLED,
+        BLOCKED,
+        AVAILABLE,
+        PAID
+    }
+    
     @Id
     @UuidGenerator
     @Column(name = "id", unique = true, updatable = false, nullable = false)
@@ -54,5 +61,7 @@ public class Patient {
     @MapKeyColumn(name = "medication_id")
     @Column(name = "quantity")
     private Map<String, Integer> prescriptions = new HashMap<>();
+    @Column(name = "prescription_status", unique = false, updatable = true, nullable = false)
+    protected STATUS prescriptionStatus;
 
 }

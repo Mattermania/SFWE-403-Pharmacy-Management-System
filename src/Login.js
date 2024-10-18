@@ -16,7 +16,8 @@ const LoginForm = () => {
 
     const handleLogin = async (event) => {
         event.preventDefault();
-
+        let userRole = "";
+        
         try {
             const response = await axios.get('http://localhost:8080/accounts/search', { 
                 params: { 
@@ -27,21 +28,33 @@ const LoginForm = () => {
             });
 
             if (response.status === 200 && response.data) {
-                const { role, token } = response.data;
-
-                // Store the token for session management (optional - use JWT or any other method)
-                //localStorage.setItem('token', token);
-                //localStorage.setItem('role', role);
-
                 setLoginMessage('Login successful!');
                 setErrorMessage('');
 
-                if (role === "PHARMACIST") {
-                    //navigate('/pharmacist');
-                } else if (role === "MANAGER") {
-                    //navigate("/beforepharm");
-                } else {
-                    navigate("/home");
+                if (response.data.role == "CASHIER") {
+                    // Redirect to cashier page
+                    userRole = "staff";
+                    navigate("/beforepharm", { state: { role: userRole } });
+                }
+                else if (response.data.role == "TECHNICIAN") {
+                    // Redirect to technician page
+                    navigate("/beforepharm/staff");
+                    userRole = "staff";
+                    navigate("/beforepharm", { state: { role: userRole } });
+                }
+                else if (response.data.role == "PHARMACIST") {
+                    // Redirect to pharmacist page
+                    userRole = "pharmacist";
+                    navigate("/beforepharm", { state: { role: userRole } });
+                }
+                else if (response.data.role == "MANAGER") {
+                    // Redirect to manager page
+                    userRole = "manager";
+                    navigate("/beforepharm", { state: { role: userRole } });
+                }
+                else {
+                    // Account wasn't initialized with a role
+                    setErrorMessage('Invalid user account.');
                 }
             } else {
                 setErrorMessage('Invalid username or password.');
