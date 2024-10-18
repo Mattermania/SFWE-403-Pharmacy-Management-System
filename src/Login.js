@@ -17,20 +17,7 @@ const LoginForm = () => {
     const handleLogin = async (event) => {
         event.preventDefault();
         let userRole = "";
-
-        if (username === "manager" && password === "1234") {
-            userRole = "manager";
-          } else if (username === "pharmacist" && password === "1234") {
-            userRole = "pharmacist";
-          } else if (username === "staff" && password === "1234") {
-            userRole = "staff";
-          } 
-
-          if (userRole) {
-            navigate("/beforepharm", { state: { role: userRole } });
-            setLoginMessage("Login successful!");
-            setErrorMessage("");
-          }
+        
         try {
             const response = await axios.get('http://localhost:8080/accounts/search', { 
                 params: { 
@@ -46,19 +33,24 @@ const LoginForm = () => {
 
                 if (response.data.role == "CASHIER") {
                     // Redirect to cashier page
-                    
+                    userRole = "staff";
+                    navigate("/beforepharm", { state: { role: userRole } });
                 }
                 else if (response.data.role == "TECHNICIAN") {
                     // Redirect to technician page
-                    
+                    navigate("/beforepharm/staff");
+                    userRole = "staff";
+                    navigate("/beforepharm", { state: { role: userRole } });
                 }
                 else if (response.data.role == "PHARMACIST") {
                     // Redirect to pharmacist page
-                    navigate('/pharmacist');
+                    userRole = "pharmacist";
+                    navigate("/beforepharm", { state: { role: userRole } });
                 }
                 else if (response.data.role == "MANAGER") {
                     // Redirect to manager page
-                    //navigate('/inventory');
+                    userRole = "manager";
+                    navigate("/beforepharm", { state: { role: userRole } });
                 }
                 else {
                     // Account wasn't initialized with a role
