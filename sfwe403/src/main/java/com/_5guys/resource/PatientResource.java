@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import com._5guys.domain.Patient;
 import com._5guys.service.PatientService;
 
@@ -25,9 +27,8 @@ public class PatientResource {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Patient>> getPatients(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                     @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok(patientService.getAllPatients(page, size));
+    public ResponseEntity<List<Patient>> getPatients() {
+        return ResponseEntity.ok(patientService.getAllPatients());
     }
 
     @GetMapping("/{id}")

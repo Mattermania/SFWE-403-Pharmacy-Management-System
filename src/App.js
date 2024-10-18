@@ -3,6 +3,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import AddCustomer from "./pages/AddCustomer";
+import ViewCustomers from "./pages/ViewCustomers"; // New View Customers component
 import Login from "./Login"; // Updated
 import Forgot from "./pages/Forgot"; // Updated
 import Signup from "./pages/Signup"; // Updated
@@ -18,6 +19,8 @@ function App() {
         <Route path="/beforepharm" element={<HomePage />} />
         <Route path="/pharmacist" element={<Pharmacist />} />
         <Route path="/add-customer" element={<AddCustomer />} />
+        <Route path="/view-customers" element={<ViewCustomers />} />{" "}
+        {/* View Customers route */}
       </Routes>
     </BrowserRouter>
   );

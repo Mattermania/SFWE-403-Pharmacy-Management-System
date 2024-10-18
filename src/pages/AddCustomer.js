@@ -1,3 +1,4 @@
+// src/pages/AddCustomer.js
 import React, { useState } from "react";
 import axios from 'axios';
 import { FormContainer, Form, Input, Button } from "../styles/LoginFormStyles";
@@ -47,7 +48,7 @@ const AddCustomer = () => {
   // Function to handle form submission
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-  
+
     // Gather all customer data (including insurance and prescriptions)
     const customerData = {
       name,
@@ -87,7 +88,7 @@ const AddCustomer = () => {
   
       if (response.status === 200) {
         // Handle success
-        console.log("Account created:", response.data);
+        console.log("Patient created:", response.data);
       } else {
         // Handle error
         console.error("Error:", response.status);
@@ -95,7 +96,7 @@ const AddCustomer = () => {
     } catch (error) {
       console.error("Error submitting request:", error);
     }
-  };  
+  };
 
   return (
     <div

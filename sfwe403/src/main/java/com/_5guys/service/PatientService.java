@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import com._5guys.domain.Patient;
 import com._5guys.repo.PatientRepo;
 
@@ -26,8 +28,8 @@ import com._5guys.repo.PatientRepo;
 public class PatientService {
     private final PatientRepo patientRepo;
 
-    public Page<Patient> getAllPatients(int page, int size) {
-        return patientRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
+    public List<Patient> getAllPatients() {
+        return patientRepo.findAll(Sort.by("name"));
     }
 
     public Patient getPatient(String id) {

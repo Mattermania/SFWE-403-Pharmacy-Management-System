@@ -21,7 +21,7 @@ const HomePage = () => {
   }, [role, navigate]);
 
   const handleNavigation = (route) => {
-    navigate(route);
+    navigate(route, { state: { role } });
   };
 
   return (
@@ -42,9 +42,12 @@ const HomePage = () => {
               Add Customer
             </Button>
 
-            {/* Role-specific and Staff buttons combined for Manager */}
+            {/* View Customers button available only for Manager */}
             {role === "manager" && (
               <>
+                <Button onClick={() => handleNavigation("/view-customers")}>
+                  View Customers
+                </Button>
                 <Button onClick={() => handleNavigation("/generate-report")}>
                   Generate Report
                 </Button>
