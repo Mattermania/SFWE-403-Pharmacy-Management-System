@@ -16,21 +16,7 @@ const LoginForm = () => {
 
     const handleLogin = async (event) => {
         event.preventDefault();
-        let userRole = "";
 
-        if (username === "manager" && password === "1234") {
-            userRole = "manager";
-          } else if (username === "pharmacist" && password === "1234") {
-            userRole = "pharmacist";
-          } else if (username === "staff" && password === "1234") {
-            userRole = "staff";
-          } 
-
-          if (userRole) {
-            navigate("/beforepharm", { state: { role: userRole } });
-            setLoginMessage("Login successful!");
-            setErrorMessage("");
-          }
         try {
             const response = await axios.get('http://localhost:8080/accounts/search', { 
                 params: { 
@@ -50,25 +36,12 @@ const LoginForm = () => {
                 setLoginMessage('Login successful!');
                 setErrorMessage('');
 
-                if (response.data.role == "CASHIER") {
-                    // Redirect to cashier page
-                    
-                }
-                else if (response.data.role == "TECHNICIAN") {
-                    // Redirect to technician page
-                    
-                }
-                else if (response.data.role == "PHARMACIST") {
-                    // Redirect to pharmacist page
-                    navigate('/pharmacist');
-                }
-                else if (response.data.role == "MANAGER") {
-                    // Redirect to manager page
-                    //navigate('/inventory');
-                }
-                else {
-                    // Account wasn't initialized with a role
-                    setErrorMessage('Invalid user account.');
+                if (role === "PHARMACIST") {
+                    //navigate('/pharmacist');
+                } else if (role === "MANAGER") {
+                    //navigate("/beforepharm");
+                } else {
+                    navigate("/home");
                 }
             } else {
                 setErrorMessage('Invalid username or password.');
