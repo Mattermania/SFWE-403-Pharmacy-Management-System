@@ -4,7 +4,9 @@ import axios from "axios";
 import "../styles/ExcelTableStyles.css"; // Import CSS for styling the table
 
 const ViewCustomers = () => {
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState([]); // Initialize customers
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(''); // Error handling state
   const navigate = useNavigate();
   const location = useLocation();
   const role = location.state?.role;
@@ -46,36 +48,46 @@ const ViewCustomers = () => {
     },
   ];
 
-  useEffect(() => {
+  // Fetch the patients from the backend
+  const fetchPatients = async () => {
     if (!role || role !== "manager") {
-      navigate("/"); // Redirect only if the role is not manager
-    } else {
-      // You can replace this mock data with the actual API call when the backend is ready
-      setCustomers(mockCustomers);
-
-      // Uncomment below to make an API call to fetch real customers from your backend
-      /*
-      axios
-        .get("http://localhost:8080/patients") // Assuming the API endpoint
-        .then((response) => {
-          setCustomers(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching patients", error);
-        });
-      */
+      navigate("/"); // Redirect if the role is not manager
+      return; // Exit early if not manager
     }
+
+    // You can replace this mock data with the actual API call when the backend is ready
+    // setCustomers(mockCustomers);
+    
+    try {
+      const response = await axios.get('http://localhost:8080/patients'); // Replace with actual endpoint
+      setCustomers(response.data); // Set the patient data from response
+    } catch (error) {
+      setError('Error fetching patients: ' + (error.response?.data.message || error.message));
+    } finally {
+      setLoading(false); // Stop loading after trying to fetch
+    }
+  };
+
+  // Run the fetchPatients function once on component mount
+  useEffect(() => {
+    fetchPatients();
   }, [role, navigate]);
 
   const removeCustomer = (id) => {
     setCustomers(customers.filter((customer) => customer.id !== id));
     // You can also add axios delete request here to remove the customer from the backend
-    /*
     axios.delete(`http://localhost:8080/patients/${id}`).then(() => {
       setCustomers(customers.filter((customer) => customer.id !== id));
     });
-    */
   };
+
+  if (loading) {
+    return <p>Loading customers...</p>; // Display loading message while fetching
+  }
+
+  if (error) {
+    return <p>{error}</p>; // Display error if any
+  }
 
   return (
     <div className="excel-table-container">
@@ -98,10 +110,10 @@ const ViewCustomers = () => {
               <tr key={customer.id}>
                 <td>{customer.name}</td>
                 <td>{customer.email}</td>
-                <td>{customer.dateOfBirth}</td>
-                <td>{customer.insurance.name}</td>
+                <td>{customer.dob}</td> {/* Corrected from dateOfBirth to dob */}
+                <td>{customer.insurance.insuranceProvider}</td>
                 <td>{customer.insurance.memberId}</td>
-                <td>{customer.status}</td>
+                <td>{customer.prescriptionStatus}</td>
                 <td>
                   <button onClick={() => removeCustomer(customer.id)}>
                     Remove
@@ -111,7 +123,7 @@ const ViewCustomers = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="6" style={{ textAlign: "center" }}>
+              <td colSpan="7" style={{ textAlign: "center" }}>
                 No customers available
               </td>
             </tr>
