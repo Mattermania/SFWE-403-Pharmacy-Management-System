@@ -59,7 +59,7 @@ const LoginForm = () => {
                 else if (response.data.role == "MANAGER") {
                     // Redirect to manager page
                     //navigate('/inventory');
-                    navigate("/beforepharm",{state:{role:"manager"}})
+                    navigate("/beforepharm",);
                 }
                 else {
                     // Account wasn't initialized with a role
