@@ -29,6 +29,28 @@ const AddCustomer = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+const AddCustomer = () => {
+  // State for customer information
+  const [name, setName] = useState("");
+  const [dob, setDob] = useState("");
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [insurance, setInsurance] = useState("");
+  const [policyNumber, setPolicyNumber] = useState("");
+  const [memberId, setMemberId] = useState("");
+  const [groupNumber, setGroupNumber] = useState("");
+  const [planType, setPlanType] = useState("");
+  const [copay, setCopay] = useState("");
+  const [policyStartDate, setPolicyStartDate] = useState("");
+  const [policyEndDate, setPolicyEndDate] = useState("");
+  const [noInsurance, setNoInsurance] = useState(false);
+
+  // State for prescriptions
+  const [prescriptions, setPrescriptions] = useState([
+    { id: 1, name: "", dosage: "", frequency: "" },
+  ]);
+}
+
   // Function to add another prescription field
   const handleAddPrescription = () => {
     setPrescriptions([
@@ -49,7 +71,7 @@ const AddCustomer = () => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
-    // Gather all customer data (including insurance and prescriptions)
+    // Gather all customer information
     const customerData = {
       name,
       dateOfBirth: dob,
@@ -82,7 +104,7 @@ const AddCustomer = () => {
       }, {}),
       noInsurance
     };
-  
+
     try {
       const response = await axios.post('http://localhost:8080/patients', customerData);
   
@@ -120,10 +142,6 @@ const AddCustomer = () => {
           style={{ display: "flex", flexDirection: "column", gap: "10px" }}
         >
           <h2 style={{ textAlign: "center" }}>Add New Customer</h2>
-          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-          {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-          {loading && <p>Loading...</p>}
-
           <label>
             Name:{" "}
             <Input

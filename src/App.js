@@ -1,12 +1,13 @@
-// src/App.js
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import AddCustomer from "./pages/AddCustomer";
-import ViewCustomers from "./pages/ViewCustomers"; // New View Customers component
-import Login from "./Login"; // Updated
-import Forgot from "./pages/Forgot"; // Updated
-import Signup from "./pages/Signup"; // Updated
+import ViewCustomers from "./pages/ViewCustomers";
+import TrackPrescriptions from "./pages/TrackPrescriptions"; // Import Track Prescriptions
+import AddPrescription from "./pages/AddPrescription"; // Import Add Prescription
+import Login from "./Login";
+import Forgot from "./pages/Forgot";
+import Signup from "./pages/Signup";
 import Pharmacist from "./pages/Pharmacist";
 
 function App() {
@@ -19,8 +20,9 @@ function App() {
         <Route path="/beforepharm" element={<HomePage />} />
         <Route path="/pharmacist" element={<Pharmacist />} />
         <Route path="/add-customer" element={<AddCustomer />} />
-        <Route path="/view-customers" element={<ViewCustomers />} />{" "}
-        {/* View Customers route */}
+        <Route path="/view-customers" element={<ViewCustomers />} />
+        <Route path="/track-prescriptions" element={<TrackPrescriptions />} />
+        <Route path="/add-prescription" element={<AddPrescription />} />
       </Routes>
     </BrowserRouter>
   );

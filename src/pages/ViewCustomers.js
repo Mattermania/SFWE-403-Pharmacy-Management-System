@@ -50,27 +50,31 @@ const ViewCustomers = () => {
     if (!role || role !== "manager") {
       navigate("/"); // Redirect only if the role is not manager
     } else {
-        setCustomers(mockCustomers);
-    
-    //   axios.get("http://localhost:8080/patients") // Assuming the API endpoint
-    //     .then((response) => {
-    //         setCustomers(response.data);
-    //         console.log("API Response:", response.data); // Log the API response
-    //     })
-    //     .catch((error) => {
-    //         console.error("Error fetching patients", error);
-    //     });
+      // You can replace this mock data with the actual API call when the backend is ready
+      setCustomers(mockCustomers);
+
+      // Uncomment below to make an API call to fetch real customers from your backend
+      /*
+      axios
+        .get("http://localhost:8080/patients") // Assuming the API endpoint
+        .then((response) => {
+          setCustomers(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching patients", error);
+        });
+      */
     }
   }, [role, navigate]);
 
   const removeCustomer = (id) => {
     setCustomers(customers.filter((customer) => customer.id !== id));
     // You can also add axios delete request here to remove the customer from the backend
-    
-    // axios.delete(`http://localhost:8080/patients/` + id).then(() => {
-    //   setCustomers(customers.filter((customer) => customer.id !== id));
-    // });
-    
+    /*
+    axios.delete(`http://localhost:8080/patients/${id}`).then(() => {
+      setCustomers(customers.filter((customer) => customer.id !== id));
+    });
+    */
   };
 
   return (
