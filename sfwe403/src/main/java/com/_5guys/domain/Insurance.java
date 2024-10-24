@@ -18,7 +18,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(NON_DEFAULT)
-@Table(name = "inventory")
 public class Insurance {
 
     private String policyNumber;            // Unique policy number for the insurance

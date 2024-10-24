@@ -2,6 +2,9 @@ package com._5guys.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import com._5guys.domain.Patient;
+import com._5guys.domain.Medication;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -13,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.CascadeType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,8 +29,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -34,44 +38,30 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(NON_DEFAULT)
-@Table(name = "patients")
-public class Patient {
+@Table(name = "prescription")
+public class Prescription {
     public enum STATUS {
-        FILLED,
-        BLOCKED,
         AVAILABLE,
-        PAID
+        BLOCKED,
+        PROCESS,
+        PAID,
+        FILLED
     }
-    
+
     @Id
     @UuidGenerator
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private String id;
     @Column(name = "name", unique = false, updatable = true, nullable = false)
-    private String name;
-    @Column(name = "date_of_birth", unique = false, updatable = true, nullable = false)
-    private LocalDate dateOfBirth;
-    @Column(name = "address", unique = false, updatable = true, nullable = false)
-    private String address;
-    @Column(name = "phone_number", unique = false, updatable = true, nullable = false)
-    private String phoneNumber;
-    @Column(name = "email", unique = true, updatable = true, nullable = false)
-    private String email;
-    @Embedded
-    @Column(name = "insurance", unique = false, updatable = true, nullable = false)
-    private Insurance insurance;
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "patient_prescriptions", joinColumns = @JoinColumn(name = "patient_id"))
-    @MapKeyColumn(name = "medication_id")
+    protected String name;
+    @Column(name = "description", unique = false, updatable = true, nullable = false)
+    private String description;
+    @Column(name = "status", unique = false, updatable = true, nullable = false)
+    private STATUS status;
+    @ManyToOne
+    @JoinColumn(name = "patient_id", unique = false, updatable = true, nullable = false)
+    private Patient patient;
     @OneToMany(mappedBy = "prescriptions", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Prescription> prescriptions = new ArrayList<>();
-
-    public List<Prescription> getPrescriptions() {
-        return this.prescriptions;
-    }
-
-    public String getId() {
-        return this.id;
-    }    
-
+    @Column(name = "medications", unique = false, updatable = true, nullable = false)
+    private List<Medication> medications = new ArrayList<>();
 }

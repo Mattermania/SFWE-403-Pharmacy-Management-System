@@ -36,22 +36,24 @@ public class Medication {
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private String id;
     @Column(name = "name", unique = true, updatable = true, nullable = false)
-    protected String name;
-    // @Column(name = "dosage", unique = false, updatable = true, nullable = false)
-    // protected int dosage;
-    // @Column(name = "frequency", unique = false, updatable = true, nullable = false)
-    // protected int frequency;
-    // @Column(name = "frequency_type", unique = false, updatable = true, nullable = false)
-    // protected String frequencyType;
-    // @Column(name = "manufacturer", unique = false, updatable = true, nullable = false)
-    // protected String manufacturer;
-
+    private String name;
+    @Column(name = "dosage", unique = false, updatable = true, nullable = false)
+    private int dosage;
+    @Column(name = "manufacturer", unique = false, updatable = true, nullable = false)
+    private String manufacturer;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "medication_inventory", joinColumns = @JoinColumn(name = "medication_id"))//could this be medication id ?? for the join column not sure if patient_id
     @MapKeyColumn(name = "expiration_date")
     @Column(name = "quantity")
-    private Map<LocalDate, Integer> medicationInventory = new HashMap<>();
+    private Map<LocalDate, Integer> inventory = new HashMap<>();
+    @JoinColumn(name = "prescription_id", nullable = false)
+    private Prescription prescription;
 
-    @Column(name = "quantity", unique = false, updatable = true, nullable = false)
-    protected int quantity;
+    public Map<LocalDate, Integer> getInventory() {
+        return this.inventory;
+    }
+
+    public String getId() {
+        return this.id;
+    } 
 }
