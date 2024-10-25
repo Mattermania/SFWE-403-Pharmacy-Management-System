@@ -1,7 +1,11 @@
 package com._5guys.resource;
 
+import com._5guys.domain.Prescription;
 import com._5guys.service.PrescriptionService;
 import lombok.RequiredArgsConstructor;
+
+import java.net.URI;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +15,31 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PrescriptionResource {
     private final PrescriptionService prescriptionService;
+    // private final PatientService patientService;
+    // private final InventoryService inventoryService;
+
+    @PostMapping
+    public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
+        Prescription createdPrescription = prescriptionService.createPrescription(prescription);
+        // Patient existingPatient = patientService.getPatient(prescription.getPatient().getId());
+        // createdPrescription.setPatient(existingPatient);
+        
+        // List<Medication> medicationsToAdd = new ArrayList<>();
+        // for (Medication medication : prescription.getMedications()) {
+        //     Medication existingMedication = inventoryService.getMedication(medication.getId());
+        //     // Only add if not already in the list
+        //     if (!createdPrescription.getMedications().contains(existingMedication)) {
+        //         medicationsToAdd.add(existingMedication);
+        //     }
+        // }
+
+        // // After the loop, add all collected medications at once
+        // createdPrescription.getMedications().addAll(medicationsToAdd);
+
+        URI location = URI.create(String.format("/prescriptions/%s", createdPrescription.getId())); // Corrected the URI creation
+
+        return ResponseEntity.created(location).body(createdPrescription);
+    }
 
     @PostMapping("/fill")
     public ResponseEntity<String> fillPrescription(

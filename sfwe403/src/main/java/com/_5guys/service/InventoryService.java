@@ -31,7 +31,7 @@ public class InventoryService {
         return inventoryRepo.findAll(Sort.by("name"));
     }
 
-    public Medication getInventory(String id) {
+    public Medication getMedication(String id) {
         return inventoryRepo.findById(id).orElseThrow(() -> new RuntimeException("Medication not found"));
     }
 

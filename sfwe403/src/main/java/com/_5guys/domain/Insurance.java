@@ -2,7 +2,6 @@ package com._5guys.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -31,7 +31,7 @@ public class InventoryResource {
 
     @GetMapping("/{id}")
     public ResponseEntity<Medication> getInventory(@PathVariable(value = "id") String id) {
-        Medication medication = inventoryService.getInventory(id);
+        Medication medication = inventoryService.getMedication(id);
         return medication != null ? ResponseEntity.ok(medication) : ResponseEntity.notFound().build();
     }
 }

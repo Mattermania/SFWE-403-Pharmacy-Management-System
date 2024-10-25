@@ -1,74 +1,106 @@
-// package com._5guys.service;
+package com._5guys.service;
 
-// import com._5guys.domain.Medication;
-// import com._5guys.domain.Patient;
-// import com._5guys.domain.Prescription;
-// import com._5guys.repo.InventoryRepo;
-// import com._5guys.repo.PatientRepo;
-// import jakarta.transaction.Transactional;
-// import lombok.RequiredArgsConstructor;
-// import org.springframework.stereotype.Service;
+import com._5guys.domain.Medication;
+import com._5guys.domain.Patient;
+import com._5guys.domain.Prescription;
+import com._5guys.repo.InventoryRepo;
+import com._5guys.repo.PatientRepo;
+import com._5guys.repo.PrescriptionRepo;
 
-// import java.time.LocalDate;
-// import java.util.Map;
-// import java.util.List;
-// import java.util.Optional;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-// @Service
-// @RequiredArgsConstructor
-// @Transactional
-// public class PrescriptionService {
-//     private final PatientRepo patientRepo;
-//     private final InventoryRepo inventoryRepo;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-//     public String fillPrescription(String patientId, String medicationId, int quantity){
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class PrescriptionService {
+    private final PatientRepo patientRepo;
+    private final InventoryRepo inventoryRepo;
+    private final PrescriptionRepo prescriptionRepo;
 
-//         Optional<Patient> patientOptional = patientRepo.findById(patientId);
-//         if(!patientOptional.isPresent()){
-//             return "Patient not found";
-//         }
+    public Prescription createPrescription(Prescription prescription) {
+        return prescriptionRepo.save(prescription);
+    }
 
-//         Patient patient = patientOptional.get();
+    public String fillPrescription(String patientId, String medicationId, int quantity){
 
-//         Optional<Medication> medicationOptional = inventoryRepo.findById(medicationId); // look at medication.java not sure if it should be medication id or patient id??
-//         if(!medicationOptional.isPresent()){
-//             return "Medication not found";
-//         }
+        // Find the patient by ID
+        Optional<Patient> patientOptional = patientRepo.findById(patientId);
+        if (!patientOptional.isPresent()) {
+            return "Patient not found";
+        }
 
-//         Medication medication = medicationOptional.get();
+        Patient patient = patientOptional.get();
 
+        // Find the medication by ID from the inventory
+        Optional<Medication> medicationOptional = inventoryRepo.findById(medicationId);
+        if (!medicationOptional.isPresent()) {
+            return "Medication not found";
+        }
 
-//         Map<LocalDate,Integer> inventory = medication.getInventory();
-//         int totalAvailable = inventory.values().stream().mapToInt(Integer::intValue).sum();
+        Medication medication = medicationOptional.get();
 
-//         if (totalAvailable < quantity) {
-//             return "Not enough stock available for this medication.";
-//         }
+        // Get the inventory of medication as a map of expiration dates and quantities
+        Map<LocalDate, Integer> inventory = medication.getInventory();
+        int totalAvailable = inventory.values().stream().mapToInt(Integer::intValue).sum();
 
-//         int remainingQuantity = quantity;
-//         for (Map.Entry<LocalDate, Integer> entry : inventory.entrySet()) {
-//             if (remainingQuantity == 0) break;
-//             int available = entry.getValue();
-//             if (available >= remainingQuantity) {
-//                 inventory.put(entry.getKey(), available - remainingQuantity);
-//                 remainingQuantity = 0;
-//             } else {
-//                 remainingQuantity -= available;
-//                 inventory.put(entry.getKey(), 0);
-//             }
-//         }
+        // Check if there is enough stock available
+        if (totalAvailable < quantity) {
+            return "Not enough stock available for this medication.";
+        }
 
-//         // Update patient's prescription (add or update quantity)
-//         List<Prescription> prescriptions = patient.getPrescriptions();
-//         prescriptions.put(medicationId, prescriptions.get(medicationId) + quantity);
-//         patientRepo.save(patient);  // Save updated patient
+        // Deduct the required quantity from the medication inventory based on expiration date
+        int remainingQuantity = quantity;
+        for (Map.Entry<LocalDate, Integer> entry : inventory.entrySet()) {
+            if (remainingQuantity == 0) break; // Stop once the required quantity is deducted
 
-//         // Save the updated medication inventory
-//         inventoryRepo.save(medication);
+            int available = entry.getValue();
+            if (available >= remainingQuantity) {
+                // Enough stock available from this batch
+                inventory.put(entry.getKey(), available - remainingQuantity);
+                remainingQuantity = 0;
+            } else {
+                // Deduct as much as possible from this batch
+                remainingQuantity -= available;
+                inventory.put(entry.getKey(), 0);
+            }
+        }
 
-//         return "Prescription filled successfully.";
+        // Loop through the patient's prescriptions to find if the medication exists
+        List<Prescription> prescriptions = patient.getPrescriptions();
+        boolean prescriptionFound = false;
 
+        // Iterate through prescriptions to find and update the prescription for this medication
+        for (Prescription prescription : prescriptions) {
+            List<Medication> prescribedMedications = prescription.getMedications();
 
+            // Check if the current prescription contains the target medication
+            for (Medication prescribedMedication : prescribedMedications) {
+                if (prescribedMedication.getId().equals(medicationId)) {
+                    // Update the quantity of the medication in this prescription
+                    prescribedMedication.updateInventory(quantity);
+                    prescriptionFound = true;
+                    break;
+                }
+            }
 
-//     }
-// }
+            if (prescriptionFound) {
+                break; // Exit the loop if the medication was found and updated
+            }
+        }
+
+        // Save the updated patient with the new/updated prescription
+        patientRepo.save(patient);
+
+        // Save the updated medication inventory
+        inventoryRepo.save(medication);
+
+        return "Prescription filled successfully.";
+    }
+}

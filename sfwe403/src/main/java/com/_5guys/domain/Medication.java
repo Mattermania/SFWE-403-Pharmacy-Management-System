@@ -42,18 +42,29 @@ public class Medication {
     @Column(name = "manufacturer", unique = false, updatable = true, nullable = false)
     private String manufacturer;
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "medication_inventory", joinColumns = @JoinColumn(name = "medication_id"))//could this be medication id ?? for the join column not sure if patient_id
+    @CollectionTable(name = "medication_inventory", joinColumns = @JoinColumn(name = "medication_id"))
     @MapKeyColumn(name = "expiration_date")
     @Column(name = "quantity")
-    private Map<LocalDate, Integer> inventory = new HashMap<>();
-    @JoinColumn(name = "prescription_id", nullable = false)
-    private Prescription prescription;
+    private Map<LocalDate, Integer> inventory = new HashMap<>(); 
 
-    public Map<LocalDate, Integer> getInventory() {
-        return this.inventory;
-    }
-
-    public String getId() {
-        return this.id;
-    } 
+    public void updateInventory(int quantity) {
+        if (inventory.isEmpty()) {
+            return; // or throw an exception, depending on your use case
+        }
+    
+        LocalDate oldestDate = null;
+    
+        // Find the oldest expiration date
+        for (LocalDate date : inventory.keySet()) {
+            if (oldestDate == null || date.isBefore(oldestDate)) {
+                oldestDate = date;
+            }
+        }
+    
+        // Update the quantity for the oldest entry
+        if (oldestDate != null) {
+            int currentQuantity = inventory.getOrDefault(oldestDate, 0);
+            inventory.put(oldestDate, currentQuantity + quantity);
+        }
+    }    
 }
