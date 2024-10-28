@@ -19,8 +19,8 @@ import org.hibernate.annotations.UuidGenerator;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Getter
@@ -55,11 +55,7 @@ public class Patient {
     private Insurance insurance;
     @OneToMany(mappedBy = "patient", orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
-    private List<Prescription> prescriptions = new ArrayList<>();
-
-    public List<Prescription> getPrescriptions() {
-        return this.prescriptions;
-    }
+    private Set<Prescription> prescriptions = new HashSet<>();
 
     public String getId() {
         return this.id;

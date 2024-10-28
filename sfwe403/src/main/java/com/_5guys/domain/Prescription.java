@@ -19,8 +19,8 @@ import org.hibernate.annotations.UuidGenerator;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Getter
@@ -53,5 +53,5 @@ public class Prescription {
     @JsonBackReference
     private Patient patient;
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Medication> medications = new ArrayList<>();
+    private Set<Medication> medications = new HashSet<>();
 }
