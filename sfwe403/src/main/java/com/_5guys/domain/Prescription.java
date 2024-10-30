@@ -2,7 +2,9 @@ package com._5guys.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -52,6 +54,46 @@ public class Prescription {
     @JoinColumn(name = "patient_id", unique = false, updatable = true, nullable = false)
     @JsonBackReference
     private Patient patient;
-    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER)
-    private Set<Medication> medications = new HashSet<>();
+    @OneToMany(mappedBy = "prescription", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference("prescriptionReference")
+    private Set<PrescriptionMedication> medications = new HashSet<>();
+
+    public void setStatus(String status) {
+        switch(status) {
+            case "AVAILABLE":
+                this.status = STATUS.AVAILABLE;
+                break;
+            case "BLOCKED":
+                this.status = STATUS.BLOCKED;
+                break;
+            case "PROCESS":
+                this.status = STATUS.PROCESS;
+                break;
+            case "PAID":
+                this.status = STATUS.PAID;
+                break;
+            case "FILLED":
+                this.status = STATUS.FILLED;
+                break;
+            default:
+                break;
+        }
+    }
+
+    public String getStatus() {
+        switch(this.status) {
+            case AVAILABLE:
+                return "AVAILABLE";
+            case BLOCKED:
+                return "BLOCKED";
+            case PROCESS:
+                return "PROCESS";
+            case PAID:
+                return "PAID";
+            case FILLED:
+                return "FILLED";
+            default:
+                return "NULL";
+        }
+    }
 }

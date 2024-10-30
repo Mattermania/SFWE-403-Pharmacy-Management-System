@@ -1,42 +1,52 @@
-// package com._5guys.domain;
+package com._5guys.domain;
 
-// import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-// import jakarta.persistence.EmbeddedId;
-// import jakarta.persistence.Entity;
-// import jakarta.persistence.JoinColumn;
-// import jakarta.persistence.ManyToOne;
-// import jakarta.persistence.MapsId;
-// import jakarta.persistence.OneToOne;
-// import lombok.AllArgsConstructor;
-// import lombok.Getter;
-// import lombok.NoArgsConstructor;
-// import lombok.Setter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-// import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 
-// @Entity
-// @Getter
-// @Setter
-// @NoArgsConstructor
-// @AllArgsConstructor
-// @JsonInclude(NON_DEFAULT)
-// public class PrescriptionMedication {
+import org.hibernate.annotations.UuidGenerator;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(NON_DEFAULT)
+public class PrescriptionMedication {
     
-//     @EmbeddedId
-//     private PrescriptionMedication id;
+    // @EmbeddedId
+    // private PrescriptionMedicationId id;
+    @Id
+    @UuidGenerator
+    @Column(name = "id", unique = true, updatable = false, nullable = false)
+    private String id;
 
-//     @OneToOne
-//     @MapsId("prescriptionId")
-//     @JoinColumn(name = "prescription_id")
-//     private Prescription prescription;
+    // @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    // // @MapsId("prescriptionId")
+    // @JoinColumn(name = "prescription_id", nullable = false)
+    // @JsonBackReference("prescriptionMedicationReference")
+    @ManyToOne
+    @JoinColumn(name = "prescription_id", unique = false, updatable = true, nullable = false)
+    @JsonBackReference("prescriptionReference")
+    private Prescription prescription;
 
-//     @ManyToOne
-//     @MapsId("medicationId")
-//     @JoinColumn(name = "medication_id")
-//     private Medication medication;
+    @ManyToOne
+    @JoinColumn(name = "medication_id", unique = false, updatable = true, nullable = false)
+    @JsonIgnoreProperties("medicationReference")
+    private Medication medication;
 
-//     private int quantity;
-
-//     // Constructors, getters, setters
-// }
+    private int quantity;
+}
