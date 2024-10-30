@@ -31,27 +31,33 @@ public class PrescriptionService {
         return prescriptionRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
     }
 
-    public String fillPrescription(String id){
-
-        Prescription prescription = prescriptionRepo.findById(id).orElseThrow(() -> new RuntimeException("Prescription not found"));
-
-        if(prescription.getStatus() == "FILLED") {
+    public String fillPrescription(String id) {
+        Prescription prescription = prescriptionRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Prescription not found"));
+    
+        if (prescription.getStatus().equals("FILLED")) {
             return "Prescription already filled.";
         }
-
+    
+        // First, check if all medications have enough stock
         for (PrescriptionMedication prescriptionMedication : prescription.getMedications()) {
             Medication medication = prescriptionMedication.getMedication();
             int quantity = prescriptionMedication.getQuantity();
-
-            // Check if there is enough stock available
-            if (!medication.removeInventory(quantity)) {
+    
+            if (medication.getTotalQuantity() < quantity) {
                 prescription.setStatus("BLOCKED");
-                return "Not enough stock available for this medication.";
+                return "Not enough stock available for medication: " + medication.getName();
             }
         }
-
+    
+        // Deduct stock for each medication after verifying availability
+        prescription.getMedications().forEach(prescriptionMedication -> {
+            Medication medication = prescriptionMedication.getMedication();
+            int quantity = prescriptionMedication.getQuantity();
+            medication.removeInventory(quantity);
+        });
+    
         prescription.setStatus("FILLED");
-
         return "Prescription filled successfully.";
-    }
+    }    
 }

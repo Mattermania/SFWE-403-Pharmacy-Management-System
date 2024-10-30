@@ -81,5 +81,42 @@ public class Medication {
         // Check if we could fully remove the requested quantity
         return remainingQuantity == 0;
     }
+
+    public void removeExpired(LocalDate currentDate) {
+        // Check if inventory is empty
+        if (inventory.isEmpty()) {
+            return;
+        }
     
+        // Loop over the entries sorted by date (oldest first)
+        for (Iterator<Map.Entry<LocalDate, Integer>> it = inventory.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<LocalDate, Integer> entry = it.next();
+            if (currentDate.isAfter(entry.getKey())) {
+                it.remove(); // Remove the entry as medications have expired
+            } else {
+                return;
+            }
+        }
+    }
+    
+    public void addInventory(LocalDate expirationDate, int quantity) {
+        // Loop over the entries sorted by date (oldest first)
+        for (Iterator<Map.Entry<LocalDate, Integer>> it = inventory.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<LocalDate, Integer> entry = it.next();
+    
+            if (expirationDate.equals(entry.getKey())) {
+                entry.setValue(entry.getValue() + quantity);
+                return;
+            }
+        }
+
+        inventory.put(expirationDate, quantity);
+
+        return;
+    }
+    
+
+    public int getTotalQuantity() {
+        return inventory.values().stream().mapToInt(Integer::intValue).sum();
+    }
 }
