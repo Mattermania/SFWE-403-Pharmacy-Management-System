@@ -3,14 +3,14 @@ package com._5guys.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
 import com._5guys.domain.Medication;
 import com._5guys.repo.InventoryRepo;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Junior RT
@@ -40,50 +40,50 @@ public class InventoryService {
     }
 
     public void deleteMedication(Medication medication) {
-        // Assignment
+        // Placeholder for delete logic
     }
 
-    // method ensures that inventory is updated when a prescription is filled, checking if enough stock is available and adjusting quantities accordingly.
+    // Method to update inventory after a prescription is filled
     public boolean updateInventoryAfterPrescriptionFill(String medicationId, int quantity) {
-    Medication medication = inventoryRepo.findById(medicationId)
-            .orElseThrow(() -> new RuntimeException("Medication not found"));
-    Map<LocalDate, Integer> inventory = medication.getMedicationInventory();
-    int totalAvailable = inventory.values().stream().mapToInt(Integer::intValue).sum();
+        Medication medication = inventoryRepo.findById(medicationId)
+                .orElseThrow(() -> new RuntimeException("Medication not found"));
+        Map<LocalDate, Integer> inventory = medication.getMedicationInventory();
+        int totalAvailable = inventory.values().stream().mapToInt(Integer::intValue).sum();
 
-    if (totalAvailable < quantity) {
-        return false; // Not enough stock
-    }
-
-    int remainingQuantity = quantity;
-    for (Map.Entry<LocalDate, Integer> entry : inventory.entrySet()) {
-        if (remainingQuantity == 0) break;
-        int available = entry.getValue();
-        if (available >= remainingQuantity) {
-            inventory.put(entry.getKey(), available - remainingQuantity);
-            remainingQuantity = 0;
-        } else {
-            remainingQuantity -= available;
-            inventory.put(entry.getKey(), 0);
+        if (totalAvailable < quantity) {
+            return false; // Not enough stock
         }
+
+        int remainingQuantity = quantity;
+        for (Map.Entry<LocalDate, Integer> entry : inventory.entrySet()) {
+            if (remainingQuantity == 0) break;
+            int available = entry.getValue();
+            if (available >= remainingQuantity) {
+                inventory.put(entry.getKey(), available - remainingQuantity);
+                remainingQuantity = 0;
+            } else {
+                remainingQuantity -= available;
+                inventory.put(entry.getKey(), 0);
+            }
+        }
+
+        inventoryRepo.save(medication);
+        return true; // Inventory updated successfully
     }
 
-    inventoryRepo.save(medication);
-    return true; // Inventory updated successfully
+    // Method to receive new stock of medicines and update inventory
+    public void receiveMedicines(String medicationId, Map<LocalDate, Integer> newStock) {
+        Medication medication = inventoryRepo.findById(medicationId)
+                .orElseThrow(() -> new RuntimeException("Medication not found"));
+
+        Map<LocalDate, Integer> currentInventory = medication.getMedicationInventory();
+
+        // Update or add the new stock to the existing inventory
+        for (Map.Entry<LocalDate, Integer> entry : newStock.entrySet()) {
+            currentInventory.put(entry.getKey(), currentInventory.getOrDefault(entry.getKey(), 0) + entry.getValue());
+        }
+
+        // Save the updated medication
+        inventoryRepo.save(medication);
     }
-    // InventoryService.java
-
-public void receiveMedicines(String medicationId, Map<LocalDate, Integer> newStock) {
-    Medication medication = inventoryRepo.findById(medicationId)
-            .orElseThrow(() -> new RuntimeException("Medication not found"));
-
-    Map<LocalDate, Integer> currentInventory = medication.getMedicationInventory();
-
-    // Update or add the new stock to the existing inventory
-    for (Map.Entry<LocalDate, Integer> entry : newStock.entrySet()) {
-        currentInventory.put(entry.getKey(), currentInventory.getOrDefault(entry.getKey(), 0) + entry.getValue());
-    }
-
-    // Save the updated medication
-    inventoryRepo.save(medication);
-}
 }
