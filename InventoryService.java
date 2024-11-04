@@ -70,4 +70,20 @@ public class InventoryService {
     inventoryRepo.save(medication);
     return true; // Inventory updated successfully
     }
+    // InventoryService.java
+
+public void receiveMedicines(String medicationId, Map<LocalDate, Integer> newStock) {
+    Medication medication = inventoryRepo.findById(medicationId)
+            .orElseThrow(() -> new RuntimeException("Medication not found"));
+
+    Map<LocalDate, Integer> currentInventory = medication.getMedicationInventory();
+
+    // Update or add the new stock to the existing inventory
+    for (Map.Entry<LocalDate, Integer> entry : newStock.entrySet()) {
+        currentInventory.put(entry.getKey(), currentInventory.getOrDefault(entry.getKey(), 0) + entry.getValue());
+    }
+
+    // Save the updated medication
+    inventoryRepo.save(medication);
+}
 }
