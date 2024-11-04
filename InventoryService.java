@@ -1,36 +1,73 @@
-//contains the main business logic for updating inventory. It retrieves the prescription data and adjusts the inventory quantity for each item in the prescription.
 package com._5guys.service;
 
-import com._5guys.domain.Inventory;
-import com._5guys.domain.Prescription;
-import com._5guys.repository.InventoryRepository;
-import com._5guys.repository.PrescriptionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com._5guys.domain.Medication;
+import com._5guys.repo.InventoryRepo;
+
+/**
+ * @author Junior RT
+ * @version 1.0
+ * @license Get Arrays, LLC (<a href="https://www.getarrays.io">Get Arrays, LLC</a>)
+ * @email getarrayz@gmail.com
+ * @since 11/22/2023
+ */
+
 @Service
+@Slf4j
+@Transactional(rollbackOn = Exception.class)
+@RequiredArgsConstructor
 public class InventoryService {
+    private final InventoryRepo inventoryRepo;
 
-    private final InventoryRepository inventoryRepository;
-    private final PrescriptionRepository prescriptionRepository;
-
-    @Autowired
-    public InventoryService(InventoryRepository inventoryRepository, PrescriptionRepository prescriptionRepository) {
-        this.inventoryRepository = inventoryRepository;
-        this.prescriptionRepository = prescriptionRepository;
+    public List<Medication> getAllMedications() {
+        return inventoryRepo.findAll(Sort.by("name"));
     }
 
-    public void updateInventoryOnPrescriptionFill(Long prescriptionId) {
-        Prescription prescription = prescriptionRepository.findById(prescriptionId)
-            .orElseThrow(() -> new RuntimeException("Prescription not found"));
+    public Medication getInventory(String id) {
+        return inventoryRepo.findById(id).orElseThrow(() -> new RuntimeException("Medication not found"));
+    }
 
-        prescription.getItems().forEach(item -> {
-            Inventory inventoryItem = inventoryRepository.findByName(item.getName())
-                .orElseThrow(() -> new RuntimeException("Inventory item not found"));
+    public Medication createMedication(Medication medication) {
+        return inventoryRepo.save(medication);
+    }
 
-            // Reduce inventory based on the prescription quantity
-            inventoryItem.setQuantity(inventoryItem.getQuantity() - item.getQuantity());
-            inventoryRepository.save(inventoryItem);
-        });
+    public void deleteMedication(Medication medication) {
+        // Assignment
+    }
+
+    // method ensures that inventory is updated when a prescription is filled, checking if enough stock is available and adjusting quantities accordingly.
+    public boolean updateInventoryAfterPrescriptionFill(String medicationId, int quantity) {
+    Medication medication = inventoryRepo.findById(medicationId)
+            .orElseThrow(() -> new RuntimeException("Medication not found"));
+    Map<LocalDate, Integer> inventory = medication.getMedicationInventory();
+    int totalAvailable = inventory.values().stream().mapToInt(Integer::intValue).sum();
+
+    if (totalAvailable < quantity) {
+        return false; // Not enough stock
+    }
+
+    int remainingQuantity = quantity;
+    for (Map.Entry<LocalDate, Integer> entry : inventory.entrySet()) {
+        if (remainingQuantity == 0) break;
+        int available = entry.getValue();
+        if (available >= remainingQuantity) {
+            inventory.put(entry.getKey(), available - remainingQuantity);
+            remainingQuantity = 0;
+        } else {
+            remainingQuantity -= available;
+            inventory.put(entry.getKey(), 0);
+        }
+    }
+
+    inventoryRepo.save(medication);
+    return true; // Inventory updated successfully
     }
 }
