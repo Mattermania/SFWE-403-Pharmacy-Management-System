@@ -42,4 +42,10 @@ public class InventoryResource {
         Medication medication = inventoryService.getMedication(id);
         return medication != null ? ResponseEntity.ok(medication) : ResponseEntity.notFound().build();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMedication(@PathVariable(value = "id") String id) {
+        inventoryService.deleteMedication(id);
+        return ResponseEntity.noContent().build(); // Returns 204 No Content
+    }
 }

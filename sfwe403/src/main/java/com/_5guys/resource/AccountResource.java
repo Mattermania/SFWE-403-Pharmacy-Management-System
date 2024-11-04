@@ -85,4 +85,16 @@ public class AccountResource {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PutMapping("/password/{id}")
+    public ResponseEntity<String> updatePassword(@PathVariable(value = "id") String id, @RequestParam("password") String password) {
+        // Consider adding error handling here (e.g., invalid file type, size too large)
+        try {
+            String responseMessage = accountService.updatePassword(id, password);
+            return ResponseEntity.ok(responseMessage);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                                 .body("Invalid request: " + e.getMessage());
+        }
+    }
 }

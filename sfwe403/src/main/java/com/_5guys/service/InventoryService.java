@@ -56,7 +56,9 @@ public class InventoryService {
         return inventoryRepo.save(medication);
     }
 
-    public void deleteMedication(Medication medication) {
-        // Assignment
+    public void deleteMedication(String id) {
+        Medication medication = inventoryRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Medication not found"));
+            inventoryRepo.delete(medication);
     }
 }
