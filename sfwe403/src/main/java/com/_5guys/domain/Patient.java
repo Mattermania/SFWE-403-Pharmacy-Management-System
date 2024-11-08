@@ -30,13 +30,6 @@ import java.util.HashSet;
 @JsonInclude(NON_DEFAULT)
 @Table(name = "patients")
 public class Patient {
-    public enum STATUS {
-        FILLED,
-        BLOCKED,
-        AVAILABLE,
-        PAID
-    }
-    
     @Id
     @UuidGenerator
     @Column(name = "id", unique = true, updatable = false, nullable = false)
@@ -55,10 +48,6 @@ public class Patient {
     private Insurance insurance;
     @OneToMany(mappedBy = "patient", orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
-    private Set<Prescription> prescriptions = new HashSet<>();
-
-    public String getId() {
-        return this.id;
-    }    
+    private Set<Prescription> prescriptions = new HashSet<>(); 
 
 }
