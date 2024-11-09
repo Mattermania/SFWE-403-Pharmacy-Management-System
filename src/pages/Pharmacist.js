@@ -21,6 +21,7 @@ const Pharmacist = () => {
 
   // Fill prescription by sending a POST request to the backend
   const handleFillPrescription = async (id) => {
+    alert(`Filling prescription for item ID: ${id}`);
     try {
       await axios.post(`http://localhost:8080/prescriptions/fill/${id}`);
       alert(`Prescription filled for item ID: ${id}`);

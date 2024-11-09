@@ -78,31 +78,36 @@ const AddCustomer = () => {
       address,
       phoneNumber,
       email,
-      insurance: noInsurance ? {
-        policyNumber: null,
-        insuranceProvider: null,
-        memberId: null,
-        groupNumber: null,
-        planType: null,
-        coPayAmount: null,
-        policyStartDate: null,
-        policyEndDate: null
-      } : {
-        policyNumber: policyNumber,
-        insuranceProvider: insurance,
-        memberId: memberId,
-        groupNumber: groupNumber,
-        planType: planType,
-        coPayAmount: copay,
-        policyStartDate: policyStartDate,
-        policyEndDate: policyEndDate
-      },
+      insurance: noInsurance
+        ? {
+            policyNumber: null,
+            insuranceProvider: null,
+            memberId: null,
+            groupNumber: null,
+            planType: null,
+            coPayAmount: null,
+            policyStartDate: null,
+            policyEndDate: null
+          }
+        : {
+            policyNumber: policyNumber,
+            insuranceProvider: insurance,
+            memberId: memberId,
+            groupNumber: groupNumber,
+            planType: planType,
+            coPayAmount: copay,
+            policyStartDate: policyStartDate,
+            policyEndDate: policyEndDate
+          },
       prescriptionStatus: "AVAILABLE",
-      prescriptions: prescriptions.reduce((acc, prescription) => {
-        acc[prescription.name] = parseInt(prescription.quantity || 0); // assuming the prescription 'name' is unique and 'quantity' is stored
-        return acc;
-      }, {}),
-      noInsurance
+      // TODO: FIX Prescription Creation
+      prescriptions: prescriptions.map((prescription) => ({
+        name: prescription.name,
+        description: prescription.dosage,
+        status: prescription.frequency,
+        quantity: parseInt(prescription.quantity || 0),
+      })),
+      noInsurance,
     };
 
     try {

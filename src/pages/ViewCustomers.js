@@ -11,42 +11,8 @@ const ViewCustomers = () => {
   const location = useLocation();
   const role = location.state?.role;
 
-  // Temporary mock data for customers
-  const mockCustomers = [
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john.doe@example.com",
-      dob: "1990-05-12",
-      insurance: {
-        name: "Blue Cross",
-      memberId: "12345678"
-      },
-      status: "AVAILABLE"
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      dob: "1985-09-17",
-      insurance: {
-        name: "Aetna",
-        memberId: "98765432"
-      },
-      status: "AVAILABLE"
-    },
-    {
-      id: "3",
-      name: "Michael Johnson",
-      email: "michael.johnson@example.com",
-      dob: "1978-12-21",
-      insurance: {
-        name: "Cigna",
-      memberId: "55555555"
-      },
-      status: "AVAILABLE"
-    },
-  ];
+
+  
 
   // Fetch the patients from the backend
   const fetchPatients = async () => {
