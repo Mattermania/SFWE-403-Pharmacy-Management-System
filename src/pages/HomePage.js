@@ -7,18 +7,45 @@ import {
   Description,
 } from "../styles/HomePageStyles";
 import { useNavigate, useLocation } from "react-router-dom";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const role = location.state?.role;
+  const [warnings, setWarnings] = useState({ lowStock: 0, expired: 0 });
 
   useEffect(() => {
     if (!role) {
       navigate("/");
+    } else if (role === "manager" || role === "pharmacist") {
+      fetchWarnings();
     }
   }, [role, navigate]);
+
+  const fetchWarnings = async () => {
+    try {
+      const [lowStockResponse, expiredResponse] = await Promise.all([
+        axios.get("http://localhost:8080/inventory/low-stock-warnings/count"),
+        axios.get("http://localhost:8080/inventory/expired-medications/count"),
+      ]);
+
+      const lowStock = lowStockResponse.data;
+      const expired = expiredResponse.data;
+
+      setWarnings({ lowStock, expired });
+
+      if (lowStock > 0 || expired > 0) {
+        alert(
+          `Warning:\n${lowStock} medications are low in stock.\n` +
+          `${expired} medications are expired or nearing expiration.`
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching warnings:", error);
+    }
+  };
 
   const handleNavigation = (route) => {
     navigate(route, { state: { role } });

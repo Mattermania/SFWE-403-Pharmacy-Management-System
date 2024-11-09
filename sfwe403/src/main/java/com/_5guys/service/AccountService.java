@@ -73,6 +73,14 @@ public class AccountService {
         return photoUrl;
     }
 
+    public String updatePassword(String id, String password) {
+        log.info("Updating password for user ID: {}", id);
+        Account account = getAccount(id);
+        account.setPassword(password);
+        accountRepo.save(account);
+        return password;
+    }
+
     private final Function<String, String> fileExtension = filename -> Optional.of(filename).filter(name -> name.contains("."))
             .map(name -> "." + name.substring(filename.lastIndexOf(".") + 1)).orElse(".png");
 

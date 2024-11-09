@@ -1,6 +1,5 @@
 // src/pages/AddCustomer.js
 import React, { useState } from "react";
-import axios from 'axios';
 import { FormContainer, Form, Input, Button } from "../styles/LoginFormStyles";
 
 const AddCustomer = () => {
@@ -9,7 +8,6 @@ const AddCustomer = () => {
   const [dob, setDob] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [insurance, setInsurance] = useState("");
   const [policyNumber, setPolicyNumber] = useState("");
   const [memberId, setMemberId] = useState("");
@@ -24,32 +22,6 @@ const AddCustomer = () => {
   const [prescriptions, setPrescriptions] = useState([
     { id: 1, name: "", dosage: "", frequency: "" },
   ]);
-
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-
-const AddCustomer = () => {
-  // State for customer information
-  const [name, setName] = useState("");
-  const [dob, setDob] = useState("");
-  const [address, setAddress] = useState("");
-  const [email, setEmail] = useState("");
-  const [insurance, setInsurance] = useState("");
-  const [policyNumber, setPolicyNumber] = useState("");
-  const [memberId, setMemberId] = useState("");
-  const [groupNumber, setGroupNumber] = useState("");
-  const [planType, setPlanType] = useState("");
-  const [copay, setCopay] = useState("");
-  const [policyStartDate, setPolicyStartDate] = useState("");
-  const [policyEndDate, setPolicyEndDate] = useState("");
-  const [noInsurance, setNoInsurance] = useState(false);
-
-  // State for prescriptions
-  const [prescriptions, setPrescriptions] = useState([
-    { id: 1, name: "", dosage: "", frequency: "" },
-  ]);
-}
 
   // Function to add another prescription field
   const handleAddPrescription = () => {
@@ -68,56 +40,31 @@ const AddCustomer = () => {
   };
 
   // Function to handle form submission
-  const handleFormSubmit = async (event) => {
+  const handleFormSubmit = (event) => {
     event.preventDefault();
 
     // Gather all customer information
     const customerData = {
       name,
-      dateOfBirth: dob,
+      dob,
       address,
-      phoneNumber,
       email,
-      insurance: noInsurance ? {
-        policyNumber: null,
-        insuranceProvider: null,
-        memberId: null,
-        groupNumber: null,
-        planType: null,
-        coPayAmount: null,
-        policyStartDate: null,
-        policyEndDate: null
-      } : {
-        policyNumber: policyNumber,
-        insuranceProvider: insurance,
-        memberId: memberId,
-        groupNumber: groupNumber,
-        planType: planType,
-        coPayAmount: copay,
-        policyStartDate: policyStartDate,
-        policyEndDate: policyEndDate
-      },
-      prescriptionStatus: "AVAILABLE",
-      prescriptions: prescriptions.reduce((acc, prescription) => {
-        acc[prescription.name] = parseInt(prescription.quantity || 0); // assuming the prescription 'name' is unique and 'quantity' is stored
-        return acc;
-      }, {}),
-      noInsurance
+      insurance: noInsurance ? null : insurance,
+      policyNumber: noInsurance ? null : policyNumber,
+      memberId: noInsurance ? null : memberId,
+      groupNumber: noInsurance ? null : groupNumber,
+      planType: noInsurance ? null : planType,
+      copay: noInsurance ? null : copay,
+      policyStartDate: noInsurance ? null : policyStartDate,
+      policyEndDate: noInsurance ? null : policyEndDate,
+      prescriptions,
+      noInsurance,
     };
 
-    try {
-      const response = await axios.post('http://localhost:8080/patients', customerData);
-  
-      if (response.status === 200) {
-        // Handle success
-        console.log("Patient created:", response.data);
-      } else {
-        // Handle error
-        console.error("Error:", response.status);
-      }
-    } catch (error) {
-      console.error("Error submitting request:", error);
-    }
+    // Log the customer data to the console (or send it to a server)
+    console.log("Customer Data Submitted:", customerData);
+
+    // You can now use customerData to perform any action, such as sending to a backend
   };
 
   return (
@@ -175,15 +122,6 @@ const AddCustomer = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Phone Number:{" "}
-            <Input
-              type="phoneNumber"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
               required
             />
           </label>

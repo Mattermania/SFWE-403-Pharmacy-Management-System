@@ -1,7 +1,9 @@
 package com._5guys.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -10,6 +12,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +24,10 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -36,22 +42,81 @@ public class Medication {
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private String id;
     @Column(name = "name", unique = true, updatable = true, nullable = false)
-    protected String name;
-    // @Column(name = "dosage", unique = false, updatable = true, nullable = false)
-    // protected int dosage;
-    // @Column(name = "frequency", unique = false, updatable = true, nullable = false)
-    // protected int frequency;
-    // @Column(name = "frequency_type", unique = false, updatable = true, nullable = false)
-    // protected String frequencyType;
-    // @Column(name = "manufacturer", unique = false, updatable = true, nullable = false)
-    // protected String manufacturer;
-
+    private String name;
+    @Column(name = "manufacturer", unique = false, updatable = true, nullable = false)
+    private String manufacturer;
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "medication_inventory", joinColumns = @JoinColumn(name = "medication_id"))//could this be medication id ?? for the join column not sure if patient_id
+    @CollectionTable(name = "medication_inventory", joinColumns = @JoinColumn(name = "medication_id"))
     @MapKeyColumn(name = "expiration_date")
     @Column(name = "quantity")
-    private Map<LocalDate, Integer> medicationInventory = new HashMap<>();
+    private Map<LocalDate, Integer> inventory = new HashMap<>(); 
+    @OneToMany(mappedBy = "medication", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference("medicationReference")
+    private Set<PrescriptionMedication> prescriptions = new HashSet<>();
 
-    @Column(name = "quantity", unique = false, updatable = true, nullable = false)
-    protected int quantity;
+    public boolean removeInventory(int quantity) {
+        int remainingQuantity = quantity;
+    
+        // Check if inventory is empty
+        if (inventory.isEmpty()) {
+            return false; // or throw an exception, depending on your use case
+        }
+    
+        // Loop over the entries sorted by date (oldest first)
+        for (Iterator<Map.Entry<LocalDate, Integer>> it = inventory.entrySet().iterator(); it.hasNext() && remainingQuantity > 0;) {
+            Map.Entry<LocalDate, Integer> entry = it.next();
+            int currentQuantity = entry.getValue();
+    
+            if (currentQuantity <= remainingQuantity) {
+                // Remove entire quantity for this date
+                remainingQuantity -= currentQuantity;
+                it.remove(); // Remove the entry as quantity reaches zero
+            } else {
+                // Partially remove quantity from this date
+                entry.setValue(currentQuantity - remainingQuantity);
+                remainingQuantity = 0;
+            }
+        }
+    
+        // Check if we could fully remove the requested quantity
+        return remainingQuantity == 0;
+    }
+
+    public void removeExpired(LocalDate currentDate) {
+        // Check if inventory is empty
+        if (inventory.isEmpty()) {
+            return;
+        }
+    
+        // Loop over the entries sorted by date (oldest first)
+        for (Iterator<Map.Entry<LocalDate, Integer>> it = inventory.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<LocalDate, Integer> entry = it.next();
+            if (currentDate.isAfter(entry.getKey())) {
+                it.remove(); // Remove the entry as medications have expired
+            } else {
+                return;
+            }
+        }
+    }
+    
+    public void addInventory(LocalDate expirationDate, int quantity) {
+        // Loop over the entries sorted by date (oldest first)
+        for (Iterator<Map.Entry<LocalDate, Integer>> it = inventory.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<LocalDate, Integer> entry = it.next();
+    
+            if (expirationDate.equals(entry.getKey())) {
+                entry.setValue(entry.getValue() + quantity);
+                return;
+            }
+        }
+
+        inventory.put(expirationDate, quantity);
+
+        return;
+    }
+    
+
+    public int getTotalQuantity() {
+        return inventory.values().stream().mapToInt(Integer::intValue).sum();
+    }
 }

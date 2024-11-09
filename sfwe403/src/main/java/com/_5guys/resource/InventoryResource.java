@@ -8,7 +8,9 @@ import com._5guys.domain.Medication;
 import com._5guys.service.InventoryService;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -29,9 +31,33 @@ public class InventoryResource {
         return ResponseEntity.ok(inventoryService.getAllMedications());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Medication> getInventory(@PathVariable(value = "id") String id) {
-        Medication medication = inventoryService.getInventory(id);
+    @PostMapping("/addInventory/{id}")
+    public ResponseEntity<Medication> addInventory(@PathVariable(value = "id") String id, @RequestBody Map<LocalDate, Integer> newInventory) {
+        Medication medication = inventoryService.addInventory(id, newInventory);
         return medication != null ? ResponseEntity.ok(medication) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Medication> getMedication(@PathVariable(value = "id") String id) {
+        Medication medication = inventoryService.getMedication(id);
+        return medication != null ? ResponseEntity.ok(medication) : ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMedication(@PathVariable(value = "id") String id) {
+        inventoryService.deleteMedication(id);
+        return ResponseEntity.noContent().build(); // Returns 204 No Content
+    }
+
+    @GetMapping("/low-stock-warnings/count")
+    public ResponseEntity<Integer> getLowStockWarningsCount() {
+        int count = inventoryService.getLowStockWarningsCount();
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/expired-medications/count")
+    public ResponseEntity<Integer> getExpiredMedicationsCount() {
+        int count = inventoryService.getExpiredMedicationsCount();
+        return ResponseEntity.ok(count);
     }
 }

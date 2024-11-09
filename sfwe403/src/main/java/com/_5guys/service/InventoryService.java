@@ -4,7 +4,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -31,15 +35,45 @@ public class InventoryService {
         return inventoryRepo.findAll(Sort.by("name"));
     }
 
-    public Medication getInventory(String id) {
+    public Medication getMedication(String id) {
         return inventoryRepo.findById(id).orElseThrow(() -> new RuntimeException("Medication not found"));
+    }
+
+    public Medication addInventory(String id, Map<LocalDate, Integer> newInventory) {
+        Optional<Medication> medication = inventoryRepo.findById(id);
+        if (medication.isPresent()) {
+            // Loop over the entries sorted by date (oldest first)
+            for (Iterator<Map.Entry<LocalDate, Integer>> it = newInventory.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<LocalDate, Integer> entry = it.next();
+                medication.get().addInventory(entry.getKey(), entry.getValue());
+            }
+        }
+        
+        return medication.orElseThrow(() -> new RuntimeException("Medication not found"));
     }
 
     public Medication createMedication(Medication medication) {
         return inventoryRepo.save(medication);
     }
 
-    public void deleteMedication(Medication medication) {
-        // Assignment
+    public void deleteMedication(String id) {
+        Medication medication = inventoryRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Medication not found"));
+            inventoryRepo.delete(medication);
     }
+    public int getLowStockWarningsCount() {
+        int threshold = 5;
+        return (int) inventoryRepo.findAll().stream()
+                .filter(medication -> medication.getTotalQuantity() <= threshold)
+                .count();
+    }
+    
+    public int getExpiredMedicationsCount() {
+        LocalDate currentDate = LocalDate.now();
+        return (int) inventoryRepo.findAll().stream()
+                .filter(medication -> medication.getInventory().keySet().stream()
+                        .anyMatch(expirationDate -> expirationDate.isBefore(currentDate)))
+                .count();
+    }
+    
 }
