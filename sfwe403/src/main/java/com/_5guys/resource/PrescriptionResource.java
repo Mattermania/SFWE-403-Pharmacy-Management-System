@@ -5,8 +5,8 @@ import com._5guys.service.PrescriptionService;
 import lombok.RequiredArgsConstructor;
 
 import java.net.URI;
+import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,9 +43,9 @@ public class PrescriptionResource {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Prescription>> getPrescriptions(@RequestParam(value = "page", defaultValue = "0") int page,
+    public ResponseEntity<List<Prescription>> getPrescriptions(@RequestParam(value = "page", defaultValue = "0") int page,
                                                      @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok(prescriptionService.getAllPrescriptions(page, size));
+        return ResponseEntity.ok(prescriptionService.getAllPrescriptions());
     }
 
     @PostMapping("/fill")

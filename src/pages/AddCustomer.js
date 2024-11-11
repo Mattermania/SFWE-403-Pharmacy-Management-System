@@ -20,10 +20,10 @@ const AddCustomer = () => {
   const [policyEndDate, setPolicyEndDate] = useState("");
   const [noInsurance, setNoInsurance] = useState(false);
 
-  // State for prescriptions
-  const [prescriptions, setPrescriptions] = useState([
-    { id: 1, name: "", dosage: "", frequency: "" },
-  ]);
+  // // State for prescriptions
+  // const [prescriptions, setPrescriptions] = useState([
+  //   { id: 1, name: "", dosage: "", frequency: "" },
+  // ]);
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -44,28 +44,7 @@ const AddCustomer = () => {
   const [policyStartDate, setPolicyStartDate] = useState("");
   const [policyEndDate, setPolicyEndDate] = useState("");
   const [noInsurance, setNoInsurance] = useState(false);
-
-  // State for prescriptions
-  const [prescriptions, setPrescriptions] = useState([
-    { id: 1, name: "", dosage: "", frequency: "" },
-  ]);
 }
-
-  // Function to add another prescription field
-  const handleAddPrescription = () => {
-    setPrescriptions([
-      ...prescriptions,
-      { id: prescriptions.length + 1, name: "", dosage: "", frequency: "" },
-    ]);
-  };
-
-  // Function to handle prescription input change
-  const handleInputChange = (index, field, value) => {
-    const newPrescriptions = prescriptions.map((prescription, i) =>
-      i === index ? { ...prescription, [field]: value } : prescription
-    );
-    setPrescriptions(newPrescriptions);
-  };
 
   // Function to handle form submission
   const handleFormSubmit = async (event) => {
@@ -90,8 +69,8 @@ const AddCustomer = () => {
             policyEndDate: null
           }
         : {
-            policyNumber: policyNumber,
-            insuranceProvider: insurance,
+          provider: insurance,  
+          policyNumber: policyNumber,
             memberId: memberId,
             groupNumber: groupNumber,
             planType: planType,
@@ -99,14 +78,6 @@ const AddCustomer = () => {
             policyStartDate: policyStartDate,
             policyEndDate: policyEndDate
           },
-      prescriptionStatus: "AVAILABLE",
-      // TODO: FIX Prescription Creation
-      prescriptions: prescriptions.map((prescription) => ({
-        name: prescription.name,
-        description: prescription.dosage,
-        status: prescription.frequency,
-        quantity: parseInt(prescription.quantity || 0),
-      })),
       noInsurance,
     };
 
@@ -205,7 +176,7 @@ const AddCustomer = () => {
           {!noInsurance && (
             <>
               <label>
-                Insurance:{" "}
+                Provider:{" "}
                 <Input
                   type="text"
                   value={insurance}
@@ -278,49 +249,6 @@ const AddCustomer = () => {
               </label>
             </>
           )}
-
-          <h3>Prescriptions</h3>
-          {prescriptions.map((prescription, index) => (
-            <div
-              key={prescription.id}
-              style={{ display: "flex", flexDirection: "column", gap: "5px" }}
-            >
-              <label>
-                Name:{" "}
-                <Input
-                  type="text"
-                  value={prescription.name}
-                  onChange={(e) =>
-                    handleInputChange(index, "name", e.target.value)
-                  }
-                />
-              </label>
-              <label>
-                Dosage:{" "}
-                <Input
-                  type="text"
-                  value={prescription.dosage}
-                  onChange={(e) =>
-                    handleInputChange(index, "dosage", e.target.value)
-                  }
-                />
-              </label>
-              <label>
-                Frequency:{" "}
-                <Input
-                  type="text"
-                  value={prescription.frequency}
-                  onChange={(e) =>
-                    handleInputChange(index, "frequency", e.target.value)
-                  }
-                />
-              </label>
-            </div>
-          ))}
-
-          <Button type="button" onClick={handleAddPrescription}>
-            + Add Another Prescription
-          </Button>
           <Button type="submit">Submit</Button>
         </Form>
       </FormContainer>
