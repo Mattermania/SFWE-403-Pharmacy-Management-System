@@ -30,9 +30,15 @@ public class PatientResource {
         return ResponseEntity.ok(patientService.getAllPatients());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Patient> getPatient(@PathVariable(value = "id") String id) {
-        Patient patient = patientService.getPatient(id);
+    @GetMapping("id/{id}")
+    public ResponseEntity<Patient> getPatientById(@PathVariable(value = "id") String id) {
+        Patient patient = patientService.getPatientById(id);
+        return patient != null ? ResponseEntity.ok(patient) : ResponseEntity.notFound().build();
+    }
+    
+    @GetMapping("name/{name}")
+    public ResponseEntity<Patient> getPatientByName(@PathVariable(value = "name") String name) {
+        Patient patient = patientService.getPatientByName(name);
         return patient != null ? ResponseEntity.ok(patient) : ResponseEntity.notFound().build();
     }
 

@@ -1,4 +1,3 @@
-// src/pages/AddCustomer.js
 import React, { useState } from "react";
 import axios from 'axios';
 import { FormContainer, Form, Input, Button } from "../styles/LoginFormStyles";
@@ -20,31 +19,9 @@ const AddCustomer = () => {
   const [policyEndDate, setPolicyEndDate] = useState("");
   const [noInsurance, setNoInsurance] = useState(false);
 
-  // // State for prescriptions
-  // const [prescriptions, setPrescriptions] = useState([
-  //   { id: 1, name: "", dosage: "", frequency: "" },
-  // ]);
-
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
-const AddCustomer = () => {
-  // State for customer information
-  const [name, setName] = useState("");
-  const [dob, setDob] = useState("");
-  const [address, setAddress] = useState("");
-  const [email, setEmail] = useState("");
-  const [insurance, setInsurance] = useState("");
-  const [policyNumber, setPolicyNumber] = useState("");
-  const [memberId, setMemberId] = useState("");
-  const [groupNumber, setGroupNumber] = useState("");
-  const [planType, setPlanType] = useState("");
-  const [copay, setCopay] = useState("");
-  const [policyStartDate, setPolicyStartDate] = useState("");
-  const [policyEndDate, setPolicyEndDate] = useState("");
-  const [noInsurance, setNoInsurance] = useState(false);
-}
 
   // Function to handle form submission
   const handleFormSubmit = async (event) => {
@@ -52,11 +29,11 @@ const AddCustomer = () => {
 
     // Gather all customer information
     const customerData = {
-      name,
+      name: name,
       dateOfBirth: dob,
-      address,
-      phoneNumber,
-      email,
+      address: address,
+      phoneNumber: phoneNumber,
+      email: email,
       insurance: noInsurance
         ? {
             policyNumber: null,
@@ -69,8 +46,8 @@ const AddCustomer = () => {
             policyEndDate: null
           }
         : {
-          provider: insurance,  
-          policyNumber: policyNumber,
+            provider: insurance,  
+            policyNumber: policyNumber,
             memberId: memberId,
             groupNumber: groupNumber,
             planType: planType,
@@ -83,16 +60,19 @@ const AddCustomer = () => {
 
     try {
       const response = await axios.post('http://localhost:8080/patients', customerData);
-  
-      if (response.status === 200) {
-        // Handle success
+
+      if (response.status === 201) {
         console.log("Patient created:", response.data);
+        setSuccessMessage("Patient created successfully.");
+        setErrorMessage('');
       } else {
-        // Handle error
-        console.error("Error:", response.status);
+        setSuccessMessage('');
+        setErrorMessage("Error creating patient." + response.status);
       }
     } catch (error) {
       console.error("Error submitting request:", error);
+      setSuccessMessage('');
+      setErrorMessage("Error submitting request: " + error.message);
     }
   };
 
@@ -249,7 +229,10 @@ const AddCustomer = () => {
               </label>
             </>
           )}
+
           <Button type="submit">Submit</Button>
+          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+          {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
         </Form>
       </FormContainer>
     </div>

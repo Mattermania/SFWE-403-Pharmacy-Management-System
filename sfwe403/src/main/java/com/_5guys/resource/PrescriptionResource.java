@@ -22,21 +22,6 @@ public class PrescriptionResource {
     @PostMapping
     public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
         Prescription createdPrescription = prescriptionService.createPrescription(prescription);
-        // Patient existingPatient = patientService.getPatient(prescription.getPatient().getId());
-        // createdPrescription.setPatient(existingPatient);
-        
-        // List<Medication> medicationsToAdd = new ArrayList<>();
-        // for (Medication medication : prescription.getMedications()) {
-        //     Medication existingMedication = inventoryService.getMedication(medication.getId());
-        //     // Only add if not already in the list
-        //     if (!createdPrescription.getMedications().contains(existingMedication)) {
-        //         medicationsToAdd.add(existingMedication);
-        //     }
-        // }
-
-        // // After the loop, add all collected medications at once
-        // createdPrescription.getMedications().addAll(medicationsToAdd);
-
         URI location = URI.create(String.format("/prescriptions/%s", createdPrescription.getId())); // Corrected the URI creation
 
         return ResponseEntity.created(location).body(createdPrescription);

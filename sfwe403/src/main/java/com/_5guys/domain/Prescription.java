@@ -96,6 +96,7 @@ public class Prescription {
                 this.status = STATUS.FILLED;
                 break;
             default:
+                this.status = STATUS.NULL;
                 break;
         }
     }

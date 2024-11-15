@@ -1,25 +1,32 @@
-// src/pages/MedicationSpecifics.js
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import "../styles/ExcelTableStyles.css"; // Optional: For table styling
 
 const MedicationSpecifics = () => {
   const location = useLocation();
-  const { inventory } = location.state || {}; // Get inventory data passed from UpdateInventory
+  const { medication } = location.state || {}; // Get medication data passed from UpdateInventory
+  
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const selectedMedication = inventory?.find(
-    (item) => item.id === parseInt(location.pathname.split("/").pop())
-  );
+  // Use useMemo to compute expirationData with error handling
+  const expirationData = useMemo(() => {
+    if (!medication) {
+      setErrorMessage("Medication not found.");
+      return [];
+    }
 
-  // Temporary mock data for expiration tracking
-  const expirationData = [
-    { quantity: 50, expirationDate: "2024-11-10" },
-    { quantity: 100, expirationDate: "2024-11-20" },
-  ];
+    if (!medication.medication_inventory) {
+      setErrorMessage("Inventory map not found.");
+      return [];
+    }
+
+    return medication.medication_inventory;
+  }, [medication]);
 
   return (
     <div className="excel-table-container">
-      <h1>Medication Details: {selectedMedication?.name}</h1>
+      <h1>Medication Details: {medication?.name}</h1>
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
       <table className="excel-table">
         <thead>
           <tr>

@@ -1,80 +1,114 @@
-// src/pages/TrackPrescriptions.js
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../styles/ExcelTableStyles.css";
 
 const TrackPrescriptions = () => {
-  const [prescriptions, setPrescriptions] = useState([]); // Initialize prescriptions
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(''); // Error handling state
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const role = location.state?.role;
 
   const [newPrescription, setNewPrescription] = useState({
     patientName: "",
+    name: "",
     description: "",
-    status: "Not Processed",
+    status: "AVAILABLE",
   });
   
-  // Fetch the prescriptions from the backend
+  // Fetch prescriptions from the backend
   const fetchPrescriptions = async () => {
-    if (!role || role !== "pharmacist") {
-      navigate("/"); // Redirect if the role is not manager
-      return; // Exit early if not manager
-    }
-
-    // You can replace this mock data with the actual API call when the backend is ready
-    // setPrescriptions(mockPrescriptions);
-    
     try {
       const response = await axios.get('http://localhost:8080/prescriptions'); // Replace with actual endpoint
-      setPrescriptions(response.data); // Set the patient data from response
+      setPrescriptions(response.data);
     } catch (error) {
       setError('Error fetching prescriptions: ' + (error.response?.data.message || error.message));
     } finally {
-      setLoading(false); // Stop loading after trying to fetch
+      setLoading(false);
     }
   };
 
-  // Run the fetchPatients function once on component mount
+  // Run fetchPrescriptions on component mount
   useEffect(() => {
     fetchPrescriptions();
   }, [role, navigate]);
 
-  const removePrescription = (id) => {
-    setPrescriptions(prescriptions.filter((prescription) => prescription.id !== id));
-    // You can also add axios delete request here to remove the prescription from the backend
-    axios.delete(`http://localhost:8080/prescriptions/${id}`).then(() => {
+  const removePrescription = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/prescriptions/${id}`);
       setPrescriptions(prescriptions.filter((prescription) => prescription.id !== id));
-    });
+    } catch (error) {
+      setError('Error deleting prescription: ' + (error.response?.data.message || error.message));
+    }
   };
 
-  if (loading) {
-    return <p>Loading prescriptions...</p>; // Display loading message while fetching
-  }
+  const handleAddPrescription = async () => {
+    setErrorMessage('');
+    setSuccessMessage('');
+  
+    try {
+      let patientId;
+  
+      // Fetch patient ID based on patient name
+      const response = await axios.get(`http://localhost:8080/patients/name/${newPrescription.patientName}`);
+      if (response.status === 200 && response.data?.id) {
+        patientId = response.data.id;
+      } else {
+        setErrorMessage('Patient not found.');
+        return; // Exit early if the patient is not found
+      }
+  
+      // Create new prescription object
+      const newPrescriptionData = {
+        patient: {
+          id: patientId,
+        },
+        name: newPrescription.name,
+        description: newPrescription.description,
+        status: newPrescription.status,
+        medications: [],
+      };
+  
+      // Send prescription data
+      const prescriptionResponse = await axios.post('http://localhost:8080/prescriptions', newPrescriptionData);
+      if (prescriptionResponse.status === 201) {
+        console.log("Prescription created:", prescriptionResponse.data);
+        setSuccessMessage(`Prescription created successfully.`);
+      } else {
+        setErrorMessage('Error creating prescription.');
+      }
 
-  if (error) {
-    return <p>{error}</p>; // Display error if any
-  }
-
-  const handleAddPrescription = () => {
-    setPrescriptions([
-      ...prescriptions,
-      { ...newPrescription, id: prescriptions.length + 1 },
-    ]);
-    setNewPrescription({
-      prescriptionName: "",
-      prescription: "",
-      status: "Not Processed",
-    });
+      setPrescriptions([
+        ...prescriptions,
+        { ...newPrescription, id: prescriptions.length + 1 },
+      ]);
+      setNewPrescription({
+        patientName: "",
+        name: "",
+        description: "",
+        status: "AVAILABLE",
+      });
+    } catch (error) {
+      console.error("Error submitting request:", error);
+    }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewPrescription({ ...newPrescription, [name]: value });
   };
+
+  if (loading) {
+    return <p>Loading prescriptions...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
 
   return (
     <div className="excel-table-container">
@@ -98,7 +132,7 @@ const TrackPrescriptions = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="3" style={{ textAlign: "center" }}>
+              <td colSpan="4" style={{ textAlign: "center" }}>
                 No prescriptions available
               </td>
             </tr>
@@ -109,6 +143,15 @@ const TrackPrescriptions = () => {
       {/* Add Prescription Form */}
       <div className="add-prescription-form">
         <h3>Add New Prescription</h3>
+        <label>
+        Prescription Name:
+          <input
+            type="text"
+            name="name"
+            value={newPrescription.name}
+            onChange={handleInputChange}
+          />
+        </label>
         <label>
           Patient Name:
           <input
@@ -134,12 +177,16 @@ const TrackPrescriptions = () => {
             value={newPrescription.status}
             onChange={handleInputChange}
           >
-            <option value="Not Processed">Not Processed</option>
-            <option value="Processing">Processing</option>
-            <option value="Ready">Ready</option>
+            <option value="AVAILABLE">Available</option>
+            <option value="BLOCKED">Blocked</option>
+            <option value="PROCESS">Process</option>
+            <option value="PAID">Paid</option>
+            <option value="FILLED">Filled</option>
           </select>
         </label>
         <button onClick={handleAddPrescription}>Add Prescription</button>
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
       </div>
     </div>
   );

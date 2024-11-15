@@ -7,70 +7,88 @@ import "../styles/ExcelTableStyles.css"; // Import CSS for the Excel-style table
 const UpdateInventory = () => {
   const navigate = useNavigate();
 
-  // Temporary mock data for inventory
-  const mockInventory = [
-    { id: 1, name: "Amoxicillin", quantity: 50 },
-    { id: 2, name: "Ibuprofen", quantity: 100 },
-    { id: 3, name: "Lisinopril", quantity: 30 },
-  ];
-
-  const [inventory, setInventory] = useState(mockInventory); // Start with mock data
+  const [inventory, setInventory] = useState([]); // Start with mock data
   const [medication, setMedication] = useState("");
   const [amount, setAmount] = useState(0);
-  const [action, setAction] = useState("add"); // "add" or "remove"
+  const [expirationDate, setExpirationDate] = useState(0);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  // const [action, setAction] = useState("add"); // "add" or "remove"
 
   useEffect(() => {
-    // Uncomment this block to fetch data from the backend when available
-    /*
     axios
-      .get("http://localhost:8080/api/inventory") // Replace with actual endpoint
+      .get("http://localhost:8080/inventory") // Replace with actual endpoint
       .then((response) => {
         setInventory(response.data);
       })
       .catch((error) => {
         console.error("Error fetching inventory", error);
       });
-    */
   }, []);
 
-  const handleUpdateInventory = () => {
-    const updatedInventory = inventory.map((item) => {
-      if (item.name.toLowerCase() === medication.toLowerCase()) {
-        let newQuantity =
-          action === "add"
-            ? item.quantity + parseInt(amount)
-            : item.quantity - parseInt(amount);
+  const handleUpdateInventory = async () => {
+    let targetMedication;
 
-        // Ensure the quantity doesn't go below zero
-        newQuantity = newQuantity < 0 ? 0 : newQuantity;
+    // Ensure the expiration date is valid
+    if (!expirationDate) {
+        setErrorMessage("Expiration date is required.");
+        setSuccessMessage("");
+        return;
+    }
 
-        // Uncomment this block to update data in the backend
-        /*
-        axios
-          .put(`http://localhost:8080/api/inventory/${item.id}`, {
-            ...item,
-            quantity: newQuantity,
-          })
-          .then(() => {
-            console.log("Inventory updated successfully");
-          })
-          .catch((error) => {
-            console.error("Error updating inventory", error);
-          });
-        */
-
-        return { ...item, quantity: newQuantity };
-      }
-      return item;
+    // Find the medication from the inventory
+    inventory.map((item) => {
+        if (item.name.toLowerCase() === medication.toLowerCase()) {
+            targetMedication = item;
+        }
     });
 
-    setInventory(updatedInventory);
-    setMedication("");
-    setAmount(0);
-  };
+    // Check if the medication was found
+    if (!targetMedication) {
+        setErrorMessage("Medication not found.");
+        setSuccessMessage("");
+        return;
+    }
 
-  const handleMedicationClick = (medicationId) => {
-    navigate(`/medication-specifics/${medicationId}`, { state: { inventory } });
+    // Calculate the new quantity
+    let newQuantity = targetMedication.quantity + parseInt(amount);
+    // Ensure the quantity doesn't go below zero
+    newQuantity = newQuantity < 0 ? 0 : newQuantity;
+
+    // Prepare the data for the API request
+    const newInventory = [
+        { expirationDate: expirationDate, quantity: parseInt(amount) }
+    ];
+
+    try {
+        // Make the POST request to update the inventory
+        await axios.post(`http://localhost:8080/inventory/addInventory/${targetMedication.id}`, newInventory);
+
+        // On success, update the inventory and show success message
+        axios
+        .get("http://localhost:8080/inventory") // Replace with actual endpoint
+        .then((response) => {
+          setInventory(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching inventory", error);
+        });
+
+        setErrorMessage(""); // Clear error messages
+        setSuccessMessage("Inventory updated successfully");
+
+    } catch (error) {
+        // Handle errors and show error message
+        console.error("Error updating inventory", error);
+        setErrorMessage("Error updating inventory");
+        setSuccessMessage("");
+    }
+};
+
+  
+
+  const handleMedicationClick = (medication) => {
+    navigate(`/medication-specifics/${medication.id}`, { state: { medication } });
   };
 
   return (
@@ -84,21 +102,29 @@ const UpdateInventory = () => {
           </tr>
         </thead>
         <tbody>
-          {inventory.map((item) => (
-            <tr key={item.id}>
-              <td>
-                <button
-                  onClick={() => handleMedicationClick(item.id)}
-                  className="medication-link"
-                >
-                  {item.name}
-                </button>
-              </td>
-              <td style={{ color: item.quantity < 50 ? "red" : "black" }}>
-                {item.quantity}
+          {inventory.length > 0 ? (
+            inventory.map((medication) => (
+              <tr key={medication.id}>
+                <td>
+                  <button
+                    onClick={() => handleMedicationClick(medication)}
+                    className="medication-link"
+                  >
+                    {medication.name}
+                  </button>
+                </td>
+                <td style={{ color: (medication?.totalQuantity || 0) < 50 ? "red" : "black" }}>
+                  {medication?.totalQuantity || 0}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" style={{ textAlign: "center" }}>
+                No medications available
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
 
@@ -121,13 +147,23 @@ const UpdateInventory = () => {
           />
         </label>
         <label>
+          Expiration Date:
+          <input
+            type="date"
+            value={expirationDate}
+            onChange={(e) => setExpirationDate(e.target.value)}
+          />
+        </label>
+        {/* <label>
           Action:
           <select value={action} onChange={(e) => setAction(e.target.value)}>
             <option value="add">Add</option>
             <option value="remove">Remove</option>
           </select>
-        </label>
+        </label> */}
         <button onClick={handleUpdateInventory}>Update Inventory</button>
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
       </div>
     </div>
   );
