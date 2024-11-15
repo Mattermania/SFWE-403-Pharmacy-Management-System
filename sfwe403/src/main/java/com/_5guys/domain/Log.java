@@ -24,6 +24,20 @@ import java.time.LocalTime;
 @JsonInclude(NON_DEFAULT)
 @Table(name = "log")
 public class Log {
+    public enum FIELD {
+        ACCOUNT,
+        PATIENT,
+        MEDICATION,
+        PRESCRIPTION
+    }
+    
+    public enum STATUS {
+        CREATE,
+        DELETE,
+        ADD,
+        REMOVE
+    }
+    
     @Id
     @UuidGenerator
     @Column(name = "id", unique = true, updatable = false, nullable = false)
@@ -34,4 +48,16 @@ public class Log {
 
     @Column(name = "time", unique = false, updatable = true, nullable = false)
     private LocalTime time;
+
+    @Column(name = "user_id", unique = false, updatable = true, nullable = false)
+    private String userId;
+
+    @Column(name = "field", unique = false, updatable = true, nullable = false)
+    private FIELD field;
+
+    @Column(name = "field_id", unique = false, updatable = true, nullable = false)
+    private String fieldId;
+
+    @Column(name = "status", unique = false, updatable = true, nullable = false)
+    private STATUS status;
 }
