@@ -11,7 +11,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -23,10 +22,9 @@ import org.hibernate.annotations.UuidGenerator;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 
 import java.time.LocalDate;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -47,9 +45,8 @@ public class Medication {
     private String manufacturer;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "medication_inventory", joinColumns = @JoinColumn(name = "medication_id"))
-    @MapKeyColumn(name = "expiration_date")
-    @Column(name = "quantity")
-    private Map<LocalDate, Integer> inventory = new HashMap<>(); 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<Stock> medication_inventory = new ArrayList<>(); 
     @OneToMany(mappedBy = "medication", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonBackReference("medicationReference")
     private Set<PrescriptionMedication> prescriptions = new HashSet<>();
@@ -57,23 +54,27 @@ public class Medication {
     public boolean removeInventory(int quantity) {
         int remainingQuantity = quantity;
     
-        // Check if inventory is empty
-        if (inventory.isEmpty()) {
+        // Check if medication_inventory is empty
+        if (medication_inventory.isEmpty()) {
             return false; // or throw an exception, depending on your use case
         }
     
         // Loop over the entries sorted by date (oldest first)
-        for (Iterator<Map.Entry<LocalDate, Integer>> it = inventory.entrySet().iterator(); it.hasNext() && remainingQuantity > 0;) {
-            Map.Entry<LocalDate, Integer> entry = it.next();
-            int currentQuantity = entry.getValue();
+        for (int i = 0; i < medication_inventory.size(); i++) {
+            int currentQuantity = medication_inventory.get(i).getQuantity();
+            Stock updatedStock = medication_inventory.get(i);
+            updatedStock.setQuantity(currentQuantity - remainingQuantity);
     
-            if (currentQuantity <= remainingQuantity) {
+            if (remainingQuantity < 0) {
+                break;
+            }
+            else if (currentQuantity <= remainingQuantity) {
                 // Remove entire quantity for this date
                 remainingQuantity -= currentQuantity;
-                it.remove(); // Remove the entry as quantity reaches zero
+                medication_inventory.remove(i); // Remove the entry as quantity reaches zero
             } else {
                 // Partially remove quantity from this date
-                entry.setValue(currentQuantity - remainingQuantity);
+                medication_inventory.set(i, updatedStock);
                 remainingQuantity = 0;
             }
         }
@@ -83,16 +84,15 @@ public class Medication {
     }
 
     public void removeExpired(LocalDate currentDate) {
-        // Check if inventory is empty
-        if (inventory.isEmpty()) {
+        // Check if medication_inventory is empty
+        if (medication_inventory.isEmpty()) {
             return;
         }
     
         // Loop over the entries sorted by date (oldest first)
-        for (Iterator<Map.Entry<LocalDate, Integer>> it = inventory.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<LocalDate, Integer> entry = it.next();
-            if (currentDate.isAfter(entry.getKey())) {
-                it.remove(); // Remove the entry as medications have expired
+        for (int i = 0; i < medication_inventory.size(); i++) {
+            if (currentDate.isAfter(medication_inventory.get(i).getExpirationDate())) {
+                medication_inventory.remove(i); // Remove the entry as medications have expired
             } else {
                 return;
             }
@@ -101,22 +101,29 @@ public class Medication {
     
     public void addInventory(LocalDate expirationDate, int quantity) {
         // Loop over the entries sorted by date (oldest first)
-        for (Iterator<Map.Entry<LocalDate, Integer>> it = inventory.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<LocalDate, Integer> entry = it.next();
-    
-            if (expirationDate.equals(entry.getKey())) {
-                entry.setValue(entry.getValue() + quantity);
+        for (int i = 0; i < medication_inventory.size(); i++) {
+            if (expirationDate.equals(medication_inventory.get(i).getExpirationDate())) {
+                medication_inventory.get(i).setQuantity(medication_inventory.get(i).getQuantity() + quantity); // Remove the entry as medications have expired
                 return;
             }
         }
 
-        inventory.put(expirationDate, quantity);
+        Stock newStock = new Stock();
+        newStock.setExpirationDate(expirationDate);
+        newStock.setQuantity(quantity);
+
+        medication_inventory.add(newStock);
 
         return;
     }
     
 
     public int getTotalQuantity() {
-        return inventory.values().stream().mapToInt(Integer::intValue).sum();
+        int totalQuantity = 0;
+        // Loop over the entries sorted by date (oldest first)
+        for (int i = 0; i < medication_inventory.size(); i++) {
+            totalQuantity += medication_inventory.get(i).getQuantity();
+        }
+        return totalQuantity;
     }
 }

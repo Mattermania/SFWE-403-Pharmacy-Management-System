@@ -5,8 +5,8 @@ import com._5guys.service.PrescriptionService;
 import lombok.RequiredArgsConstructor;
 
 import java.net.URI;
+import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,30 +22,15 @@ public class PrescriptionResource {
     @PostMapping
     public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
         Prescription createdPrescription = prescriptionService.createPrescription(prescription);
-        // Patient existingPatient = patientService.getPatient(prescription.getPatient().getId());
-        // createdPrescription.setPatient(existingPatient);
-        
-        // List<Medication> medicationsToAdd = new ArrayList<>();
-        // for (Medication medication : prescription.getMedications()) {
-        //     Medication existingMedication = inventoryService.getMedication(medication.getId());
-        //     // Only add if not already in the list
-        //     if (!createdPrescription.getMedications().contains(existingMedication)) {
-        //         medicationsToAdd.add(existingMedication);
-        //     }
-        // }
-
-        // // After the loop, add all collected medications at once
-        // createdPrescription.getMedications().addAll(medicationsToAdd);
-
         URI location = URI.create(String.format("/prescriptions/%s", createdPrescription.getId())); // Corrected the URI creation
 
         return ResponseEntity.created(location).body(createdPrescription);
     }
 
     @GetMapping
-    public ResponseEntity<Page<Prescription>> getPrescriptions(@RequestParam(value = "page", defaultValue = "0") int page,
+    public ResponseEntity<List<Prescription>> getPrescriptions(@RequestParam(value = "page", defaultValue = "0") int page,
                                                      @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok(prescriptionService.getAllPrescriptions(page, size));
+        return ResponseEntity.ok(prescriptionService.getAllPrescriptions());
     }
 
     @PostMapping("/fill")

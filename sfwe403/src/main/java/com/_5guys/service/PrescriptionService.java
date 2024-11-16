@@ -8,8 +8,8 @@ import com._5guys.repo.PrescriptionRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import java.util.List;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +27,8 @@ public class PrescriptionService {
         return prescriptionRepo.findById(id).orElseThrow(() -> new RuntimeException("Prescription not found"));
     }
 
-    public Page<Prescription> getAllPrescriptions(int page, int size) {
-        return prescriptionRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
+    public List<Prescription> getAllPrescriptions() {
+        return prescriptionRepo.findAll(Sort.by("name"));
     }
 
     public String fillPrescription(String id) {

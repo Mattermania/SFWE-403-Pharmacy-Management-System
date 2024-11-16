@@ -30,8 +30,12 @@ public class PatientService {
         return patientRepo.findAll(Sort.by("name"));
     }
 
-    public Patient getPatient(String id) {
+    public Patient getPatientById(String id) {
         return patientRepo.findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
+    }
+
+    public Patient getPatientByName(String name) {
+        return patientRepo.findByName(name).orElseThrow(() -> new RuntimeException("Patient not found"));
     }
 
     public Patient createPatient(Patient patient) {

@@ -4,16 +4,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDate;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com._5guys.domain.Medication;
+import com._5guys.domain.Stock;
 import com._5guys.repo.InventoryRepo;
 
 /**
@@ -39,13 +37,12 @@ public class InventoryService {
         return inventoryRepo.findById(id).orElseThrow(() -> new RuntimeException("Medication not found"));
     }
 
-    public Medication addInventory(String id, Map<LocalDate, Integer> newInventory) {
+    public Medication addInventory(String id, List<Stock> newInventory) {
         Optional<Medication> medication = inventoryRepo.findById(id);
         if (medication.isPresent()) {
             // Loop over the entries sorted by date (oldest first)
-            for (Iterator<Map.Entry<LocalDate, Integer>> it = newInventory.entrySet().iterator(); it.hasNext();) {
-                Map.Entry<LocalDate, Integer> entry = it.next();
-                medication.get().addInventory(entry.getKey(), entry.getValue());
+            for (Stock stock : newInventory) {
+                medication.get().addInventory(stock.getExpirationDate(), stock.getQuantity());
             }
         }
         

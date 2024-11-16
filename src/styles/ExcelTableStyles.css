@@ -44,3 +44,13 @@ button {
 button:hover {
   background-color: #ff4c4c;
 }
+.medication-link {
+  background: none;
+  border: none;
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.medication-link:hover {
+  color: darkblue;
+}
