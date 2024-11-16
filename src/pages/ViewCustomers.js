@@ -9,14 +9,14 @@ const ViewCustomers = () => {
   const [error, setError] = useState(''); // Error handling state
   const navigate = useNavigate();
   const location = useLocation();
-  const role = location.state?.role;
+  const account = location.state?.account;
 
 
   
 
   // Fetch the patients from the backend
   const fetchPatients = async () => {
-    if (!role || role !== "manager") {
+    if (!account || account.role !== "manager") {
       navigate("/"); // Redirect if the role is not manager
       return; // Exit early if not manager
     }
@@ -37,7 +37,7 @@ const ViewCustomers = () => {
   // Run the fetchPatients function once on component mount
   useEffect(() => {
     fetchPatients();
-  }, [role, navigate]);
+  }, [account, navigate]);
 
   const removeCustomer = (id) => {
     setCustomers(customers.filter((customer) => customer.id !== id));

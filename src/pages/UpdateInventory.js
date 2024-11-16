@@ -1,18 +1,19 @@
 // src/pages/UpdateInventory.js
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../styles/ExcelTableStyles.css"; // Import CSS for the Excel-style table
 
 const UpdateInventory = () => {
-  const navigate = useNavigate();
-
   const [inventory, setInventory] = useState([]); // Start with mock data
   const [medication, setMedication] = useState("");
   const [amount, setAmount] = useState(0);
   const [expirationDate, setExpirationDate] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const account = location.state?.account;
   // const [action, setAction] = useState("add"); // "add" or "remove"
 
   useEffect(() => {
@@ -31,7 +32,7 @@ const UpdateInventory = () => {
 
     // Ensure the expiration date is valid
     if (!expirationDate) {
-        setErrorMessage("Expiration date is required.");
+        setErrorMessage("Expiration date is required." + account.role);
         setSuccessMessage("");
         return;
     }

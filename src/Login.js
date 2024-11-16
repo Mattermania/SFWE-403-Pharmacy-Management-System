@@ -31,31 +31,7 @@ const LoginForm = () => {
                 setLoginMessage('Login successful!');
                 setErrorMessage('');
 
-                if (response.data.role == "CASHIER") {
-                    // Redirect to cashier page
-                    userRole = "staff";
-                    navigate("/beforepharm", { state: { role: userRole } });
-                }
-                else if (response.data.role == "TECHNICIAN") {
-                    // Redirect to technician page
-                    navigate("/beforepharm/staff");
-                    userRole = "staff";
-                    navigate("/beforepharm", { state: { role: userRole } });
-                }
-                else if (response.data.role == "PHARMACIST") {
-                    // Redirect to pharmacist page
-                    userRole = "pharmacist";
-                    navigate("/beforepharm", { state: { role: userRole } });
-                }
-                else if (response.data.role == "MANAGER") {
-                    // Redirect to manager page
-                    userRole = "manager";
-                    navigate("/beforepharm", { state: { role: userRole } });
-                }
-                else {
-                    // Account wasn't initialized with a role
-                    setErrorMessage('Invalid user account.');
-                }
+                navigate("/beforepharm", { state: { account: response.data } });
             } else {
                 setErrorMessage('Invalid username or password.');
             }

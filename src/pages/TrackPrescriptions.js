@@ -11,7 +11,7 @@ const TrackPrescriptions = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const role = location.state?.role;
+  const account = location.state?.account;
 
   const [newPrescription, setNewPrescription] = useState({
     patientName: "",
@@ -35,7 +35,7 @@ const TrackPrescriptions = () => {
   // Run fetchPrescriptions on component mount
   useEffect(() => {
     fetchPrescriptions();
-  }, [role, navigate]);
+  }, [account, navigate]);
 
   const removePrescription = async (id) => {
     try {
@@ -78,6 +78,20 @@ const TrackPrescriptions = () => {
       if (prescriptionResponse.status === 201) {
         console.log("Prescription created:", prescriptionResponse.data);
         setSuccessMessage(`Prescription created successfully.`);
+
+        // Create a new logs object
+        const now = new Date();
+
+        const newLogData = {
+          date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`,
+          time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`,
+          userId: account.id,
+          field: "PRESCRIPTION",
+          fieldId: prescriptionResponse.data.id,
+          status: "ADD"
+        };
+
+        await axios.post('http://localhost:8080/logs', newLogData);
       } else {
         setErrorMessage('Error creating prescription.');
       }
