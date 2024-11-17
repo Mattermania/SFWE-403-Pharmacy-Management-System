@@ -12,30 +12,30 @@ import React, { useEffect } from "react";
 const HomePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const role = location.state?.role;
+  const account = location.state?.account;
 
   useEffect(() => {
-    if (!role) {
+    if (!account) {
       navigate("/");
     }
-  }, [role, navigate]);
+  }, [account, navigate]);
 
   const handleNavigation = (route) => {
-    navigate(route, { state: { role } });
+    navigate(route, { state: { account } });
   };
 
   return (
     <Container>
       <Title>Pharmacy Management System</Title>
-      {role ? (
+      {account ? (
         <>
           <Description>
-            Welcome, {role.charAt(0).toUpperCase() + role.slice(1)}! Select an
+            Welcome, {account.role.charAt(0).toUpperCase() + account.role.slice(1)}! Select an
             action below:
           </Description>
 
           <Section>
-            <Title>{role.charAt(0).toUpperCase() + role.slice(1)}</Title>
+            <Title>{account.role.charAt(0).toUpperCase() + account.role.slice(1)}</Title>
 
             {/* Add Customer button available for Manager, Pharmacist, and Staff */}
             <Button onClick={() => handleNavigation("/add-customer")}>
@@ -43,7 +43,7 @@ const HomePage = () => {
             </Button>
 
             {/* View Customers button available only for Manager */}
-            {role === "manager" && (
+            {account.role.toLowerCase() === "manager" && (
               <>
                 <Button onClick={() => handleNavigation("/view-customers")}>
                   View Customers
@@ -94,7 +94,7 @@ const HomePage = () => {
             )}
 
             {/* Pharmacist Buttons, with additional Staff Buttons */}
-            {role === "pharmacist" && (
+            {account.role.toLowerCase() === "pharmacist" && (
               <>
                 <Button onClick={() => handleNavigation("/pharmacist")}>
                   Get Inventory
@@ -136,7 +136,7 @@ const HomePage = () => {
             )}
 
             {/* Staff-only buttons */}
-            {role === "staff" && (
+            {account.role.toLowerCase() === "staff" && (
               <>
                 <Button onClick={() => handleNavigation("/enter-prescription")}>
                   Enter Prescription
@@ -164,7 +164,7 @@ const HomePage = () => {
             )}
 
             {/* Customer-specific buttons */}
-            {role === "customer" && (
+            {account.role.toLowerCase() === "customer" && (
               <>
                 <Button
                   onClick={() => handleNavigation("/submit-prescription")}
