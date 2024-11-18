@@ -141,3 +141,69 @@ public class InventoryService {
     }
 }
 
+
+//New Implementation:
+import com._5guys.domain.ActivityLog;
+import com._5guys.repo.ActivityLogRepo;
+
+// Add ActivityLogRepo as a dependency
+@RequiredArgsConstructor
+public class InventoryService {
+    private final InventoryRepo inventoryRepo;
+    private final ActivityLogRepo activityLogRepo; // New dependency
+    private final NotificationService notificationService;
+
+    // Existing methods...
+
+    // Update the checkForExpiringMedicines method
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void checkForExpiringMedicines() {
+        List<Medication> medications = inventoryRepo.findAll();
+        LocalDate today = LocalDate.now();
+        LocalDate thresholdDate = today.plusDays(30);
+
+        Map<String, List<LocalDate>> expiringMedicines = new HashMap<>();
+
+        for (Medication medication : medications) {
+            Map<LocalDate, Integer> inventory = medication.getMedicationInventory();
+            List<LocalDate> datesToRemove = new ArrayList<>();
+
+            for (LocalDate expiryDate : inventory.keySet()) {
+                if (expiryDate.isBefore(today)) {
+                    // Medicine has expired
+                    expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(expiryDate);
+                    datesToRemove.add(expiryDate);
+
+                    // **Remove expired medication from inventory**
+                    inventory.put(expiryDate, 0);
+
+                    // **Log the removal in the activity log**
+                    ActivityLog logEntry = new ActivityLog();
+                    logEntry.setPharmacistName("System"); // Or assign the responsible pharmacist
+                    logEntry.setPrescriptionNumber("N/A");
+                    logEntry.setPatientDetails("N/A");
+                    logEntry.setAction("Removed expired medication: " + medication.getName());
+                    logEntry.setTimestamp(LocalDateTime.now());
+                    activityLogRepo.save(logEntry);
+                } else if (!expiryDate.isAfter(thresholdDate)) {
+                    // Medicine is about to expire
+                    expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(expiryDate);
+                }
+            }
+
+            // Remove zero-quantity entries
+            for (LocalDate dateToRemove : datesToRemove) {
+                inventory.remove(dateToRemove);
+            }
+
+            // Save updated medication
+            inventoryRepo.save(medication);
+        }
+
+        if (!expiringMedicines.isEmpty()) {
+            notificationService.notifyManagerOfExpiringMedicines(expiringMedicines);
+        }
+    }
+}
+
+
