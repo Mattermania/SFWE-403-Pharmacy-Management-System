@@ -87,3 +87,55 @@ public class InventoryService {
         inventoryRepo.save(medication);
     }
 }
+
+//Sprint 5 chanegs: Added a method to check for expired or about-to-expire medicines. This method will be scheduled to run at a regular interval (e.g., daily).
+package com._5guys.service;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import com._5guys.domain.Medication;
+import com._5guys.repo.InventoryRepo;
+
+import java.time.LocalDate;
+import java.util.*;
+
+@Service
+@Slf4j
+@Transactional(rollbackOn = Exception.class)
+@RequiredArgsConstructor
+public class InventoryService {
+    private final InventoryRepo inventoryRepo;
+    private final NotificationService notificationService; // New service for notifications
+
+    // Existing methods...
+
+    // **New method to check for expired or about-to-expire medicines**
+    public void checkForExpiringMedicines() {
+        List<Medication> medications = inventoryRepo.findAll();
+        LocalDate today = LocalDate.now();
+        LocalDate thresholdDate = today.plusDays(30); // Set threshold for notification (e.g., 30 days)
+
+        Map<String, List<LocalDate>> expiringMedicines = new HashMap<>();
+
+        for (Medication medication : medications) {
+            Map<LocalDate, Integer> inventory = medication.getMedicationInventory();
+            for (LocalDate expiryDate : inventory.keySet()) {
+                if (expiryDate.isBefore(today)) {
+                    // Medicine has expired
+                    expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(expiryDate);
+                } else if (!expiryDate.isAfter(thresholdDate)) {
+                    // Medicine is about to expire within the threshold
+                    expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(expiryDate);
+                }
+            }
+        }
+
+        if (!expiringMedicines.isEmpty()) {
+            // Notify the manager
+            notificationService.notifyManagerOfExpiringMedicines(expiringMedicines);
+        }
+    }
+}
+
