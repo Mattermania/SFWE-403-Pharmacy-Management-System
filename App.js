@@ -41,3 +41,22 @@ function App() {
 }
 
 export default App;
+
+
+//New code to implement
+import ActivityLog from "./pages/ActivityLog"; // Import the new component
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Existing routes */}
+        <Route path="/activity-log" element={<ActivityLog />} /> {/* New route */}
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+
