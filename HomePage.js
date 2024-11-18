@@ -1,6 +1,3 @@
-//Add a button for managers to navigate to the unlock accounts page.
-
-// src/pages/HomePage.js
 import {
   Container,
   Title,
@@ -50,27 +47,48 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/view-customers")}>
                   View Customers
                 </Button>
-                <Button onClick={() => handleNavigation("/generate-report")}>
+                <Button
+                  onClick={() => handleNavigation("/generate-report")}
+                >
                   Generate Report
                 </Button>
-                <Button onClick={() => handleNavigation("/order-medication")}>
+                <Button
+                  onClick={() => handleNavigation("/order-medication")}
+                >
                   Order Medication
                 </Button>
-                <Button onClick={() => handleNavigation("/update-inventory")}>
+                <Button
+                  onClick={() => handleNavigation("/update-inventory")}
+                >
                   Update Inventory
                 </Button>
-                <Button onClick={() => handleNavigation("/remove-access")}>
+                <Button
+                  onClick={() => handleNavigation("/remove-access")}
+                >
                   Remove Access
                 </Button>
-                <Button onClick={() => handleNavigation("/create-user")}>
+                <Button
+                  onClick={() => handleNavigation("/create-user")}
+                >
                   Create User Account
                 </Button>
-                <Button onClick={() => handleNavigation("/manage-roles")}>
+                <Button
+                  onClick={() => handleNavigation("/manage-roles")}
+                >
                   Manage User Roles
                 </Button>
 
+                {/* New implementation: Unlock Accounts button */}
+                <Button
+                  onClick={() => handleNavigation("/unlock-accounts")}
+                >
+                  Unlock Accounts
+                </Button>
+
                 {/* Staff Buttons */}
-                <Button onClick={() => handleNavigation("/enter-prescription")}>
+                <Button
+                  onClick={() => handleNavigation("/enter-prescription")}
+                >
                   Enter Prescription
                 </Button>
                 <Button
@@ -78,13 +96,19 @@ const HomePage = () => {
                 >
                   Process Prescription
                 </Button>
-                <Button onClick={() => handleNavigation("/request-refill")}>
+                <Button
+                  onClick={() => handleNavigation("/request-refill")}
+                >
                   Request Refill Authorization
                 </Button>
-                <Button onClick={() => handleNavigation("/check-inventory")}>
+                <Button
+                  onClick={() => handleNavigation("/check-inventory")}
+                >
                   Check Inventory
                 </Button>
-                <Button onClick={() => handleNavigation("/receive-warning")}>
+                <Button
+                  onClick={() => handleNavigation("/receive-warning")}
+                >
                   Receive Warning
                 </Button>
                 <Button
@@ -101,18 +125,26 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/pharmacist")}>
                   Get Inventory
                 </Button>
-                <Button onClick={() => handleNavigation("/order-medication")}>
+                <Button
+                  onClick={() => handleNavigation("/order-medication")}
+                >
                   Order Medication
                 </Button>
-                <Button onClick={() => handleNavigation("/review-warnings")}>
+                <Button
+                  onClick={() => handleNavigation("/review-warnings")}
+                >
                   Review Warnings
                 </Button>
-                <Button onClick={() => handleNavigation("/sign-prescription")}>
+                <Button
+                  onClick={() => handleNavigation("/sign-prescription")}
+                >
                   Sign for Prescription
                 </Button>
 
                 {/* Staff Buttons */}
-                <Button onClick={() => handleNavigation("/enter-prescription")}>
+                <Button
+                  onClick={() => handleNavigation("/enter-prescription")}
+                >
                   Enter Prescription
                 </Button>
                 <Button
@@ -120,13 +152,19 @@ const HomePage = () => {
                 >
                   Process Prescription
                 </Button>
-                <Button onClick={() => handleNavigation("/request-refill")}>
+                <Button
+                  onClick={() => handleNavigation("/request-refill")}
+                >
                   Request Refill Authorization
                 </Button>
-                <Button onClick={() => handleNavigation("/check-inventory")}>
+                <Button
+                  onClick={() => handleNavigation("/check-inventory")}
+                >
                   Check Inventory
                 </Button>
-                <Button onClick={() => handleNavigation("/receive-warning")}>
+                <Button
+                  onClick={() => handleNavigation("/receive-warning")}
+                >
                   Receive Warning
                 </Button>
                 <Button
@@ -140,7 +178,9 @@ const HomePage = () => {
             {/* Staff-only buttons */}
             {role === "staff" && (
               <>
-                <Button onClick={() => handleNavigation("/enter-prescription")}>
+                <Button
+                  onClick={() => handleNavigation("/enter-prescription")}
+                >
                   Enter Prescription
                 </Button>
                 <Button
@@ -148,13 +188,19 @@ const HomePage = () => {
                 >
                   Process Prescription
                 </Button>
-                <Button onClick={() => handleNavigation("/request-refill")}>
+                <Button
+                  onClick={() => handleNavigation("/request-refill")}
+                >
                   Request Refill Authorization
                 </Button>
-                <Button onClick={() => handleNavigation("/check-inventory")}>
+                <Button
+                  onClick={() => handleNavigation("/check-inventory")}
+                >
                   Check Inventory
                 </Button>
-                <Button onClick={() => handleNavigation("/receive-warning")}>
+                <Button
+                  onClick={() => handleNavigation("/receive-warning")}
+                >
                   Receive Warning
                 </Button>
                 <Button
@@ -190,17 +236,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-//New implementation
-// Inside the manager-specific buttons
-{role === "manager" && (
-  <>
-    {/* Existing buttons */}
-    <Button onClick={() => handleNavigation("/unlock-accounts")}>
-      Unlock Accounts
-    </Button>
-    {/* Other buttons */}
-  </>
-)}
-
-
