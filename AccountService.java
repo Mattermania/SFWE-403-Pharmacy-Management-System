@@ -25,11 +25,7 @@ import static com._5guys.constant.Constant.PHOTO_DIRECTORY;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
- * @author Junior RT
- * @version 1.0
- * @license Get Arrays, LLC (<a href="https://www.getarrays.io">Get Arrays, LLC</a>)
- * @email getarrayz@gmail.com
- * @since 11/22/2023
+ * AccountService handles account-related operations.
  */
 @Service
 @Slf4j
@@ -95,7 +91,8 @@ public class AccountService {
     }
 
     public Account getAccount(String id) {
-        return accountRepo.findById(id).orElseThrow(() -> new RuntimeException("Account not found"));
+        return accountRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
     }
 
     public Account createAccount(Account account) {
@@ -117,19 +114,23 @@ public class AccountService {
         return photoUrl;
     }
 
-    private final Function<String, String> fileExtension = filename -> Optional.of(filename).filter(name -> name.contains("."))
-            .map(name -> "." + name.substring(filename.lastIndexOf(".") + 1)).orElse(".png");
+    private final Function<String, String> fileExtension = filename -> Optional.of(filename)
+            .filter(name -> name.contains("."))
+            .map(name -> "." + name.substring(filename.lastIndexOf(".") + 1))
+            .orElse(".png");
 
     private final BiFunction<String, MultipartFile, String> photoFunction = (id, image) -> {
         String filename = id + fileExtension.apply(image.getOriginalFilename());
         try {
             Path fileStorageLocation = Paths.get(PHOTO_DIRECTORY).toAbsolutePath().normalize();
-            if(!Files.exists(fileStorageLocation)) { Files.createDirectories(fileStorageLocation); }
+            if (!Files.exists(fileStorageLocation)) {
+                Files.createDirectories(fileStorageLocation);
+            }
             Files.copy(image.getInputStream(), fileStorageLocation.resolve(filename), REPLACE_EXISTING);
-            return ServletUriComponentsBuilder
-                    .fromCurrentContextPath()
-                    .path("/accounts/image/" + filename).toUriString();
-        }catch (Exception exception) {
+            return ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/accounts/image/" + filename)
+                    .toUriString();
+        } catch (Exception exception) {
             throw new RuntimeException("Unable to save image");
         }
     };
