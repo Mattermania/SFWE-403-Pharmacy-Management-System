@@ -236,3 +236,19 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+
+
+//New Implementation
+// Inside the manager-specific buttons
+{role === "manager" && (
+  <>
+    {/* Existing buttons */}
+    <Button onClick={() => handleNavigation("/activity-log")}>
+      View Activity Log
+    </Button>
+    {/* Other buttons */}
+  </>
+)}
+
+
