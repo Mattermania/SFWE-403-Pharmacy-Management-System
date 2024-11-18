@@ -12,6 +12,9 @@ import Login from "./Login";
 import Forgot from "./pages/Forgot";
 import Signup from "./pages/Signup";
 import Pharmacist from "./pages/Pharmacist";
+import GenerateReportPage from "./pages/GenerateReportPage";
+import FinancialReportPage from "./pages/FinancialReportPage";
+import InventoryReportPage from "./pages/InventoryReportPage";
 
 function App() {
   return (
@@ -27,6 +30,9 @@ function App() {
         <Route path="/track-prescriptions" element={<TrackPrescriptions />} />
         <Route path="/add-prescription" element={<AddPrescription />} />
         <Route path="/update-inventory" element={<UpdateInventory />} />
+        <Route path="/generate-report" element ={<GenerateReportPage />} />
+        <Route path="/financial-report" element ={<FinancialReportPage/>} />
+        <Route path ="/inventory-report" element ={<InventoryReportPage/>} />
         <Route
           path="/medication-specifics/:medicationId"
           element={<MedicationSpecifics />}
