@@ -63,6 +63,10 @@ public class Account {
     private boolean accountLocked = false;
 
     // Existing methods and fields remain unchanged
+}
+
+
+    // Existing methods and fields remain unchanged
       // public Account(String username, String password, String name, String email, String phoneNumber, String address) {
     //     this.username = username;
     //     this.password = password;
