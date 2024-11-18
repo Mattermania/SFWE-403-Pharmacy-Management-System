@@ -111,7 +111,9 @@ public class InventoryService {
 
     // Existing methods...
 
-    // **New method to check for expired or about-to-expire medicines**
+    // **Scheduled method to check for expiring medicines daily at midnight**
+    @Scheduled(cron = "0 0 0 * * ?") // Every day at midnight
+   // **New method to check for expired or about-to-expire medicines**
     public void checkForExpiringMedicines() {
         List<Medication> medications = inventoryRepo.findAll();
         LocalDate today = LocalDate.now();
