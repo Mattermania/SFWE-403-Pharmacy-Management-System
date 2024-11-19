@@ -85,6 +85,11 @@ const HomePage = () => {
                   Unlock Accounts
                 </Button>
 
+                {/* New implementation: View Activity Log button */}
+                <Button onClick={() => handleNavigation("/activity-log")}>
+                  View Activity Log
+                </Button>
+
                 {/* Staff Buttons */}
                 <Button
                   onClick={() => handleNavigation("/enter-prescription")}
@@ -236,19 +241,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-
-
-//New Implementation
-// Inside the manager-specific buttons
-{role === "manager" && (
-  <>
-    {/* Existing buttons */}
-    <Button onClick={() => handleNavigation("/activity-log")}>
-      View Activity Log
-    </Button>
-    {/* Other buttons */}
-  </>
-)}
-
-
