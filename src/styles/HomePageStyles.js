@@ -40,3 +40,24 @@ export const Button = styled.button`
     background-color: #45a049;
   }
 `;
+
+export const AlertBox = styled.div`
+  background-color: #ffcccc;
+  border: 1px solid #ff0000;
+  color: #660000;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  width: 90%;
+  max-width: 600px;
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin: 5px 0;
+  }
+`;
