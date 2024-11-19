@@ -4,20 +4,20 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com._5guys.domain.Medication;
+import com._5guys.domain.ActivityLog;
 import com._5guys.repo.InventoryRepo;
+import com._5guys.repo.ActivityLogRepo;
+import com._5guys.service.NotificationService;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
- * @author Junior RT
- * @version 1.0
- * @license Get Arrays, LLC (<a href="https://www.getarrays.io">Get Arrays, LLC</a>)
- * @email getarrayz@gmail.com
- * @since 11/22/2023
+ * InventoryService handles inventory operations.
  */
 
 @Service
@@ -26,6 +26,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class InventoryService {
     private final InventoryRepo inventoryRepo;
+    private final ActivityLogRepo activityLogRepo; // New dependency
+    private final NotificationService notificationService; // New service for notifications
 
     public List<Medication> getAllMedications() {
         return inventoryRepo.findAll(Sort.by("name"));
@@ -86,34 +88,9 @@ public class InventoryService {
         // Save the updated medication
         inventoryRepo.save(medication);
     }
-}
-
-//Sprint 5 chanegs: Added a method to check for expired or about-to-expire medicines. This method will be scheduled to run at a regular interval (e.g., daily).
-package com._5guys.service;
-
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import com._5guys.domain.Medication;
-import com._5guys.repo.InventoryRepo;
-
-import java.time.LocalDate;
-import java.util.*;
-
-@Service
-@Slf4j
-@Transactional(rollbackOn = Exception.class)
-@RequiredArgsConstructor
-public class InventoryService {
-    private final InventoryRepo inventoryRepo;
-    private final NotificationService notificationService; // New service for notifications
-
-    // Existing methods...
 
     // **Scheduled method to check for expiring medicines daily at midnight**
     @Scheduled(cron = "0 0 0 * * ?") // Every day at midnight
-   // **New method to check for expired or about-to-expire medicines**
     public void checkForExpiringMedicines() {
         List<Medication> medications = inventoryRepo.findAll();
         LocalDate today = LocalDate.now();
@@ -123,52 +100,12 @@ public class InventoryService {
 
         for (Medication medication : medications) {
             Map<LocalDate, Integer> inventory = medication.getMedicationInventory();
-            for (LocalDate expiryDate : inventory.keySet()) {
-                if (expiryDate.isBefore(today)) {
-                    // Medicine has expired
-                    expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(expiryDate);
-                } else if (!expiryDate.isAfter(thresholdDate)) {
-                    // Medicine is about to expire within the threshold
-                    expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(expiryDate);
-                }
-            }
-        }
-
-        if (!expiringMedicines.isEmpty()) {
-            // Notify the manager
-            notificationService.notifyManagerOfExpiringMedicines(expiringMedicines);
-        }
-    }
-}
-
-
-//New Implementation:
-import com._5guys.domain.ActivityLog;
-import com._5guys.repo.ActivityLogRepo;
-
-// Add ActivityLogRepo as a dependency
-@RequiredArgsConstructor
-public class InventoryService {
-    private final InventoryRepo inventoryRepo;
-    private final ActivityLogRepo activityLogRepo; // New dependency
-    private final NotificationService notificationService;
-
-    // Existing methods...
-
-    // Update the checkForExpiringMedicines method
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void checkForExpiringMedicines() {
-        List<Medication> medications = inventoryRepo.findAll();
-        LocalDate today = LocalDate.now();
-        LocalDate thresholdDate = today.plusDays(30);
-
-        Map<String, List<LocalDate>> expiringMedicines = new HashMap<>();
-
-        for (Medication medication : medications) {
-            Map<LocalDate, Integer> inventory = medication.getMedicationInventory();
             List<LocalDate> datesToRemove = new ArrayList<>();
 
-            for (LocalDate expiryDate : inventory.keySet()) {
+            for (Map.Entry<LocalDate, Integer> entry : inventory.entrySet()) {
+                LocalDate expiryDate = entry.getKey();
+                int quantity = entry.getValue();
+
                 if (expiryDate.isBefore(today)) {
                     // Medicine has expired
                     expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(expiryDate);
@@ -186,7 +123,7 @@ public class InventoryService {
                     logEntry.setTimestamp(LocalDateTime.now());
                     activityLogRepo.save(logEntry);
                 } else if (!expiryDate.isAfter(thresholdDate)) {
-                    // Medicine is about to expire
+                    // Medicine is about to expire within the threshold
                     expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(expiryDate);
                 }
             }
@@ -201,9 +138,8 @@ public class InventoryService {
         }
 
         if (!expiringMedicines.isEmpty()) {
+            // Notify the manager
             notificationService.notifyManagerOfExpiringMedicines(expiringMedicines);
         }
     }
 }
-
-
