@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,4 +59,19 @@ public class InventoryService {
                 .orElseThrow(() -> new RuntimeException("Medication not found"));
             inventoryRepo.delete(medication);
     }
+    public int getLowStockWarningsCount() {
+        int threshold = 5;
+        return (int) inventoryRepo.findAll().stream()
+                .filter(medication -> medication.getTotalQuantity() <= threshold)
+                .count();
+    }
+
+    public int getExpiredMedicationsCount() {
+        LocalDate currentDate = LocalDate.now();
+        return (int) inventoryRepo.findAll().stream()
+                .filter(medication -> medication.getMedication_inventory().stream()
+                        .anyMatch(stock -> stock.getExpirationDate().isBefore(currentDate)))
+                .count();
+    }
+    
 }

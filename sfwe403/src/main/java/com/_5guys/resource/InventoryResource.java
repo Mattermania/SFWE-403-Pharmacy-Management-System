@@ -47,4 +47,16 @@ public class InventoryResource {
         inventoryService.deleteMedication(id);
         return ResponseEntity.noContent().build(); // Returns 204 No Content
     }
+
+    @GetMapping("/low-stock-warnings/count")
+    public ResponseEntity<Integer> getLowStockWarningsCount() {
+        int count = inventoryService.getLowStockWarningsCount();
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/expired-medications/count")
+    public ResponseEntity<Integer> getExpiredMedicationsCount() {
+        int count = inventoryService.getExpiredMedicationsCount();
+        return ResponseEntity.ok(count);
+    }
 }
