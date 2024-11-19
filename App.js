@@ -9,7 +9,8 @@ import Login from "./Login";
 import Forgot from "./pages/Forgot";
 import Signup from "./pages/Signup";
 import Pharmacist from "./pages/Pharmacist";
-import UnlockAccounts from "./pages/UnlockAccounts"; // Import the new component
+import UnlockAccounts from "./pages/UnlockAccounts"; // Import the UnlockAccounts component
+import ActivityLog from "./pages/ActivityLog"; // Import the new ActivityLog component
 
 function App() {
   return (
@@ -33,30 +34,14 @@ function App() {
         <Route
           path="/unlock-accounts"
           element={<UnlockAccounts />}
-        />{" "}
-        {/* New route */}
+        />
+        <Route
+          path="/activity-log"
+          element={<ActivityLog />}
+        /> {/* New route */}
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
-
-
-//New code to implement
-import ActivityLog from "./pages/ActivityLog"; // Import the new component
-
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Existing routes */}
-        <Route path="/activity-log" element={<ActivityLog />} /> {/* New route */}
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;
-
-
