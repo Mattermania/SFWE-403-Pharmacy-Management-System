@@ -61,7 +61,7 @@ const HomePage = () => {
         <>
           <Description>
             Welcome,{" "}
-            {account.role.charAt(0).toUpperCase() + account.role.slice(1)}! Select an action below:
+            {account.name}! Select an action below:
           </Description>
 
           <Section>

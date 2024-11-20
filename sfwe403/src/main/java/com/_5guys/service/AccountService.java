@@ -38,12 +38,12 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 public class AccountService {
     private final AccountRepo accountRepo;
 
-    public Account findByUsernameAndPassword(String username, String password) {
-        return accountRepo.findByUsernameAndPassword(username, password);
+    public Account findByUsername(String username) {
+        return accountRepo.findByUsername(username);
     }
 
-    public Account findByEmailAndPassword(String email, String password) {
-        return accountRepo.findByEmailAndPassword(email, password);
+    public Account findByEmail(String email) {
+        return accountRepo.findByEmail(email);
     }
 
     public Page<Account> getAllAccounts(int page, int size) {
@@ -79,6 +79,14 @@ public class AccountService {
         account.setPassword(password);
         accountRepo.save(account);
         return password;
+    }
+
+    public String updateState(String id, String state) {
+        log.info("Updating state for user ID: {}", id);
+        Account account = getAccount(id);
+        account.setState(state);
+        accountRepo.save(account);
+        return state;
     }
 
     private final Function<String, String> fileExtension = filename -> Optional.of(filename).filter(name -> name.contains("."))

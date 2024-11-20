@@ -45,15 +45,21 @@ public class AccountResource {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Account> searchAccountByUsernameEmailAndPassword(
+    public ResponseEntity<Account> searchAccountByUsernameAndEmail(
             @RequestParam("username") String username,
-            @RequestParam("username") String email,
-            @RequestParam("password") String password) {
+            @RequestParam("username") String email) {
         
-        Account account = accountService.findByUsernameAndPassword(username, password);
+        Account account = accountService.findByUsername(username);
         if (account == null) {
-            account = accountService.findByEmailAndPassword(email, password);
+            account = accountService.findByEmail(email);
         }
+        return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/search/email")
+    public ResponseEntity<Account> searchAccountByEmail(@RequestParam("email") String email) {
+        
+        Account account = accountService.findByEmail(email);
         return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
     }
 
@@ -91,6 +97,18 @@ public class AccountResource {
         // Consider adding error handling here (e.g., invalid file type, size too large)
         try {
             String responseMessage = accountService.updatePassword(id, password);
+            return ResponseEntity.ok(responseMessage);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                                 .body("Invalid request: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/state/{id}")
+    public ResponseEntity<String> updateState(@PathVariable(value = "id") String id, @RequestParam("state") String state) {
+        // Consider adding error handling here (e.g., invalid file type, size too large)
+        try {
+            String responseMessage = accountService.updateState(id, state);
             return ResponseEntity.ok(responseMessage);
         } catch (Exception e) {
             return ResponseEntity.badRequest()

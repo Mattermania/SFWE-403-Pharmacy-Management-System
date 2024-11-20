@@ -8,30 +8,57 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const LoginForm = () => {
     const [username, setUsername] = useState('');
+    const [prevUsername, setPrevUsername] = useState('');
+    const [wrongAttempts, setWrongAttempts] = useState(0);
     const [password, setPassword] = useState('');
     const [successfulLoginMessage, setLoginMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [showPassword, setShowPassword] = useState(false); 
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (event) => {
         event.preventDefault();
         let userRole = "";
+        let currWrongAttempts = wrongAttempts;
         
         try {
             const response = await axios.get('http://localhost:8080/accounts/search', { 
-                params: { 
+                params: {
                     username: username, 
-                    email: username, 
-                    password: password 
+                    email: username
                 }
             });
 
             if (response.status === 200 && response.data) {
-                setLoginMessage('Login successful!');
-                setErrorMessage('');
+                if (response.data.password == password) {
+                    setLoginMessage('Login successful!');
+                    setErrorMessage('');
 
-                navigate("/beforepharm", { state: { account: response.data } });
+                    navigate("/beforepharm", { state: { account: response.data } });
+                } else {
+                    if (((currWrongAttempts + 1) >= 5) || response.data.state == 'LOCKED') {
+                        try {
+                            const returnResponse = await axios.put(`http://localhost:8080/accounts/state/${response.data.id}`, null, {
+                                params: { state: 'LOCKED' }
+                            });
+                    
+                            if (returnResponse.status === 200 && returnResponse.data) {
+                                setErrorMessage('Account locked. Please request manager support to unlock.');
+                            } else {
+                                setSuccessMessage('');
+                                setErrorMessage('Error: Account not successfully locked.');
+                            }
+                        } catch (error) {
+                            setSuccessMessage('');
+                            setErrorMessage('Error: Unable to send locked account request.' + error.message);
+                            console.error('Error:', error.returnResponse ? error.returnResponse.data : error.message);
+                        }
+                    } else {
+                        setWrongAttempts(currWrongAttempts + 1);
+                        setErrorMessage('Invalid username or password.' + (currWrongAttempts + 1));
+                        setPrevUsername(username);
+                    }
+                }
             } else {
                 setErrorMessage('Invalid username or password.');
             }

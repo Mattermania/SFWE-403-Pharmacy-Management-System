@@ -108,6 +108,7 @@ const TrackPrescriptions = () => {
       });
     } catch (error) {
       console.error("Error submitting request:", error);
+      setErrorMessage('Error creating prescription.');
     }
   };
 

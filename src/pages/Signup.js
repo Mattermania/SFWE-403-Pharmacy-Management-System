@@ -52,6 +52,7 @@ const SignUpForm = () => {
       phoneNumber,
       email,
       role,
+      state: "INACTIVE"
     };
 
     try {
@@ -75,9 +76,6 @@ const SignUpForm = () => {
       }
     } catch (error) {
       console.error("Error submitting request:", error);
-      // setErrorMessage(
-      //   `Error submitting request: ${error.response?.data?.message || error.message}`
-      // );
       setErrorMessage(`Account with this username and/or email already exists`);
       setSuccessMessage("");
     } finally {
