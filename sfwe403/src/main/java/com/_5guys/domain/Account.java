@@ -49,4 +49,16 @@ public class Account {
     private Role role;
     
     private String photoUrl;
+
+    // **New fields added for account lockout functionality**
+
+    // Field to track the number of failed login attempts
+    @Column(name = "failed_login_attempts", nullable = false)
+    private int failedLoginAttempts = 0;
+
+    // Field to indicate whether the account is locked
+    @Column(name = "account_locked", nullable = false)
+    private boolean accountLocked = false;
+
+    // Existing methods and fields remain unchanged
 }

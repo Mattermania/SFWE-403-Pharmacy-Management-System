@@ -62,6 +62,7 @@ export const Button = styled.button`
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
+  margin: 0 auto; 
   &:hover {
     background-color: #365B93; // Slightly darker blue on hover
   }
@@ -87,6 +88,7 @@ export const Heading = styled.h1`
 `;
 
 export const EyeButton = styled.button`
+  
   position: absolute;
   right: 10px; /* Position it closer to the right edge of the input */
   top: 50%;
@@ -99,13 +101,15 @@ export const EyeButton = styled.button`
   margin: 0; /* Remove default margin */
   z-index: 1; /* Ensure it's above the input field */
   &:hover {
-    color: #365B93; /* Change color on hover */
+     background-color:  transparent; /* Change color on hover */
   }
 `;
 
 export const InputContainer = styled.div`
-  position: relative; /* Needed for EyeButton positioning */
+  position: relative;
   display: flex;
+  align-items: center;
+  width: 100%; /* Ensure it takes the full width of the form */
 `;
 
 export const InventoryList = styled.ul`

@@ -100,6 +100,15 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/manage-roles")}>
                   Manage User Roles
                 </Button>
+                 {/* New implementation: Unlock Accounts button */}
+                <Button
+                  onClick={() => handleNavigation("/unlock-accounts")}>
+                  Unlock Accounts
+                </Button>
+                {/* New implementation: View Activity Log button */}
+                <Button onClick={() => handleNavigation("/activity-log")}>
+                  View Activity Log
+                </Button>
                 <Button onClick={() => handleNavigation("/enter-prescription")}>
                   Enter Prescription
                 </Button>

@@ -54,7 +54,21 @@ public class AccountResource {
         if (account == null) {
             account = accountService.findByEmailAndPassword(email, password);
         }
-        return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
+        if (account != null) {
+            if (account.isAccountLocked()) {
+                // Account is locked
+                return ResponseEntity.status(423).body(null); // 423 Locked
+            } else {
+                // Successful login
+                return ResponseEntity.ok(account);
+            }
+        } else {
+            // Handle failed login attempt
+            accountService.handleFailedLoginAttempt(username);
+            return ResponseEntity.status(401).body(null); // 401 Unauthorized
+        }
+    
+        //return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
@@ -85,6 +99,20 @@ public class AccountResource {
             return ResponseEntity.notFound().build();
         }
     }
+    
+     // **New endpoint to unlock an account**
+     @PutMapping("/unlock/{id}")
+     public ResponseEntity<String> unlockAccount(
+             @PathVariable("id") String id, @RequestParam("managerId") String managerId) {
+         // Verify that the requester is a manager
+         Account manager = accountService.getAccount(managerId);
+         if (manager.getRole() != Account.Role.MANAGER) {
+             return ResponseEntity.status(403).body("Only managers can unlock accounts.");
+         }
+ 
+         accountService.unlockAccount(id);
+         return ResponseEntity.ok("Account unlocked successfully.");
+     }
 
     @PutMapping("/password/{id}")
     public ResponseEntity<String> updatePassword(@PathVariable(value = "id") String id, @RequestParam("password") String password) {

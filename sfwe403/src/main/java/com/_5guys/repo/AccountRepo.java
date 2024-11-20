@@ -5,6 +5,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com._5guys.domain.Account;
+import java.util.List;
 
 import java.util.Optional;
 
@@ -21,4 +22,13 @@ public interface AccountRepo extends JpaRepository<Account, String> {
     @NonNull Optional<Account> findById(@NonNull String id);
     Account findByUsernameAndPassword(String username, String password);
     Account findByEmailAndPassword(String email, String password);
+
+     // Find an account by username
+     Optional<Account> findByUsername(String username);
+
+     // Find an account by email
+     Optional<Account> findByEmail(String email);
+ 
+     // **New method to find accounts by role**
+     List<Account> findByRole(Account.Role role);
 }
