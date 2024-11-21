@@ -81,6 +81,8 @@ public class AccountService {
     }
 
     public Account createAccount(Account account) {
+        account.setFailedLoginAttempts(0); // Initialize failed login attempts
+        account.setAccountLocked(false); // Initialize account lock status
         return accountRepo.save(account);
     }
 
