@@ -17,7 +17,8 @@ import FinancialReportPage from "./pages/FinancialReportPage";
 import InventoryReportPage from "./pages/InventoryReportPage";
 import UnlockAccounts from "./pages/UnlockAccounts"; // Import the UnlockAccounts component
 import ActivityLog from "./pages/ActivityLog"; // Import the new ActivityLog component
-import ProcessPrescriptionPurchase from "./pages/ProcessPrescriptionPurchase"; // Added import 
+import ProcessPrescriptionPurchase from "./pages/ProcessPrescriptionPurchase"; // Added import Sprint 6 
+import ProcessNonPrescriptionSale from "./pages/ProcessNonPrescriptionSale"; // Sprint 6 added
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
         <Route path="/order-medicine" element={<OrderMedicine />} /> {/* Add Order Medicine route */}
         <Route path="/activity-log" element={<ActivityLog />}/>
         <Route path="/process-prescription-purchase" element={<ProcessPrescriptionPurchase />} /> 
+        <Route path="/process-non-prescription-sale" element={<ProcessNonPrescriptionSale />} />
   /*Added the line above, new route */
       </Routes>
     </BrowserRouter>
