@@ -41,7 +41,7 @@ function App() {
         <Route path="/order-medicine" element={<OrderMedicine />} /> {/* Add Order Medicine route */}
         <Route path="/activity-log" element={<ActivityLog />}/>
         <Route path="/process-prescription-purchase" element={<ProcessPrescriptionPurchase />} /> 
-  //Added the line above, new route
+  /*Added the line above, new route */
       </Routes>
     </BrowserRouter>
   );
