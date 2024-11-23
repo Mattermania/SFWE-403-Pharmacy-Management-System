@@ -226,3 +226,17 @@ export default HomePage;
     {/* Other buttons */}
   </>
 )}
+
+//Add this as well idk where but you do.
+// src/pages/HomePage.js
+
+// Inside the Staff section
+{account.role.toLowerCase() === "staff" && (
+  <>
+    {/* Existing buttons */}
+    <Button onClick={() => handleNavigation("/process-non-prescription-sale")}>
+      Process Non-Prescription Sale
+    </Button>
+    {/* Other buttons */}
+  </>
+)}
