@@ -4,229 +4,199 @@ import {
   Button,
   Section,
   Description,
+  AlertBox,
 } from "../styles/HomePageStyles";
 import { useNavigate, useLocation } from "react-router-dom";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const role = location.state?.role;
+  const account = location.state?.account;
+  const [lowInventory, setLowInventory] = useState([]);
 
   useEffect(() => {
-    if (!role) {
+    if (!account) {
       navigate("/");
     }
-  }, [role, navigate]);
+  }, [account, navigate]);
+
+  // Fetch low inventory data
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/inventory") // Replace with your API endpoint
+      .then((response) => {
+        // Filter medications with `totalQuantity <= 10`, including `0`
+        const lowStockItems = response.data.filter(
+          (item) => item.totalQuantity <= 10 // Include items with zero stock
+        );
+        setLowInventory(lowStockItems); // Set state with filtered items
+      })
+      .catch((error) => {
+        console.error("Error fetching inventory:", error);
+      });
+  }, []);
+  
 
   const handleNavigation = (route) => {
-    navigate(route, { state: { role } });
+    navigate(route, { state: { account } });
   };
 
   return (
     <Container>
+      {/* Alert Banner for Low Inventory */}
+{lowInventory.length > 0 && (
+  <AlertBox>
+    <strong>Low Inventory Alert:</strong>
+    <ul>
+      {lowInventory.map((item) => (
+        <li key={item.id}>
+          {item.name}: {item.totalQuantity === 0 ? "Out of Stock" : `${item.totalQuantity} remaining`}
+        </li>
+      ))}
+    </ul>
+  </AlertBox>
+)}
+
+
       <Title>Pharmacy Management System</Title>
-      {role ? (
+      {account ? (
         <>
           <Description>
-            Welcome, {role.charAt(0).toUpperCase() + role.slice(1)}! Select an
+            Welcome, {account.role.charAt(0).toUpperCase() + account.role.slice(1)}! Select an
             action below:
           </Description>
 
           <Section>
-            <Title>{role.charAt(0).toUpperCase() + role.slice(1)}</Title>
+            <Title>{account.role.charAt(0).toUpperCase() + account.role.slice(1)}</Title>
 
-            {/* Add Customer button available for Manager, Pharmacist, and Staff */}
+            {/* Buttons available to all roles */}
             <Button onClick={() => handleNavigation("/add-customer")}>
               Add Customer
             </Button>
 
-            {/* View Customers button available only for Manager */}
-            {role === "manager" && (
+            {/* Role-specific buttons */}
+            {account.role.toLowerCase() === "manager" && (
               <>
                 <Button onClick={() => handleNavigation("/view-customers")}>
                   View Customers
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/generate-report")}
-                >
+                <Button onClick={() => handleNavigation("/generate-report")}>
                   Generate Report
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/order-medication")}
-                >
-                  Order Medication
+                <Button onClick={() => handleNavigation("/order-medicine")}>
+                  Order Medicine
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/update-inventory")}
-                >
+                <Button onClick={() => handleNavigation("/update-inventory")}>
                   Update Inventory
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/remove-access")}
-                >
+                <Button onClick={() => handleNavigation("/remove-access")}>
                   Remove Access
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/create-user")}
-                >
+                <Button onClick={() => handleNavigation("/create-user")}>
                   Create User Account
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/manage-roles")}
-                >
+                <Button onClick={() => handleNavigation("/manage-roles")}>
                   Manage User Roles
                 </Button>
-
-                {/* New implementation: Unlock Accounts button */}
+                 {/* New implementation: Unlock Accounts button */}
                 <Button
-                  onClick={() => handleNavigation("/unlock-accounts")}
-                >
+                  onClick={() => handleNavigation("/unlock-accounts")}>
                   Unlock Accounts
                 </Button>
-
                 {/* New implementation: View Activity Log button */}
                 <Button onClick={() => handleNavigation("/activity-log")}>
                   View Activity Log
                 </Button>
-
-                {/* Staff Buttons */}
-                <Button
-                  onClick={() => handleNavigation("/enter-prescription")}
-                >
+                <Button onClick={() => handleNavigation("/enter-prescription")}>
                   Enter Prescription
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/process-prescription")}
-                >
+                <Button onClick={() => handleNavigation("/process-prescription")}>
                   Process Prescription
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/request-refill")}
-                >
+                <Button onClick={() => handleNavigation("/request-refill")}>
                   Request Refill Authorization
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/check-inventory")}
-                >
+                <Button onClick={() => handleNavigation("/check-inventory")}>
                   Check Inventory
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/receive-warning")}
-                >
+                <Button onClick={() => handleNavigation("/receive-warning")}>
                   Receive Warning
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/track-prescriptions")}
-                >
+                <Button onClick={() => handleNavigation("/track-prescriptions")}>
                   Track Prescriptions
                 </Button>
               </>
             )}
 
-            {/* Pharmacist Buttons, with additional Staff Buttons */}
-            {role === "pharmacist" && (
+            {/* Pharmacist Buttons */}
+            {account.role.toLowerCase() === "pharmacist" && (
               <>
                 <Button onClick={() => handleNavigation("/pharmacist")}>
                   Get Inventory
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/order-medication")}
-                >
-                  Order Medication
+                <Button onClick={() => handleNavigation("/order-medicine")}>
+                  Order Medicine
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/review-warnings")}
-                >
+                <Button onClick={() => handleNavigation("/review-warnings")}>
                   Review Warnings
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/sign-prescription")}
-                >
+                <Button onClick={() => handleNavigation("/sign-prescription")}>
                   Sign for Prescription
                 </Button>
-
-                {/* Staff Buttons */}
-                <Button
-                  onClick={() => handleNavigation("/enter-prescription")}
-                >
+                <Button onClick={() => handleNavigation("/enter-prescription")}>
                   Enter Prescription
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/process-prescription")}
-                >
+                <Button onClick={() => handleNavigation("/process-prescription")}>
                   Process Prescription
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/request-refill")}
-                >
+                <Button onClick={() => handleNavigation("/request-refill")}>
                   Request Refill Authorization
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/check-inventory")}
-                >
+                <Button onClick={() => handleNavigation("/check-inventory")}>
                   Check Inventory
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/receive-warning")}
-                >
+                <Button onClick={() => handleNavigation("/receive-warning")}>
                   Receive Warning
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/track-prescriptions")}
-                >
+                <Button onClick={() => handleNavigation("/track-prescriptions")}>
                   Track Prescriptions
                 </Button>
               </>
             )}
 
             {/* Staff-only buttons */}
-            {role === "staff" && (
+            {account.role.toLowerCase() === "staff" && (
               <>
-                <Button
-                  onClick={() => handleNavigation("/enter-prescription")}
-                >
+                <Button onClick={() => handleNavigation("/enter-prescription")}>
                   Enter Prescription
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/process-prescription")}
-                >
+                <Button onClick={() => handleNavigation("/process-prescription")}>
                   Process Prescription
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/request-refill")}
-                >
+                <Button onClick={() => handleNavigation("/request-refill")}>
                   Request Refill Authorization
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/check-inventory")}
-                >
+                <Button onClick={() => handleNavigation("/check-inventory")}>
                   Check Inventory
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/receive-warning")}
-                >
+                <Button onClick={() => handleNavigation("/receive-warning")}>
                   Receive Warning
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/track-prescriptions")}
-                >
+                <Button onClick={() => handleNavigation("/track-prescriptions")}>
                   Track Prescriptions
                 </Button>
               </>
             )}
 
             {/* Customer-specific buttons */}
-            {role === "customer" && (
+            {account.role.toLowerCase() === "customer" && (
               <>
-                <Button
-                  onClick={() => handleNavigation("/submit-prescription")}
-                >
+                <Button onClick={() => handleNavigation("/submit-prescription")}>
                   Submit Prescription
                 </Button>
-                <Button
-                  onClick={() => handleNavigation("/track-prescriptions")}
-                >
+                <Button onClick={() => handleNavigation("/track-prescriptions")}>
                   Track Prescriptions
                 </Button>
               </>
@@ -241,3 +211,18 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+//Implement the new code below where needed.
+
+// src/pages/HomePage.js
+
+// Inside the Staff section
+{account.role.toLowerCase() === "staff" && (
+  <>
+    {/* Existing buttons */}
+    <Button onClick={() => handleNavigation("/process-prescription-purchase")}>
+      Process Prescription Purchase
+    </Button>
+    {/* Other buttons */}
+  </>
+)}
