@@ -1,4 +1,13 @@
+// src/main/java/com/_5guys/service/InventoryService.java
+
 package com._5guys.service;
+
+import com._5guys.domain.ActivityLog;
+import com._5guys.domain.Medication;
+import com._5guys.domain.Stock;
+import com._5guys.dto.NonPrescriptionSaleRequest; // Added import
+import com._5guys.repo.ActivityLogRepo;
+import com._5guys.repo.InventoryRepo;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -6,29 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import com._5guys.domain.Medication;
-import com._5guys.domain.Stock;
-import com._5guys.repo.InventoryRepo;
-import com._5guys.domain.ActivityLog;
-import com._5guys.repo.ActivityLogRepo;
-
-/**
- * @author Junior RT
- * @version 1.0
- * @license Get Arrays, LLC (<a href="https://www.getarrays.io">Get Arrays, LLC</a>)
- * @email getarrayz@gmail.com
- * @since 11/22/2023
- */
 
 @Service
 @Slf4j
@@ -38,7 +29,6 @@ public class InventoryService {
     private final InventoryRepo inventoryRepo;
     private final ActivityLogRepo activityLogRepo;
     private final NotificationService notificationService;
-    
 
     public List<Medication> getAllMedications() {
         return inventoryRepo.findAll(Sort.by("name"));
@@ -55,9 +45,11 @@ public class InventoryService {
             for (Stock stock : newInventory) {
                 medication.get().addInventory(stock.getExpirationDate(), stock.getQuantity());
             }
+            inventoryRepo.save(medication.get());
+        } else {
+            throw new RuntimeException("Medication not found");
         }
-        
-        return medication.orElseThrow(() -> new RuntimeException("Medication not found"));
+        return medication.get();
     }
 
     public Medication createMedication(Medication medication) {
@@ -67,7 +59,7 @@ public class InventoryService {
     public void deleteMedication(String id) {
         Medication medication = inventoryRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Medication not found"));
-            inventoryRepo.delete(medication);
+        inventoryRepo.delete(medication);
     }
 
     // Method to update inventory after a prescription is filled
@@ -76,7 +68,6 @@ public class InventoryService {
                 .orElseThrow(() -> new RuntimeException("Medication not found"));
         List<Stock> inventory = medication.getMedication_inventory();
         int totalAvailable = inventory.stream().mapToInt(Stock::getQuantity).sum();
-
 
         if (totalAvailable < quantity) {
             return false; // Not enough stock
@@ -125,7 +116,7 @@ public class InventoryService {
         inventoryRepo.save(medication);
     }
 
-    // **Scheduled method to check for expiring medicines daily at midnight**
+    // Scheduled method to check for expiring medicines daily at midnight
     @Scheduled(cron = "0 0 0 * * ?")
     public void checkForExpiringMedicines() {
         List<Medication> medications = inventoryRepo.findAll();
@@ -178,39 +169,39 @@ public class InventoryService {
                         .anyMatch(stock -> stock.getExpirationDate().isBefore(currentDate)))
                 .count();
     }
-    
-}
 
-//Implement the new changes below to the existing file.
-// src/main/java/com/_5guys/service/InventoryService.java
-// Add the following imports
-import com._5guys.dto.NonPrescriptionSaleRequest;
-import com._5guys.domain.ActivityLog;
+    // New method added for processing non-prescription sales
+    /**
+     * Processes the sale of a non-prescription item.
+     *
+     * @param request The sale request containing medication ID, quantity, staff member ID, and payment method.
+     * @return A success message if the sale is processed successfully.
+     * @throws RuntimeException if any validation fails.
+     */
+    public String processNonPrescriptionSale(NonPrescriptionSaleRequest request) {
+        Medication medication = getMedication(request.getMedicationId());
+        if (medication == null) {
+            throw new RuntimeException("Medication not found");
+        }
 
-// Inside the InventoryService class, add the method
-public String processNonPrescriptionSale(NonPrescriptionSaleRequest request) {
-    Medication medication = getMedication(request.getMedicationId());
-    if (medication == null) {
-        throw new RuntimeException("Medication not found");
+        // Check if the medication requires a prescription
+        if (medication.isPrescriptionRequired()) {
+            throw new RuntimeException("Medication requires a prescription");
+        }
+
+        // Update inventory
+        boolean updated = updateInventoryAfterPrescriptionFill(medication.getId(), request.getQuantity());
+        if (!updated) {
+            throw new RuntimeException("Insufficient stock for medication: " + medication.getName());
+        }
+
+        // Log the sale
+        ActivityLog log = new ActivityLog();
+        log.setPharmacistName(request.getStaffMemberId());
+        log.setAction("Sold non-prescription item: " + medication.getName() + ", Quantity: " + request.getQuantity());
+        log.setTimestamp(LocalDateTime.now());
+        activityLogRepo.save(log);
+
+        return "Non-prescription sale processed successfully";
     }
-
-    // Check if the medication requires a prescription
-    if (medication.isPrescriptionRequired()) {
-        throw new RuntimeException("Medication requires a prescription");
-    }
-
-    // Update inventory
-    boolean updated = updateInventoryAfterPrescriptionFill(medication.getId(), request.getQuantity());
-    if (!updated) {
-        throw new RuntimeException("Insufficient stock for medication: " + medication.getName());
-    }
-
-    // Log the sale
-    ActivityLog log = new ActivityLog();
-    log.setPharmacistName(request.getStaffMemberId());
-    log.setAction("Sold non-prescription item: " + medication.getName() + ", Quantity: " + request.getQuantity());
-    log.setTimestamp(LocalDateTime.now());
-    activityLogRepo.save(log);
-
-    return "Non-prescription sale processed successfully";
 }
