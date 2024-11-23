@@ -38,6 +38,10 @@ public class InventoryService {
         return inventoryRepo.findById(id).orElseThrow(() -> new RuntimeException("Medication not found"));
     }
 
+    public Medication getMedicationByName(String name) {
+        return inventoryRepo.findByName(name).orElseThrow(() -> new RuntimeException("Medication not found"));
+    }
+
     public Medication addInventory(String id, List<Stock> newInventory) {
         Optional<Medication> medication = inventoryRepo.findById(id);
         if (medication.isPresent()) {
@@ -69,7 +73,7 @@ public class InventoryService {
     public int getExpiredMedicationsCount() {
         LocalDate currentDate = LocalDate.now();
         return (int) inventoryRepo.findAll().stream()
-                .filter(medication -> medication.getMedication_inventory().stream()
+                .filter(medication -> medication.getMedicationInventory().stream()
                         .anyMatch(stock -> stock.getExpirationDate().isBefore(currentDate)))
                 .count();
     }

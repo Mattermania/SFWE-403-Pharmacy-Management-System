@@ -15,12 +15,12 @@ const MedicationSpecifics = () => {
       return [];
     }
 
-    if (!medication.medication_inventory) {
+    if (!medication.medicationInventory) {
       setErrorMessage("Inventory map not found.");
       return [];
     }
 
-    return medication.medication_inventory;
+    return medication.medicationInventory;
   }, [medication]);
 
   return (

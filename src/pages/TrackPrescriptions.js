@@ -117,6 +117,10 @@ const TrackPrescriptions = () => {
     setNewPrescription({ ...newPrescription, [name]: value });
   };
 
+  const handlePrescriptionClick = (prescription) => {
+    navigate(`/prescription-specifics/${prescription.id}`, { state: { prescription } });
+  };
+
   if (loading) {
     return <p>Loading prescriptions...</p>;
   }
@@ -140,7 +144,14 @@ const TrackPrescriptions = () => {
           {prescriptions.length > 0 ? (
             prescriptions.map((prescription) => (
               <tr key={prescription.id}>
-                <td>{prescription.name}</td>
+                <td>
+                  <button
+                    onClick={() => handlePrescriptionClick(prescription)}
+                    className="prescription-link"
+                  >
+                    {prescription.name}
+                  </button>
+                </td>
                 <td>{prescription.description}</td>
                 <td>{prescription.status}</td>
               </tr>

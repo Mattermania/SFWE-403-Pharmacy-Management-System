@@ -78,6 +78,9 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/order-medication")}>
                   Order Medication
                 </Button>
+                <Button onClick={() => handleNavigation("/add-medication")}>
+                  Add Medication
+                </Button>
                 <Button onClick={() => handleNavigation("/update-inventory")}>
                   Update Inventory
                 </Button>
