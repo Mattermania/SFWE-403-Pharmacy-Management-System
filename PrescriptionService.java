@@ -1,23 +1,29 @@
+// src/main/java/com/_5guys/service/PrescriptionService.java
+
 package com._5guys.service;
 
+import com._5guys.domain.ActivityLog;
 import com._5guys.domain.Medication;
 import com._5guys.domain.Prescription;
 import com._5guys.domain.PrescriptionMedication;
+import com._5guys.dto.PrescriptionPurchaseRequest; // Added import
+import com._5guys.repo.ActivityLogRepo; // Added import
 import com._5guys.repo.PrescriptionRepo;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class PrescriptionService {
     private final PrescriptionRepo prescriptionRepo;
+    private final ActivityLogRepo activityLogRepo; // Added this
 
     public Prescription createPrescription(Prescription prescription) {
         return prescriptionRepo.save(prescription);
@@ -34,52 +40,41 @@ public class PrescriptionService {
     public String fillPrescription(String id) {
         Prescription prescription = prescriptionRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prescription not found"));
-    
+
         if (prescription.getStatus().equals("FILLED")) {
             return "Prescription already filled.";
         }
-    
+
         // First, check if all medications have enough stock
         for (PrescriptionMedication prescriptionMedication : prescription.getMedications()) {
             Medication medication = prescriptionMedication.getMedication();
             int quantity = prescriptionMedication.getQuantity();
-    
+
             if (medication.getTotalQuantity() < quantity) {
                 prescription.setStatus("BLOCKED");
                 return "Not enough stock available for medication: " + medication.getName();
             }
         }
-    
+
         // Deduct stock for each medication after verifying availability
         prescription.getMedications().forEach(prescriptionMedication -> {
             Medication medication = prescriptionMedication.getMedication();
             int quantity = prescriptionMedication.getQuantity();
             medication.removeInventory(quantity);
         });
-    
+
         prescription.setStatus("FILLED");
         return "Prescription filled successfully.";
-    }    
-}
+    }
 
-//New modification below:
-// src/main/java/com/_5guys/service/PrescriptionService.java
-// Add the following imports
-import com._5guys.dto.PrescriptionPurchaseRequest;
-import com._5guys.domain.ActivityLog;
-import com._5guys.repo.ActivityLogRepo;
-
-// Modify the class to include ActivityLogRepo
-@Service
-@RequiredArgsConstructor
-@Transactional
-public class PrescriptionService {
-    private final PrescriptionRepo prescriptionRepo;
-    private final ActivityLogRepo activityLogRepo; // Add this
-
-    // Existing methods...
-
-    // Add the new method
+    // New method added for processing prescription purchases
+    /**
+     * Processes the purchase of a prescription.
+     *
+     * @param request The purchase request containing prescription ID, staff member ID, payment method, and customer confirmation.
+     * @return A success message if the purchase is processed successfully.
+     * @throws RuntimeException if any validation fails.
+     */
     public String processPrescriptionPurchase(PrescriptionPurchaseRequest request) {
         // Fetch the prescription by ID
         Prescription prescription = getPrescription(request.getPrescriptionId());
