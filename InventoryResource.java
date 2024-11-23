@@ -1,12 +1,14 @@
-package com._5guys.resource;
+// src/main/java/com/_5guys/resource/InventoryResource.java
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+package com._5guys.resource;
 
 import com._5guys.domain.Medication;
 import com._5guys.domain.Stock;
+import com._5guys.dto.NonPrescriptionSaleRequest; // Added import
 import com._5guys.service.InventoryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -23,7 +25,7 @@ public class InventoryResource {
     @PostMapping
     public ResponseEntity<Medication> createMedication(@RequestBody Medication medication) {
         Medication createdMedication = inventoryService.createMedication(medication);
-        URI location = URI.create(String.format("/inventory/%s", createdMedication.getId())); // Corrected the URI creation
+        URI location = URI.create(String.format("/inventory/%s", createdMedication.getId()));
         return ResponseEntity.created(location).body(createdMedication);
     }
 
@@ -47,7 +49,7 @@ public class InventoryResource {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMedication(@PathVariable(value = "id") String id) {
         inventoryService.deleteMedication(id);
-        return ResponseEntity.noContent().build(); // Returns 204 No Content
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/low-stock-warnings/count")
@@ -62,7 +64,18 @@ public class InventoryResource {
         return ResponseEntity.ok(count);
     }
 
-    // New endpoint to receive medicines and update the inventory
+    // New endpoint added for processing non-prescription sales
+    @PostMapping("/process-non-prescription-sale")
+    public ResponseEntity<String> processNonPrescriptionSale(@RequestBody NonPrescriptionSaleRequest request) {
+        try {
+            String result = inventoryService.processNonPrescriptionSale(request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error processing sale: " + e.getMessage());
+        }
+    }
+
+    // Existing endpoint to receive medicines and update the inventory
     @PostMapping("/receive")
     public ResponseEntity<String> receiveMedicines(
             @RequestParam("medicationId") String medicationId,
@@ -77,28 +90,11 @@ public class InventoryResource {
                         return stock;
                     })
                     .toList();
-    
+
             inventoryService.receiveMedicines(medicationId, stockList);
             return ResponseEntity.ok("Medicines received and inventory updated successfully.");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
-    }
-}
-
-//Implement the logic below into this file 
-
-// src/main/java/com/_5guys/resource/InventoryResource.java
-// Add the following imports
-import com._5guys.dto.NonPrescriptionSaleRequest;
-
-// Inside the InventoryResource class, add the endpoint
-@PostMapping("/process-non-prescription-sale")
-public ResponseEntity<String> processNonPrescriptionSale(@RequestBody NonPrescriptionSaleRequest request) {
-    try {
-        String result = inventoryService.processNonPrescriptionSale(request);
-        return ResponseEntity.ok(result);
-    } catch (Exception e) {
-        return ResponseEntity.badRequest().body("Error processing sale: " + e.getMessage());
     }
 }
