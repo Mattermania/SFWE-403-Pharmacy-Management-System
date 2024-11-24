@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static com._5guys.constant.Constant.PHOTO_DIRECTORY;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
@@ -51,16 +52,23 @@ public class AccountResource {
         
         Account account = accountService.findByUsername(username);
         if (account == null) {
-            account = accountService.findByEmail(email);
+            account = accountService.findByEmailAndPassword(email, password);
         }
-        return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/search/email")
-    public ResponseEntity<Account> searchAccountByEmail(@RequestParam("email") String email) {
-        
-        Account account = accountService.findByEmail(email);
-        return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
+        if (account != null) {
+            if (account.isAccountLocked()) {
+                // Account is locked
+                return ResponseEntity.status(423).body(null); // 423 Locked
+            } else {
+                // Successful login
+                return ResponseEntity.ok(account);
+            }
+        } else {
+            // Handle failed login attempt
+            accountService.handleFailedLoginAttempt(username);
+            return ResponseEntity.status(401).body(null); // 401 Unauthorized
+        }
+    
+        //return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
@@ -91,6 +99,13 @@ public class AccountResource {
             return ResponseEntity.notFound().build();
         }
     }
+    
+     // **New endpoint to unlock an account**
+     @PutMapping("/unlock/{id}")
+     public ResponseEntity<String> unlockAccount(@PathVariable("id") String id) {
+         accountService.unlockAccount(id);
+         return ResponseEntity.ok("Account unlocked successfully.");
+     }
 
     @PutMapping("/password/{id}")
     public ResponseEntity<String> updatePassword(@PathVariable(value = "id") String id, @RequestParam("password") String password) {
@@ -104,15 +119,10 @@ public class AccountResource {
         }
     }
 
-    @PutMapping("/state/{id}")
-    public ResponseEntity<String> updateState(@PathVariable(value = "id") String id, @RequestParam("state") String state) {
-        // Consider adding error handling here (e.g., invalid file type, size too large)
-        try {
-            String responseMessage = accountService.updateState(id, state);
-            return ResponseEntity.ok(responseMessage);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                                 .body("Invalid request: " + e.getMessage());
-        }
-    }
+    @GetMapping("/locked")
+public ResponseEntity<List<Account>> getLockedAccounts() {
+    List<Account> lockedAccounts = accountService.getLockedAccounts();
+    return ResponseEntity.ok(lockedAccounts);
+}
+    
 }

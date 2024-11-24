@@ -28,6 +28,15 @@
   color: #61dafb;
 }
 
+
+label {
+  display: flex;
+  flex-direction: column; /* Stack label text and input vertically */
+  font-size: 1rem;
+  margin-bottom: 1rem; /* Space between labels */
+  width: 100%; /* Match input width */
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -35,4 +44,11 @@
   to {
     transform: rotate(360deg);
   }
+  label {
+  display: flex;
+  flex-direction: column; /* Stack label text and input vertically */
+  font-size: 1rem;
+  margin-bottom: 1rem; /* Space between labels */
+  width: 100%; /* Match input width */
+}
 }

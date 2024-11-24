@@ -1,54 +1,42 @@
-// src/pages/HomePage.js
 import {
   Container,
   Title,
   Button,
   Section,
   Description,
+  AlertBox,
 } from "../styles/HomePageStyles";
 import { useNavigate, useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import SignOutButton from "../components/SignOutButton"; // Import the SignOutButton
 
 const HomePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const account = location.state?.account;
-  const [warnings, setWarnings] = useState({ lowStock: 0, expired: 0 });
+  const [lowInventory, setLowInventory] = useState([]);
 
   useEffect(() => {
     if (!account) {
       navigate("/");
-    } else if (
-      account.role.toLowerCase() === "manager" ||
-      account.role.toLowerCase() === "pharmacist"
-    ) {
-      fetchWarnings();
     }
   }, [account, navigate]);
 
-  const fetchWarnings = async () => {
-    try {
-      const [lowStockResponse, expiredResponse] = await Promise.all([
-        axios.get("http://localhost:8080/inventory/low-stock-warnings/count"),
-        axios.get("http://localhost:8080/inventory/expired-medications/count"),
-      ]);
-
-      const lowStock = lowStockResponse.data;
-      const expired = expiredResponse.data;
-
-      setWarnings({ lowStock, expired });
-
-      if (lowStock > 0 || expired > 0) {
-        alert(
-          `Warning:\n${lowStock} medications are low in stock.\n` +
-            `${expired} medications are expired or nearing expiration.`
+  // Fetch low inventory data
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/inventory") // Replace with your API endpoint
+      .then((response) => {
+        const lowStockItems = response.data.filter(
+          (item) => item.totalQuantity <= 10 // Include items with zero stock
         );
-      }
-    } catch (error) {
-      console.error("Error fetching warnings:", error);
-    }
-  };
+        setLowInventory(lowStockItems); // Set state with filtered items
+      })
+      .catch((error) => {
+        console.error("Error fetching inventory:", error);
+      });
+  }, []);
 
   const handleNavigation = (route) => {
     navigate(route, { state: { account } });
@@ -56,27 +44,54 @@ const HomePage = () => {
 
   return (
     <Container>
+      <SignOutButton /> {/* Add the SignOutButton */}
+      {/* Alert Banner for Low Inventory */}
+      {lowInventory.length > 0 && (
+        <AlertBox>
+          <strong>Low Inventory Alert:</strong>
+          <ul>
+            {lowInventory.map((item) => (
+              <li key={item.id}>
+                {item.name}:{" "}
+                {item.totalQuantity === 0
+                  ? "Out of Stock"
+                  : `${item.totalQuantity} remaining`}
+              </li>
+            ))}
+          </ul>
+        </AlertBox>
+      )}
+
       <Title>Pharmacy Management System</Title>
       {account ? (
         <>
           <Description>
             Welcome,{" "}
-            {account.name}! Select an action below:
+            {account.name}!
+            Select an action below:
           </Description>
 
           <Section>
-            <Title>{account.role.charAt(0).toUpperCase() + account.role.slice(1)}</Title>
+            <Title>
+              {account.role.charAt(0).toUpperCase() + account.role.slice(1)}
+            </Title>
 
-            {/* Add Customer button available for Manager, Pharmacist, and Staff */}
-            <Button onClick={() => handleNavigation("/add-customer")}>Add Customer</Button>
+            {/* Buttons available to all roles */}
+            <Button onClick={() => handleNavigation("/add-customer")}>
+              Add Customer
+            </Button>
 
-            {/* View Customers button available only for Manager */}
+            {/* Role-specific buttons */}
             {account.role.toLowerCase() === "manager" && (
               <>
-                <Button onClick={() => handleNavigation("/view-customers")}>View Customers</Button>
-                <Button onClick={() => handleNavigation("/generate-report")}>Generate Report</Button>
-                <Button onClick={() => handleNavigation("/order-medication")}>
-                  Order Medication
+                <Button onClick={() => handleNavigation("/view-customers")}>
+                  View Customers
+                </Button>
+                <Button onClick={() => handleNavigation("/generate-report")}>
+                  Generate Report
+                </Button>
+                <Button onClick={() => handleNavigation("/order-medicine")}>
+                  Order Medicine
                 </Button>
                 <Button onClick={() => handleNavigation("/add-medication")}>
                   Add Medication
@@ -84,17 +99,18 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/update-inventory")}>
                   Update Inventory
                 </Button>
-                <Button onClick={() => handleNavigation("/remove-access")}>Remove Access</Button>
-                <Button onClick={() => handleNavigation("/create-user")}>
-                  Create User Account
+                <Button onClick={() => handleNavigation("/remove-access")}>
+                  Remove Access
                 </Button>
-                <Button onClick={() => handleNavigation("/manage-roles")}>Manage User Roles</Button>
-
-                {/* Staff Buttons */}
+                <Button onClick={() => handleNavigation("/manage-roles")}>
+                  Manage User Roles
+                </Button>
                 <Button onClick={() => handleNavigation("/enter-prescription")}>
                   Enter Prescription
                 </Button>
-                <Button onClick={() => handleNavigation("/process-prescription")}>
+                <Button
+                  onClick={() => handleNavigation("/process-prescription")}
+                >
                   Process Prescription
                 </Button>
                 <Button onClick={() => handleNavigation("/request-refill")}>
@@ -106,27 +122,35 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/receive-warning")}>
                   Receive Warning
                 </Button>
-                <Button onClick={() => handleNavigation("/track-prescriptions")}>
+                <Button
+                  onClick={() => handleNavigation("/track-prescriptions")}
+                >
                   Track Prescriptions
                 </Button>
               </>
             )}
 
-            {/* Pharmacist Buttons, with additional Staff Buttons */}
+            {/* Pharmacist Buttons */}
             {account.role.toLowerCase() === "pharmacist" && (
               <>
-                <Button onClick={() => handleNavigation("/pharmacist")}>Get Inventory</Button>
-                <Button onClick={() => handleNavigation("/order-medication")}>Order Medication</Button>
-                <Button onClick={() => handleNavigation("/review-warnings")}>Review Warnings</Button>
+                <Button onClick={() => handleNavigation("/pharmacist")}>
+                  Get Inventory
+                </Button>
+                <Button onClick={() => handleNavigation("/order-medicine")}>
+                  Order Medicine
+                </Button>
+                <Button onClick={() => handleNavigation("/review-warnings")}>
+                  Review Warnings
+                </Button>
                 <Button onClick={() => handleNavigation("/sign-prescription")}>
                   Sign for Prescription
                 </Button>
-
-                {/* Staff Buttons */}
                 <Button onClick={() => handleNavigation("/enter-prescription")}>
                   Enter Prescription
                 </Button>
-                <Button onClick={() => handleNavigation("/process-prescription")}>
+                <Button
+                  onClick={() => handleNavigation("/process-prescription")}
+                >
                   Process Prescription
                 </Button>
                 <Button onClick={() => handleNavigation("/request-refill")}>
@@ -138,7 +162,9 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/receive-warning")}>
                   Receive Warning
                 </Button>
-                <Button onClick={() => handleNavigation("/track-prescriptions")}>
+                <Button
+                  onClick={() => handleNavigation("/track-prescriptions")}
+                >
                   Track Prescriptions
                 </Button>
               </>
@@ -150,7 +176,9 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/enter-prescription")}>
                   Enter Prescription
                 </Button>
-                <Button onClick={() => handleNavigation("/process-prescription")}>
+                <Button
+                  onClick={() => handleNavigation("/process-prescription")}
+                >
                   Process Prescription
                 </Button>
                 <Button onClick={() => handleNavigation("/request-refill")}>
@@ -162,7 +190,9 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/receive-warning")}>
                   Receive Warning
                 </Button>
-                <Button onClick={() => handleNavigation("/track-prescriptions")}>
+                <Button
+                  onClick={() => handleNavigation("/track-prescriptions")}
+                >
                   Track Prescriptions
                 </Button>
               </>
@@ -171,10 +201,14 @@ const HomePage = () => {
             {/* Customer-specific buttons */}
             {account.role.toLowerCase() === "customer" && (
               <>
-                <Button onClick={() => handleNavigation("/submit-prescription")}>
+                <Button
+                  onClick={() => handleNavigation("/submit-prescription")}
+                >
                   Submit Prescription
                 </Button>
-                <Button onClick={() => handleNavigation("/track-prescriptions")}>
+                <Button
+                  onClick={() => handleNavigation("/track-prescriptions")}
+                >
                   Track Prescriptions
                 </Button>
               </>

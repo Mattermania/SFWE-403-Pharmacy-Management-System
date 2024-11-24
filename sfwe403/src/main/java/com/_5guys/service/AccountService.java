@@ -13,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com._5guys.domain.Account;
 import com._5guys.repo.AccountRepo;
 
+import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,6 +47,31 @@ public class AccountService {
         return accountRepo.findByEmail(email);
     }
 
+    // **New method to handle failed login attempts**
+    public void handleFailedLoginAttempt(String username) {
+        Optional<Account> accountOptional = accountRepo.findByUsername(username);
+        if (accountOptional.isPresent()) {
+            Account account = accountOptional.get();
+            int failedAttempts = account.getFailedLoginAttempts() + 1;
+            account.setFailedLoginAttempts(failedAttempts);
+    
+            if (failedAttempts >= 5) { // Lock after 5 failed attempts
+                account.setAccountLocked(true);
+                log.warn("Account locked due to too many failed login attempts: {}", username);
+            }
+            accountRepo.save(account);
+        }
+    }
+
+    // **New method to unlock an account**
+    public void unlockAccount(String id) {
+        Account account = accountRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        account.setAccountLocked(false);
+        account.setFailedLoginAttempts(0);
+        accountRepo.save(account);
+    }
+
     public Page<Account> getAllAccounts(int page, int size) {
         return accountRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
     }
@@ -55,6 +81,8 @@ public class AccountService {
     }
 
     public Account createAccount(Account account) {
+        account.setFailedLoginAttempts(0); // Initialize failed login attempts
+        account.setAccountLocked(false); // Initialize account lock status
         return accountRepo.save(account);
     }
 
@@ -105,6 +133,10 @@ public class AccountService {
             throw new RuntimeException("Unable to save image");
         }
     };
+
+    public List<Account> getLockedAccounts() {
+        return accountRepo.findByAccountLockedTrue();
+    }
 }
 
 

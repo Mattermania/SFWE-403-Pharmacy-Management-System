@@ -9,7 +9,9 @@ import com._5guys.domain.Stock;
 import com._5guys.service.InventoryService;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -64,5 +66,28 @@ public class InventoryResource {
     public ResponseEntity<Integer> getExpiredMedicationsCount() {
         int count = inventoryService.getExpiredMedicationsCount();
         return ResponseEntity.ok(count);
+    }
+
+    // New endpoint to receive medicines and update the inventory
+    @PostMapping("/receive")
+    public ResponseEntity<String> receiveMedicines(
+            @RequestParam("medicationId") String medicationId,
+            @RequestBody Map<LocalDate, Integer> newStock) {
+        try {
+            // Convert Map<LocalDate, Integer> to List<Stock>
+            List<Stock> stockList = newStock.entrySet().stream()
+                    .map(entry -> {
+                        Stock stock = new Stock();
+                        stock.setExpirationDate(entry.getKey());
+                        stock.setQuantity(entry.getValue());
+                        return stock;
+                    })
+                    .toList();
+    
+            inventoryService.receiveMedicines(medicationId, stockList);
+            return ResponseEntity.ok("Medicines received and inventory updated successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 }
