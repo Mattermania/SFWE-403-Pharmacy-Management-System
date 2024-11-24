@@ -19,7 +19,7 @@ public class NotificationService {
     // **Method to notify the manager of expiring medicines**
     public void notifyManagerOfExpiringMedicines(Map<String, List<LocalDate>> expiringMedicines) {
         // Find the manager account(s)
-        List<Account> managers = accountRepo.findByRole(Account.Role.MANAGER);
+        List<Account> managers = accountRepo.findByRole(Account.Role.manager);
 
         if (managers.isEmpty()) {
             log.warn("No manager accounts found to notify.");

@@ -106,7 +106,7 @@ public class AccountResource {
              @PathVariable("id") String id, @RequestParam("managerId") String managerId) {
          // Verify that the requester is a manager
          Account manager = accountService.getAccount(managerId);
-         if (manager.getRole() != Account.Role.MANAGER) {
+         if (manager.getRole() != Account.Role.manager) {
              return ResponseEntity.status(403).body("Only managers can unlock accounts.");
          }
  

@@ -24,10 +24,11 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 @Table(name = "accounts")
 public class Account {
     public enum Role {
-        CASHIER,
-        TECHNICIAN,
-        PHARMACIST,
-        MANAGER
+        cashier,
+        staff,
+        technician,
+        pharmacist,
+        manager
     }
 
     @Id

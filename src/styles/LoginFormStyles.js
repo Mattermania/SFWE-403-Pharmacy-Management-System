@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
-
 // Light blue color scheme with complementary colors
 const primaryColor = '#ADD8E6'; // Light Blue
 const secondaryColor = '#4F74BF'; // Darker Blue for accents
@@ -47,11 +46,14 @@ export const Form = styled.form`
 `;
 
 export const Input = styled.input`
+  width: 100%;
   padding: 0.75rem;
+  padding-right: 3rem; /* Leave space for the EyeButton */
   margin-bottom: 1rem;
   border: 1px solid ${borderColor};
   border-radius: 3px;
   font-size: 1rem;
+  box-sizing: border-box; /* Ensure padding doesn't affect size */
 `;
 
 export const Button = styled.button`
@@ -62,7 +64,6 @@ export const Button = styled.button`
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
-  margin: 0 auto; 
   &:hover {
     background-color: #365B93; // Slightly darker blue on hover
   }
@@ -82,34 +83,36 @@ export const Heading = styled.h1`
   color: ${textColor};
   font-size: 2rem;
   text-align: center;
-  background-color:#00008B;
+  background-color: #00008B;
   margin: 0;
   padding: 1rem;
 `;
 
 export const EyeButton = styled.button`
-  
   position: absolute;
-  right: 10px; /* Position it closer to the right edge of the input */
+  right: 10px; /* Position closer to the input edge */
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
   color: ${secondaryColor};
-  padding: 0; /* Adjust padding to fit inside the input */
-  margin: 0; /* Remove default margin */
-  z-index: 1; /* Ensure it's above the input field */
+  font-size: 1.5rem; /* Increase size for better visibility */
+  width: 2rem; /* Control button size */
+  height: 2rem; /* Control button size */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   &:hover {
-     background-color:  transparent; /* Change color on hover */
+    color: #365B93; /* Change color on hover */
   }
 `;
 
 export const InputContainer = styled.div`
-  position: relative;
+  position: relative; /* Needed for EyeButton positioning */
   display: flex;
-  align-items: center;
-  width: 100%; /* Ensure it takes the full width of the form */
+  width: 100%;
 `;
 
 export const InventoryList = styled.ul`
