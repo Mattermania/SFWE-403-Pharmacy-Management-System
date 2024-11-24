@@ -48,6 +48,13 @@ const PrescriptionSpecifics = () => {
         return; // Exit early if the medication is not found
       }
 
+      for (const medication of medicationData) {
+        if (response.id == medication.id) {
+          setSuccessMessage("Prescription already contains this medication.");
+          return;
+        }
+      }
+
       // Create new prescriptionMedications object
       const newPrescriptionMedicationsData = {
         prescription: {id: prescription.id},
@@ -73,7 +80,7 @@ const PrescriptionSpecifics = () => {
       });
     } catch (error) {
       console.error("Error submitting request:", error);
-      setErrorMessage("Error adding medication.");
+      setErrorMessage("Error adding medication." + error);
     }
   };
 

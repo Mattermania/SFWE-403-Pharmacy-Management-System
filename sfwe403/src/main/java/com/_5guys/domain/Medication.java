@@ -43,6 +43,8 @@ public class Medication {
     private String name;
     @Column(name = "manufacturer", unique = false, updatable = true, nullable = false)
     private String manufacturer;
+    @Column(name = "price", unique = false, updatable = true, nullable = false)
+    private double price;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "medication_inventory", joinColumns = @JoinColumn(name = "medication_id"))
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

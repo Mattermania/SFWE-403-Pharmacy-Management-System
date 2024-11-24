@@ -1,43 +1,49 @@
 package com._5guys.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import org.hibernate.annotations.UuidGenerator;
+
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorValue("Log")
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME, 
+    include = JsonTypeInfo.As.PROPERTY, 
+    property = "logType"
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = TransactionLog.class, name = "transaction"),
+    @JsonSubTypes.Type(value = ActivityLog.class, name = "activity"),
+    @JsonSubTypes.Type(value = InventoryLog.class, name = "inventory")
+})
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(NON_DEFAULT)
-@Table(name = "log")
-public class Log {
-    public enum FIELD {
-        ACCOUNT,
-        PATIENT,
-        MEDICATION,
-        PRESCRIPTION
-    }
-    
-    public enum STATUS {
-        CREATE,
-        DELETE,
-        ADD,
-        REMOVE
-    }
-    
+@Table(name = "logs")
+public abstract class Log implements Serializable {
     @Id
     @UuidGenerator
     @Column(name = "id", unique = true, updatable = false, nullable = false)
@@ -52,12 +58,4 @@ public class Log {
     @Column(name = "user_id", unique = false, updatable = true, nullable = false)
     private String userId;
 
-    @Column(name = "field", unique = false, updatable = true, nullable = false)
-    private FIELD field;
-
-    @Column(name = "field_id", unique = false, updatable = true, nullable = false)
-    private String fieldId;
-
-    @Column(name = "status", unique = false, updatable = true, nullable = false)
-    private STATUS status;
 }

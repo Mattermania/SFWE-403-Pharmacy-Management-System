@@ -27,7 +27,7 @@ public class LogService {
     private final LogRepo logRepo;
 
 
-    public List<Log> getAllLogs() {
+    public List<Log> getAllReportEntries() {
         return logRepo.findAll(Sort.by("id"));
     }
 
