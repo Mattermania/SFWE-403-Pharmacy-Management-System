@@ -13,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com._5guys.domain.Account;
 import com._5guys.repo.AccountRepo;
 
+import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,9 +54,8 @@ public class AccountService {
             Account account = accountOptional.get();
             int failedAttempts = account.getFailedLoginAttempts() + 1;
             account.setFailedLoginAttempts(failedAttempts);
-
-            // If failed attempts reach threshold, lock the account
-            if (failedAttempts >= 5) {
+    
+            if (failedAttempts >= 5) { // Lock after 5 failed attempts
                 account.setAccountLocked(true);
                 log.warn("Account locked due to too many failed login attempts: {}", username);
             }
@@ -125,6 +125,10 @@ public class AccountService {
             throw new RuntimeException("Unable to save image");
         }
     };
+
+    public List<Account> getLockedAccounts() {
+        return accountRepo.findByAccountLockedTrue();
+    }
 }
 
 

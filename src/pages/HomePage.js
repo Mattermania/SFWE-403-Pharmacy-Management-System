@@ -99,9 +99,6 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/remove-access")}>
                   Remove Access
                 </Button>
-                <Button onClick={() => handleNavigation("/create-user")}>
-                  Create User Account
-                </Button>
                 <Button onClick={() => handleNavigation("/manage-roles")}>
                   Manage User Roles
                 </Button>

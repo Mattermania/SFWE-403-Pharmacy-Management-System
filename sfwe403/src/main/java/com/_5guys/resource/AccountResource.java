@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static com._5guys.constant.Constant.PHOTO_DIRECTORY;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
@@ -102,14 +103,7 @@ public class AccountResource {
     
      // **New endpoint to unlock an account**
      @PutMapping("/unlock/{id}")
-     public ResponseEntity<String> unlockAccount(
-             @PathVariable("id") String id, @RequestParam("managerId") String managerId) {
-         // Verify that the requester is a manager
-         Account manager = accountService.getAccount(managerId);
-         if (manager.getRole() != Account.Role.manager) {
-             return ResponseEntity.status(403).body("Only managers can unlock accounts.");
-         }
- 
+     public ResponseEntity<String> unlockAccount(@PathVariable("id") String id) {
          accountService.unlockAccount(id);
          return ResponseEntity.ok("Account unlocked successfully.");
      }
@@ -125,4 +119,11 @@ public class AccountResource {
                                  .body("Invalid request: " + e.getMessage());
         }
     }
+
+    @GetMapping("/locked")
+public ResponseEntity<List<Account>> getLockedAccounts() {
+    List<Account> lockedAccounts = accountService.getLockedAccounts();
+    return ResponseEntity.ok(lockedAccounts);
+}
+    
 }

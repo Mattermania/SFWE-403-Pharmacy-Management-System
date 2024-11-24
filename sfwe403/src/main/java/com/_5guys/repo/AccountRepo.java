@@ -31,4 +31,7 @@ public interface AccountRepo extends JpaRepository<Account, String> {
  
      // **New method to find accounts by role**
      List<Account> findByRole(Account.Role role);
+
+     List<Account> findByAccountLockedTrue();
+     
 }
