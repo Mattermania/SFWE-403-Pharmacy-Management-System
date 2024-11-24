@@ -17,7 +17,7 @@ const SignUpForm = () => {
   const [role, setRole] = useState("customer");
   const { addPendingAccount } = usePendingAccounts(); // Access context functions
 
-  const handleSignUp = (event) => {
+  const handleSignUp = async (event) => {
     event.preventDefault();
 
     if (password !== confirmPassword) {
