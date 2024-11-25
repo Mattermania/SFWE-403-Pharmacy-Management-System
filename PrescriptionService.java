@@ -174,3 +174,8 @@ public class PrescriptionService {
         }
     }
 }
+
+//Just do option 2 and save it into the databse.
+
+
+
