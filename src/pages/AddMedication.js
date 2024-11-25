@@ -18,6 +18,7 @@ const TrackMedications = () => {
     manufacturer: "",
     startingExpirationDate: "",
     startingQuantity: 0,
+    price: 0,
     medicationInventory: [],
     prescriptions: []
   });
@@ -57,6 +58,7 @@ const TrackMedications = () => {
       const newMedicationData = {
         name: newMedication.name,
         manufacturer: newMedication.manufacturer,
+        price: newMedication.price,
         medicationInventory: [{expirationDate: newMedication.startingExpirationDate, quantity: newMedication.startingQuantity}],
         prescriptions: []
       };
@@ -67,19 +69,29 @@ const TrackMedications = () => {
         console.log("Medication created:", medicationResponse.data);
         setSuccessMessage(`Medication created successfully.`);
 
-        // Create a new logs object
-        const now = new Date();
+        try {
+          // Create a new logs object
+          const now = new Date();
 
-        const newLogData = {
-          date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`,
-          time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`,
-          userId: account.id,
-          field: "MEDICATION",
-          fieldId: medicationResponse.data.id,
-          status: "ADD"
-        };
+          const newLogData = {
+            logType: "inventory",
+            date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`,
+            time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`,
+            userId: account.id,
+            medicationId: medicationResponse.id,
+            quantityChanged: medicationResponse.totalQuantity,
+            totalQuantity: medicationResponse.totalQuantity,
+            state: "CREATED"
+          };
 
-        await axios.post('http://localhost:8080/logs', newLogData);
+          await axios.post('http://localhost:8080/reports/inventory', newLogData);
+        } catch(error) {
+          // Handle errors and show error message
+          console.error("Error logging inventory change", error);
+          setErrorMessage("Error logging inventory change");
+          setSuccessMessage("");
+          return;
+        }
       } else {
         setErrorMessage('Error creating medication.');
       }
@@ -89,10 +101,13 @@ const TrackMedications = () => {
         { ...newMedication, id: medications.length + 1 },
       ]);
       setNewMedication({
-        patientName: "",
         name: "",
-        description: "",
-        status: "AVAILABLE",
+        manufacturer: "",
+        startingExpirationDate: "",
+        startingQuantity: 0,
+        price: 0,
+        medicationInventory: [],
+        prescriptions: [],
       });
     } catch (error) {
       console.error("Error submitting request:", error);
@@ -102,11 +117,7 @@ const TrackMedications = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-  
-    setNewMedication((prev) => ({
-      ...prev,
-      [name]: name === "startingQuantity" ? parseInt(value) || 0 : value, // Convert startingQuantity to a number
-    }));
+    setNewMedication({ ...newMedication, [name]: value });
   };
   
 
@@ -127,6 +138,7 @@ const TrackMedications = () => {
             <th>Medication Name</th>
             <th>Manufacturer</th>
             <th>Total Quantity</th>
+            <th>Price</th>
           </tr>
         </thead>
         <tbody>
@@ -136,6 +148,7 @@ const TrackMedications = () => {
                 <td>{medication.name}</td>
                 <td>{medication.manufacturer}</td>
                 <td>{medication?.totalQuantity || 0}</td>
+                <td>{medication?.price || 0}</td>
               </tr>
             ))
           ) : (
@@ -185,6 +198,16 @@ const TrackMedications = () => {
             name="startingQuantity"
             value={newMedication.startingQuantity}
             onChange={handleInputChange}
+          />
+          Price:
+          <input
+            type="number"
+            name="price"
+            value={newMedication.price}
+            onChange={handleInputChange}
+            step="0.01" // Allows decimal values for cents
+            min="0" // Ensures non-negative values
+            placeholder="Enter price"
           />
         </label>
         <button onClick={handleAddMedication}>Add Medication</button>

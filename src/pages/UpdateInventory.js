@@ -75,6 +75,30 @@ const UpdateInventory = () => {
           console.error("Error fetching inventory", error);
         });
 
+        try {
+          // Create a new logs object
+          const now = new Date();
+
+          const newLogData = {
+            logType: "inventory",
+            date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`,
+            time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`,
+            userId: account.id,
+            medicationId: targetMedication.id,
+            quantityChanged: amount,
+            totalQuantity: targetMedication.totalQuantity,
+            state: "PURCHASED"
+          };
+
+          await axios.post('http://localhost:8080/reports/inventory', newLogData);
+        } catch(error) {
+          // Handle errors and show error message
+          console.error("Error logging inventory change", error);
+          setErrorMessage("Error logging inventory change");
+          setSuccessMessage("");
+          return;
+        }
+
         setErrorMessage(""); // Clear error messages
         setSuccessMessage("Inventory updated successfully");
 
@@ -92,6 +116,11 @@ const UpdateInventory = () => {
     navigate(`/medication-specifics/${medication.id}`, { state: { medication } });
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewPrescription({ ...newPrescription, [name]: value });
+  };
+
   return (
     <div className="excel-table-container">
       <h1>Update Inventory</h1>
@@ -100,6 +129,7 @@ const UpdateInventory = () => {
           <tr>
             <th>Medication Name</th>
             <th>Quantity</th>
+            <th>Price</th>
           </tr>
         </thead>
         <tbody>
@@ -117,6 +147,7 @@ const UpdateInventory = () => {
                 <td style={{ color: (medication?.totalQuantity || 0) < 50 ? "red" : "black" }}>
                   {medication?.totalQuantity || 0}
                 </td>
+                <td>${medication?.price}</td>
               </tr>
             ))
           ) : (
@@ -136,7 +167,7 @@ const UpdateInventory = () => {
           <input
             type="text"
             value={medication}
-            onChange={(e) => setMedication(e.target.value)}
+            onChange={handleInputChange}
           />
         </label>
         <label>
@@ -144,7 +175,7 @@ const UpdateInventory = () => {
           <input
             type="number"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={handleInputChange}
           />
         </label>
         <label>
@@ -152,7 +183,7 @@ const UpdateInventory = () => {
           <input
             type="date"
             value={expirationDate}
-            onChange={(e) => setExpirationDate(e.target.value)}
+            onChange={handleInputChange}
           />
         </label>
         {/* <label>
