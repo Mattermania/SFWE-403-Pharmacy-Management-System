@@ -108,3 +108,69 @@ public class PrescriptionService {
         return "Prescription purchase processed successfully";
     }
 }
+
+//Include modiciations from below into code above.
+
+// src/main/java/com/_5guys/service/PrescriptionService.java
+
+// Existing imports...
+
+import org.apache.commons.lang3.StringUtils; // Add this import for StringUtils
+
+public class PrescriptionService {
+    // Existing code...
+
+    public String processPrescriptionPurchase(PrescriptionPurchaseRequest request) {
+        // Fetch the prescription by ID
+        Prescription prescription = getPrescription(request.getPrescriptionId());
+        if (prescription == null) {
+            throw new RuntimeException("Prescription not found");
+        }
+
+        // Ensure the prescription is ready for purchase
+        if (!prescription.getStatus().equalsIgnoreCase("FILLED")) {
+            throw new RuntimeException("Prescription is not ready for purchase");
+        }
+
+        // Check if the customer has confirmed (signed)
+        if (StringUtils.isBlank(request.getElectronicSignature()) && !request.isCustomerConfirmed()) {
+            throw new RuntimeException("Customer signature is required");
+        }
+
+        // If electronic signature is provided, store it
+        if (StringUtils.isNotBlank(request.getElectronicSignature())) {
+            // Save the electronic signature (implementation depends on how you choose to store it)
+            // For example, you can save it to the file system or store it in the database
+            saveElectronicSignature(prescription.getId(), request.getElectronicSignature());
+        }
+
+        // Update prescription status to 'PURCHASED'
+        prescription.setStatus("PURCHASED");
+        prescriptionRepo.save(prescription);
+
+        // Log the purchase action
+        ActivityLog log = new ActivityLog();
+        log.setPharmacistName(request.getStaffMemberId());
+        log.setPrescriptionNumber(prescription.getId());
+        log.setPatientDetails(prescription.getPatient().getName());
+        log.setAction("Processed prescription purchase");
+        log.setTimestamp(LocalDateTime.now());
+        activityLogRepo.save(log);
+
+        return "Prescription purchase processed successfully";
+    }
+
+    private void saveElectronicSignature(String prescriptionId, String signatureData) {
+        // Implement logic to save the signature data
+        // Option 1: Save as a file
+        // Option 2: Save in the database
+        // For example, saving as a file:
+        String filePath = "/path/to/signatures/" + prescriptionId + ".png";
+        try {
+            byte[] imageBytes = Base64.getDecoder().decode(signatureData.split(",")[1]);
+            Files.write(Paths.get(filePath), imageBytes);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save electronic signature", e);
+        }
+    }
+}
