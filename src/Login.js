@@ -154,7 +154,8 @@ const LoginForm = () => {
                 setErrorMessage('Network error: ' + error.message);
             }
         }
-    };
+    }
+};
 
   return (
     <>

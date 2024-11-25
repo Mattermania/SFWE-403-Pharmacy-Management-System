@@ -75,12 +75,20 @@ const HomePage = () => {
             <Title>
               {account.role.charAt(0).toUpperCase() + account.role.slice(1)}
             </Title>
+            <Title>
+              {account.role.charAt(0).toUpperCase() + account.role.slice(1)}
+            </Title>
 
             {/* Buttons available to all roles */}
             <Button onClick={() => handleNavigation("/add-customer")}>
               Add Customer
             </Button>
+            {/* Buttons available to all roles */}
+            <Button onClick={() => handleNavigation("/add-customer")}>
+              Add Customer
+            </Button>
 
+            {/* Role-specific buttons */}
             {/* Role-specific buttons */}
             {account.role.toLowerCase() === "manager" && (
               <>
@@ -124,6 +132,9 @@ const HomePage = () => {
                 </Button>
                 <Button
                   onClick={() => handleNavigation("/track-prescriptions")}
+                ></Button>
+                <Button
+                  onClick={() => handleNavigation("/track-prescriptions")}
                 >
                   Track Prescriptions
                 </Button>
@@ -133,6 +144,15 @@ const HomePage = () => {
             {/* Pharmacist Buttons */}
             {account.role.toLowerCase() === "pharmacist" && (
               <>
+                <Button onClick={() => handleNavigation("/pharmacist")}>
+                  Get Inventory
+                </Button>
+                <Button onClick={() => handleNavigation("/order-medicine")}>
+                  Order Medicine
+                </Button>
+                <Button onClick={() => handleNavigation("/review-warnings")}>
+                  Review Warnings
+                </Button>
                 <Button onClick={() => handleNavigation("/pharmacist")}>
                   Get Inventory
                 </Button>
