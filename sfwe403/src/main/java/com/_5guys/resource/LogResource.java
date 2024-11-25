@@ -54,6 +54,11 @@ public class LogResource {
         return ResponseEntity.ok(logService.getAllReportEntries());
     }
 
+    @GetMapping("/inventory")
+    public ResponseEntity<List<InventoryLog>> getInventoryEntries() {
+        return ResponseEntity.ok(logService.getInventoryEntries());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Log> getLog(@PathVariable(value = "id") String id) {
         Log log = logService.getLog(id);

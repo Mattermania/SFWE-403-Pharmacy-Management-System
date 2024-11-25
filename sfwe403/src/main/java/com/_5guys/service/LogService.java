@@ -7,7 +7,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com._5guys.domain.InventoryLog;
 import com._5guys.domain.Log;
 import com._5guys.repo.LogRepo;
 
@@ -29,6 +31,14 @@ public class LogService {
 
     public List<Log> getAllReportEntries() {
         return logRepo.findAll(Sort.by("id"));
+    }
+
+    public List<InventoryLog> getInventoryEntries() {
+        return logRepo.findAll(Sort.by("id"))
+                    .stream()
+                    .filter(log -> log instanceof InventoryLog)
+                    .map(log -> (InventoryLog) log)
+                    .collect(Collectors.toList());
     }
 
     public Log getLog(String id) {
