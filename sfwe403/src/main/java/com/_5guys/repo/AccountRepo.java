@@ -20,10 +20,7 @@ import java.util.Optional;
 @Repository
 public interface AccountRepo extends JpaRepository<Account, String> {
     @NonNull Optional<Account> findById(@NonNull String id);
-    Account findByUsername(String username);
-    Account findByEmail(String email);
-
-     // Find an account by username
+    // Find an account by username
      Optional<Account> findByUsername(String username);
 
      // Find an account by email

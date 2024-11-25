@@ -14,6 +14,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 import static com._5guys.constant.Constant.PHOTO_DIRECTORY;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
@@ -46,16 +47,16 @@ public class AccountResource {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Account> searchAccountByUsernameAndEmail(
+    public ResponseEntity<Optional<Account>> searchAccountByUsernameAndEmail(
             @RequestParam("username") String username,
             @RequestParam("username") String email) {
         
-        Account account = accountService.findByUsername(username);
+        Optional<Account> account = accountService.findByUsername(username);
         if (account == null) {
-            account = accountService.findByEmailAndPassword(email, password);
+            account = accountService.findByEmail(email);
         }
         if (account != null) {
-            if (account.isAccountLocked()) {
+            if (account.get().isAccountLocked()) {
                 // Account is locked
                 return ResponseEntity.status(423).body(null); // 423 Locked
             } else {

@@ -1,44 +1,103 @@
-// src/pages/OrderMedicine.js
-import React, { useState } from "react";
-import { Container, Title, Description } from "../styles/PageStyles";
-import "../styles/TextboxAlignment.css"; // Import CSS for alignment
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";import { Container, Title, Description } from "../styles/PageStyles";
+import "../styles/ExcelTableStyles.css"; // Import CSS for the Excel-style table
 
-const OrderMedicine = () => {
-  const [medicineName, setMedicineName] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [supplier, setSupplier] = useState("");
-  const [message, setMessage] = useState("");
+const OrderMedication = () => {
+  const [inventory, setInventory] = useState([]);
+  const [orderDetails, setOrderDetails] = useState({ name: "", quantity: 0, expirationDate: "" });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    fetchInventory();
+  }, []);
 
-    // Validate inputs (basic validation example)
-    if (!medicineName || !quantity || !supplier) {
-      setMessage("Please fill in all fields.");
+  // Fetch current inventory
+  const fetchInventory = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:8080/inventory");
+      setInventory(data);
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+      setErrorMessage("Failed to fetch inventory.");
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    const { name, quantity, expirationDate } = orderDetails;
+
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    // Check if medication exists in inventory
+    const targetMedication = inventory.find(
+      (item) => item.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (!targetMedication) {
+      setErrorMessage("Medication not found in inventory.");
+      setSuccessMessage("");
       return;
     }
 
-    // Example of using sample data instead of making an API call
     try {
-      // Sample data logic to simulate placing an order
-      const sampleResponse = {
-        status: 200, // Simulated successful response status
-        message: "Order placed successfully!", // Simulated response message
-      };
+      // Prepare data for updating inventory
+      const updatedInventory = [{ expirationDate, quantity: parseInt(quantity, 10) }];
+      const newQuantity = targetMedication.quantity + parseInt(quantity, 10);
 
-      if (sampleResponse.status === 200) {
-        setMessage(sampleResponse.message);
-        // Clear form fields
-        setMedicineName("");
-        setQuantity("");
-        setSupplier("");
-      } else {
-        setMessage("Failed to place the order.");
-      }
+      // Update inventory
+      await axios.post(
+        `http://localhost:8080/inventory/addInventory/${targetMedication.id}`,
+        updatedInventory
+      );
+
+      // Log the order
+      await logOrder(targetMedication.id, quantity, newQuantity);
+
+      // Refresh inventory
+      await fetchInventory();
+
+      setErrorMessage("");
+      setSuccessMessage("Order placed successfully.");
     } catch (error) {
       console.error("Error placing order:", error);
-      setMessage("An error occurred while placing the order.");
+      setErrorMessage("Failed to place order.");
+      setSuccessMessage("");
     }
+  };
+
+  const logOrder = async (medicationId, quantityOrdered, totalQuantity) => {
+    try {
+      const now = new Date();
+      const logData = {
+        logType: "inventory",
+        date: formatDate(now),
+        time: formatTime(now),
+        userId: account.id, // Replace with dynamic user ID if applicable
+        medicationId,
+        quantityChanged: quantityOrdered,
+        totalQuantity,
+        state: "ORDERED",
+      };
+
+      await axios.post("http://localhost:8080/reports/orders", logData);
+    } catch (error) {
+      console.error("Error logging order:", error);
+      throw error; // Re-throw for error handling
+    }
+  };
+
+  const formatDate = (date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+  const formatTime = (date) =>
+    `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}`;
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setOrderDetails({ ...orderDetails, [name]: value });
   };
 
   return (
@@ -47,47 +106,57 @@ const OrderMedicine = () => {
       <Description>
         This page is accessible only by the Manager to order medicines for the pharmacy.
       </Description>
-      <form onSubmit={handleSubmit} className="form-container">
-        <div className="form-group">
-          <label className="form-label">Medicine Name:</label>
-          <input
-            className="form-input"
-            type="text"
-            value={medicineName}
-            onChange={(e) => setMedicineName(e.target.value)}
-            placeholder="Enter medicine name"
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Quantity:</label>
-          <input
-            className="form-input"
-            type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder="Enter quantity"
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Supplier:</label>
-          <input
-            className="form-input"
-            type="text"
-            value={supplier}
-            onChange={(e) => setSupplier(e.target.value)}
-            placeholder="Enter supplier name"
-            required
-          />
-        </div>
-        <button type="submit" className="form-button">
-          Place Order
-        </button>
-      </form>
-      {message && <p>{message}</p>}
+      {/* Order Form */}
+      <div className="update-inventory-form">
+        <h3>Place Order</h3>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handlePlaceOrder();
+          }}
+        >
+          <label>
+            Medication Name:
+            <input
+              type="text"
+              name="name"
+              value={orderDetails.name}
+              onChange={handleInputChange}
+              placeholder="Enter medicine name"
+              required
+            />
+          </label>
+          <label>
+            Quantity:
+            <input
+              type="number"
+              name="quantity"
+              value={orderDetails.quantity}
+              onChange={handleInputChange}
+              placeholder="Enter quantity"
+              required
+              min="1"
+            />
+          </label>
+          <label>
+            Expiration Date:
+            <input
+              type="date"
+              name="expirationDate"
+              value={orderDetails.expirationDate}
+              onChange={handleInputChange}
+              required
+            />
+          </label>
+          <button type="submit">Place Order</button>
+        </form>
+
+        {/* Status Messages */}
+        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+        {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
+      </div>
     </Container>
   );
 };
 
-export default OrderMedicine;
+export default OrderMedication;

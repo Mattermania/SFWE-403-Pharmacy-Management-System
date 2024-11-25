@@ -25,7 +25,7 @@ import { PendingAccountsProvider } from "./context/PendingAccountsContext"; // I
 
 function App() {
   return (
-    <><PendingAccountsProvider>
+    <PendingAccountsProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
@@ -36,6 +36,7 @@ function App() {
           <Route path="/add-customer" element={<AddCustomer />} />
           <Route path="/view-customers" element={<ViewCustomers />} />
           <Route path="/track-prescriptions" element={<TrackPrescriptions />} />
+          <Route path="/add-medication" element={<AddMedication />} />
           <Route path="/add-prescription" element={<AddPrescription />} />
           <Route path="/update-inventory" element={<UpdateInventory />} />
           <Route path="/generate-report" element={<GenerateReportPage />} />
@@ -43,36 +44,13 @@ function App() {
           <Route path="/inventory-report" element={<InventoryReportPage />} />
           <Route path="/unlock-accounts" element={<UnlockAccounts />} />
           <Route path="/medication-specifics/:medicationId" element={<MedicationSpecifics />} />
+          <Route path="/prescription-specifics/:prescriptionId" element={<PrescriptionSpecifics />} />
           <Route path="/order-medicine" element={<OrderMedicine />} /> {/* Add Order Medicine route */}
           <Route path="/activity-log" element={<ActivityLog />} />
           <Route path="/manage-roles" element={<ManageRoles />} /> {/* Add ManageRoles route */}
         </Routes>
       </BrowserRouter>
     </PendingAccountsProvider>
-    <PendingAccountsProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/forgotpassword" element={<Forgot />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/beforepharm" element={<HomePage />} />
-            <Route path="/pharmacist" element={<Pharmacist />} />
-            <Route path="/add-customer" element={<AddCustomer />} />
-            <Route path="/view-customers" element={<ViewCustomers />} />
-            <Route path="/track-prescriptions" element={<TrackPrescriptions />} />
-            <Route path="/add-prescription" element={<AddPrescription />} />
-            <Route path="/update-inventory" element={<UpdateInventory />} />
-            <Route path="/generate-report" element={<GenerateReportPage />} />
-            <Route path="/financial-report" element={<FinancialReportPage />} />
-            <Route path="/inventory-report" element={<InventoryReportPage />} />
-            <Route path="/unlock-accounts" element={<UnlockAccounts />} />
-            <Route path="/medication-specifics/:medicationId" element={<MedicationSpecifics />} />
-            <Route path="/order-medicine" element={<OrderMedicine />} /> {/* Add Order Medicine route */}
-            <Route path="/activity-log" element={<ActivityLog />} />
-            <Route path="/manage-roles" element={<ManageRoles />} /> {/* Add ManageRoles route */}
-          </Routes>
-        </BrowserRouter>
-      </PendingAccountsProvider></>
   );
 }
 

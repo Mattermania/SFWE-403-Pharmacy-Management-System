@@ -72,4 +72,38 @@ public class Account {
     private boolean accountLocked = false;
 
     // Existing methods and fields remain unchanged
+    public void setState(String state) {
+        switch(state) {
+            case "LOCKED":
+                this.state = State.LOCKED;
+                break;
+            case "FORGOTPASSWORD":
+                this.state = State.FORGOTPASSWORD;
+                break;
+            case "ACTIVE":
+                this.state = State.ACTIVE;
+                break;
+            case "INACTIVE":
+                this.state = State.INACTIVE;
+                break;
+            default:
+                this.state = State.INACTIVE;
+                break;
+        }
+    }
+
+    public String getState() {
+        switch(this.state) {
+            case LOCKED:
+                return "LOCKED";
+            case FORGOTPASSWORD:
+                return "FORGOTPASSWORD";
+            case ACTIVE:
+                return "ACTIVE";
+            case INACTIVE:
+                return "INACTIVE";
+            default:
+                return "INACTIVE";
+        }
+    }
 }

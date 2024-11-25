@@ -37,8 +37,11 @@ public class TransactionLog extends Log {
     @CollectionTable(name = "purchased_items", joinColumns = @JoinColumn(name = "log_id"))
     private Map<String, Double> purchasedItems = new HashMap<String, Double>();
 
+    @Column(name = "payment_method", unique = false, updatable = true, nullable = true)
+    private Payment paymentMethod;
+
     @Column(name = "payment", unique = false, updatable = true, nullable = true)
-    private Payment payment;
+    private String payment;
 
     // Constructors, equals, and hashCode if needed
 

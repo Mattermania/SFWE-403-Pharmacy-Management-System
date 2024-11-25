@@ -16,7 +16,6 @@ const MedicationSpecifics = () => {
     }
 
     if (!medication.medicationInventory) {
-      setErrorMessage("Inventory map not found.");
       return [];
     }
 
@@ -35,12 +34,20 @@ const MedicationSpecifics = () => {
           </tr>
         </thead>
         <tbody>
-          {expirationData.map((entry, index) => (
-            <tr key={index}>
-              <td>{entry.quantity}</td>
-              <td>{entry.expirationDate}</td>
+          {expirationData.length > 0 ? (
+            expirationData.map((entry, index) => (
+              <tr key={index}>
+                <td>{entry.quantity}</td>
+                <td>{entry.expirationDate}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="2" style={{ textAlign: "center" }}>
+                No stock available
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

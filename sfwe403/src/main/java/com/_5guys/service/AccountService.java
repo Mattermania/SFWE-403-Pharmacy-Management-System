@@ -39,37 +39,12 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 public class AccountService {
     private final AccountRepo accountRepo;
 
-    public Account findByUsername(String username) {
+    public Optional<Account> findByUsername(String username) {
         return accountRepo.findByUsername(username);
     }
 
-    public Account findByEmail(String email) {
+    public Optional<Account> findByEmail(String email) {
         return accountRepo.findByEmail(email);
-    }
-
-    // **New method to handle failed login attempts**
-    public void handleFailedLoginAttempt(String username) {
-        Optional<Account> accountOptional = accountRepo.findByUsername(username);
-        if (accountOptional.isPresent()) {
-            Account account = accountOptional.get();
-            int failedAttempts = account.getFailedLoginAttempts() + 1;
-            account.setFailedLoginAttempts(failedAttempts);
-    
-            if (failedAttempts >= 5) { // Lock after 5 failed attempts
-                account.setAccountLocked(true);
-                log.warn("Account locked due to too many failed login attempts: {}", username);
-            }
-            accountRepo.save(account);
-        }
-    }
-
-    // **New method to unlock an account**
-    public void unlockAccount(String id) {
-        Account account = accountRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-        account.setAccountLocked(false);
-        account.setFailedLoginAttempts(0);
-        accountRepo.save(account);
     }
 
     // **New method to handle failed login attempts**
