@@ -78,26 +78,83 @@ const LoginForm = () => {
           }
         );
 
-        if (response.status === 200 && response.data) {
-          setLoginMessage("Login successful!");
-          setErrorMessage("");
-          navigate("/beforepharm", { state: { account: response.data } });
-        } else {
-          setErrorMessage("Invalid username or password.");
+            if (response.status === 200 && response.data) {
+                if ((response.data.role != "MANAGER") && (response.data.state == "LOCKED")) {
+                    setLoginMessage('');
+                    setErrorMessage('Account locked. Please contact Manager for assistance.' + response.data.role);
+                    return;
+                }
+                else if ((response.data.role != "MANAGER") && (response.data.state == "INACTIVE")) {
+                    setLoginMessage('');
+                    setErrorMessage('Account not activated. Please contact Manager for assistance.');
+                    return;
+                }
+                
+                if (response.data.password == password) {
+                    setLoginMessage('Login successful!');
+                    setErrorMessage('');
+
+                    navigate("/beforepharm", { state: { account: response.data } });
+                } else {
+                    if ((response.data.role != "MANAGER") && (((currWrongAttempts + 1) >= 5) || response.data.state == 'LOCKED')) {
+                        try {
+                            const returnResponse = await axios.put(`http://localhost:8080/accounts/state/${response.data.id}`, null, {
+                                params: { state: 'LOCKED' }
+                            });
+                    
+                            if (returnResponse.status === 200 && returnResponse.data) {
+                                setErrorMessage('Account locked. Please request manager support to unlock.');
+                            } else {
+                                setSuccessMessage('');
+                                setErrorMessage('Error: Account not successfully locked.');
+                            }
+                        } catch (error) {
+                            setSuccessMessage('');
+                            setErrorMessage('Error: Unable to send locked account request.' + error.message);
+                            console.error('Error:', error.returnResponse ? error.returnResponse.data : error.message);
+                        }
+
+                        try {
+                            // Create a new logs object
+                            const now = new Date();
+                    
+                            const newLogData = {
+                                logType: "activity",
+                                date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`,
+                                time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`,
+                                userId: response.data.id,
+                                activity: "LOCKED"
+                            };
+                    
+                            await axios.post('http://localhost:8080/reports/inventory', newLogData);
+                        } catch(error) {
+                            // Handle errors and show error message
+                            console.error("Error logging inventory change", error);
+                            setErrorMessage("Error logging inventory change");
+                            setSuccessMessage("");
+                            return;
+                        }
+                    } else {
+                        setWrongAttempts(currWrongAttempts + 1);
+                        setErrorMessage('Invalid username or password.');
+                        setPrevUsername(username);
+                    }
+                }
+            } else {
+                setErrorMessage('Invalid username or password.');
+            }
+        } catch (error) {
+            if (error.response) {
+                if (error.response.status === 404) {
+                    setErrorMessage('Invalid username or password.');
+                } else {
+                    setErrorMessage('Error submitting request: ' + error.message);
+                }
+            } else {
+                setErrorMessage('Network error: ' + error.message);
+            }
         }
-      } catch (error) {
-        if (error.response) {
-          if (error.response.status === 404) {
-            setErrorMessage("Invalid username or password.");
-          } else {
-            setErrorMessage("Error submitting request: " + error.message);
-          }
-        } else {
-          setErrorMessage("Network error: " + error.message);
-        }
-      }
-    }
-  };
+    };
 
   return (
     <>
