@@ -9,4 +9,5 @@ public class PrescriptionPurchaseRequest {
     private String staffMemberId;
     private String paymentMethod; // "CASH", "DEBIT", or "CREDIT"
     private boolean customerConfirmed;
+    private String electronicSignature; // Base64-encoded string of the signature image
 }
