@@ -66,17 +66,17 @@ const LoginForm = () => {
       setLoginMessage("Login successful!");
       setErrorMessage("");
     } else {
-      try {
-        const response = await axios.get(
-          "http://localhost:8080/accounts/search",
-          {
-            params: {
-              username: username,
-              email: username,
-              password: password,
-            },
-          }
-        );
+        try {
+            const response = await axios.get(
+            "http://localhost:8080/accounts/search",
+            {
+                params: {
+                username: username,
+                email: username,
+                password: password,
+                },
+            }
+            );
 
             if (response.status === 200 && response.data) {
                 if ((response.data.role != "MANAGER") && (response.data.state == "LOCKED")) {
