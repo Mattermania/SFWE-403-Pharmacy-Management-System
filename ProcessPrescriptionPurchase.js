@@ -1,84 +1,10 @@
 // src/pages/ProcessPrescriptionPurchase.js
-import React, { useState } from "react";
-import axios from "axios";
-import { useLocation } from "react-router-dom";
-import "../styles/ExcelTableStyles.css"; // Import your CSS styles
-
-const ProcessPrescriptionPurchase = () => {
-  const [prescriptionId, setPrescriptionId] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("CASH");
-  const [customerConfirmed, setCustomerConfirmed] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const location = useLocation();
-  const account = location.state?.account; // Get the logged-in staff member's account
-
-  const handleProcessPurchase = async () => {
-    if (!customerConfirmed) {
-      setError("Please confirm customer signature before proceeding.");
-      return;
-    }
-
-    try {
-      const response = await axios.post("http://localhost:8080/prescriptions/process-purchase", {
-        prescriptionId,
-        staffMemberId: account?.id || "unknown",
-        paymentMethod,
-        customerConfirmed,
-      });
-      setMessage(response.data);
-      setError("");
-    } catch (error) {
-      setError(error.response?.data || "Error processing purchase");
-      setMessage("");
-    }
-  };
-
-  return (
-    <div className="form-container">
-      <h2>Process Prescription Purchase</h2>
-      <label>
-        Prescription ID:
-        <input
-          type="text"
-          value={prescriptionId}
-          onChange={(e) => setPrescriptionId(e.target.value)}
-        />
-      </label>
-      <label>
-        Payment Method:
-        <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-          <option value="CASH">Cash</option>
-          <option value="DEBIT">Debit</option>
-          <option value="CREDIT">Credit</option>
-        </select>
-      </label>
-      <label>
-        Customer has signed:
-        <input
-          type="checkbox"
-          checked={customerConfirmed}
-          onChange={(e) => setCustomerConfirmed(e.target.checked)}
-        />
-      </label>
-      <button onClick={handleProcessPurchase}>Process Purchase</button>
-      {message && <p style={{ color: "green" }}>{message}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
-  );
-};
-
-export default ProcessPrescriptionPurchase;
-
-
-//Implement anything missing below
-// src/pages/ProcessPrescriptionPurchase.js
 
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
-import SignatureCanvas from "react-signature-canvas";
-import "../styles/ProcessPrescriptionPurchase.css"; // Create a CSS file for custom styles if needed
+import SignatureCanvas from "react-signature-canvas"; // Added import for electronic signature
+import "../styles/ProcessPrescriptionPurchase.css"; // Import your CSS styles
 
 const ProcessPrescriptionPurchase = () => {
   const [prescriptionId, setPrescriptionId] = useState("");
@@ -89,18 +15,20 @@ const ProcessPrescriptionPurchase = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const location = useLocation();
-  const account = location.state?.account;
-  const sigCanvasRef = useRef({});
+  const account = location.state?.account; // Get the logged-in staff member's account
+  const sigCanvasRef = useRef({}); // Reference to the signature canvas
 
   const handleProcessPurchase = async () => {
     setError("");
     setMessage("");
 
+    // Validation for manual signing
     if (signingMethod === "MANUAL" && !customerConfirmed) {
       setError("Please confirm customer signature before proceeding.");
       return;
     }
 
+    // Validation for electronic signing
     if (signingMethod === "ELECTRONIC" && !signatureData) {
       setError("Please capture the customer's electronic signature.");
       return;
@@ -114,7 +42,7 @@ const ProcessPrescriptionPurchase = () => {
           staffMemberId: account?.id || "unknown",
           paymentMethod,
           customerConfirmed: signingMethod === "MANUAL" ? customerConfirmed : true,
-          electronicSignature: signatureData,
+          electronicSignature: signatureData, // Include signature data if electronic signing
         }
       );
       setMessage(response.data);
@@ -135,6 +63,7 @@ const ProcessPrescriptionPurchase = () => {
     }
   };
 
+  // Handle capturing the signature data
   const handleSignature = () => {
     if (sigCanvasRef.current) {
       const signature = sigCanvasRef.current.getTrimmedCanvas().toDataURL("image/png");
@@ -142,6 +71,7 @@ const ProcessPrescriptionPurchase = () => {
     }
   };
 
+  // Clear the signature pad
   const clearSignature = () => {
     if (sigCanvasRef.current) {
       sigCanvasRef.current.clear();
@@ -168,6 +98,8 @@ const ProcessPrescriptionPurchase = () => {
           <option value="CREDIT">Credit</option>
         </select>
       </label>
+
+      {/* New signing method selection */}
       <label>
         Signing Method:
         <select value={signingMethod} onChange={(e) => setSigningMethod(e.target.value)}>
@@ -176,6 +108,7 @@ const ProcessPrescriptionPurchase = () => {
         </select>
       </label>
 
+      {/* Conditional rendering based on signing method */}
       {signingMethod === "MANUAL" && (
         <label>
           Customer has signed:
@@ -190,6 +123,7 @@ const ProcessPrescriptionPurchase = () => {
       {signingMethod === "ELECTRONIC" && (
         <div>
           <p>Please have the customer sign below:</p>
+          {/* Signature pad component */}
           <SignatureCanvas
             penColor="black"
             canvasProps={{ className: "signature-canvas" }}
