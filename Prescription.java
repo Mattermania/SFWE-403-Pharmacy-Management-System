@@ -1,3 +1,5 @@
+// src/main/java/com/_5guys/domain/Prescription.java
+
 package com._5guys.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -12,9 +14,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,7 +40,7 @@ import java.util.HashSet;
 public class Prescription {
 
     public enum STATUS {
-        AVAILABLE, BLOCKED, PROCESS, PAID, FILLED, NULL;
+        AVAILABLE, BLOCKED, PROCESS, PAID, FILLED, PURCHASED, NULL;
 
         @Override
         @JsonValue
@@ -60,17 +64,17 @@ public class Prescription {
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private String id;
 
-    @Column(name = "name", unique = false, updatable = true, nullable = false)
+    @Column(name = "name", nullable = false)
     protected String name;
 
-    @Column(name = "description", unique = false, updatable = true, nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "status", unique = false, updatable = true, nullable = false)
+    @Column(name = "status", nullable = false)
     private STATUS status = STATUS.NULL;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", unique = false, updatable = true, nullable = false)
+    @JoinColumn(name = "patient_id", nullable = false)
     @JsonBackReference
     private Patient patient;
 
@@ -78,57 +82,15 @@ public class Prescription {
     @JsonManagedReference("prescriptionReference")
     private Set<PrescriptionMedication> medications = new HashSet<>();
 
+    @Lob
+    @Column(name = "electronic_signature")
+    private String electronicSignature; // Added this field to store electronic signatures
+
     public void setStatus(String status) {
-        switch(status) {
-            case "AVAILABLE":
-                this.status = STATUS.AVAILABLE;
-                break;
-            case "BLOCKED":
-                this.status = STATUS.BLOCKED;
-                break;
-            case "PROCESS":
-                this.status = STATUS.PROCESS;
-                break;
-            case "PAID":
-                this.status = STATUS.PAID;
-                break;
-            case "FILLED":
-                this.status = STATUS.FILLED;
-                break;
-            default:
-                this.status = STATUS.NULL;
-                break;
-        }
+        this.status = STATUS.fromString(status);
     }
 
     public String getStatus() {
-        switch(this.status) {
-            case AVAILABLE:
-                return "AVAILABLE";
-            case BLOCKED:
-                return "BLOCKED";
-            case PROCESS:
-                return "PROCESS";
-            case PAID:
-                return "PAID";
-            case FILLED:
-                return "FILLED";
-            default:
-                return "NULL";
-        }
+        return this.status.toString();
     }
-}
-
-
-//Implement the field below if needed or what is needed to the existing code:
-// src/main/java/com/_5guys/domain/Prescription.java
-
-@Entity
-public class Prescription {
-    // Existing fields...
-
-    @Lob
-    private String electronicSignature; // Add this field
-
-    // Getters and Setters...
 }
