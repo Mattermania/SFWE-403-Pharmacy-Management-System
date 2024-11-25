@@ -1,0 +1,70 @@
+/* ReportTableStyles.css */
+
+/* Table Container */
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 1em;
+  font-family: Arial, sans-serif;
+  text-align: left;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Header */
+.report-table th {
+  background-color: #4caf50;
+  color: white;
+  padding: 12px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid #ddd;
+}
+
+/* Table Data Cells */
+.report-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+/* Alternating Row Colors */
+.report-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.report-table tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+/* Highlight on Hover */
+.report-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Centered Content */
+.report-table td.center {
+  text-align: center;
+}
+
+/* Bold Text */
+.report-table td.bold {
+  font-weight: bold;
+}
+
+/* Responsive Table for Small Screens */
+@media (max-width: 768px) {
+  .report-table {
+    font-size: 0.9em;
+  }
+
+  .report-table th, .report-table td {
+    padding: 8px;
+  }
+}
+
+/* Styling for No Data Row */
+.report-table td[colspan] {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+}

@@ -17,7 +17,16 @@ const HomePage = () => {
   const account = location.state?.account;
   const [lowInventory, setLowInventory] = useState([]);
 
+  // Redirect to login page if account is not available
   useEffect(() => {
+    if (!account) {
+      navigate("/");
+    }
+  }, [account, navigate]);
+
+  // Debugging to check account state
+  useEffect(() => {
+    console.log("Account state:", account);
     if (!account) {
       navigate("/");
     }
@@ -38,6 +47,7 @@ const HomePage = () => {
       });
   }, []);
 
+  // Navigate to specific routes
   const handleNavigation = (route) => {
     navigate(route, { state: { account } });
   };
@@ -80,6 +90,9 @@ const HomePage = () => {
             <Button onClick={() => handleNavigation("/add-customer")}>
               Add Customer
             </Button>
+            <Button onClick={() => handleNavigation("/transaction")}>
+              Complete a Transaction
+            </Button> {/* Transaction button */}
 
             {/* Role-specific buttons */}
             {account.role.toLowerCase() === "manager" && (
@@ -95,9 +108,6 @@ const HomePage = () => {
                 </Button>
                 <Button onClick={() => handleNavigation("/update-inventory")}>
                   Update Inventory
-                </Button>
-                <Button onClick={() => handleNavigation("/remove-access")}>
-                  Remove Access
                 </Button>
                 <Button onClick={() => handleNavigation("/manage-roles")}>
                   Manage User Roles
