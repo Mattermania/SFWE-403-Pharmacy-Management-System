@@ -7,9 +7,11 @@ import HomePage from "./pages/HomePage";
 import AddCustomer from "./pages/AddCustomer";
 import ViewCustomers from "./pages/ViewCustomers";
 import TrackPrescriptions from "./pages/TrackPrescriptions";
+import AddMedication from "./pages/AddMedication"; // Import Add Medication
 import AddPrescription from "./pages/AddPrescription";
 import UpdateInventory from "./pages/UpdateInventory";
 import MedicationSpecifics from "./pages/MedicationSpecifics";
+import PrescriptionSpecifics from "./pages/PrescriptionSpecifics"; // Import Prescription Specifics page
 import Login from "./Login";
 import ForgotPassword from "./Forgot";
 import Signup from "./pages/Signup";
@@ -40,11 +42,10 @@ function App() {
             <Route path="/view-customers" element={<ViewCustomers />} />
             <Route path="/track-prescriptions" element={<TrackPrescriptions />} />
             <Route path="/add-prescription" element={<AddPrescription />} />
+            <Route path="/add-medication" element={<AddMedication />} />
             <Route path="/update-inventory" element={<UpdateInventory />} />
-            <Route
-              path="/medication-specifics/:medicationId"
-              element={<MedicationSpecifics />}
-            />
+            <Route path="/medication-specifics/:medicationId" element={<MedicationSpecifics />}/>
+            <Route path="/prescription-specifics/:prescriptionId" element={<PrescriptionSpecifics />} />
             <Route path="/pharmacist" element={<Pharmacist />} />
             <Route path="/order-medicine" element={<OrderMedicine />} />
             <Route path="/generate-report" element={<GenerateReportPage />} />
