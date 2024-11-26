@@ -31,6 +31,8 @@ const ManageRoles = () => {
   const [lockedAccounts, setLockedAccounts] = useState([]); // Locked accounts list
   const [passwordResetAccounts, setPasswordResetAccounts] = useState([]); // Password reset requests
   const location = useLocation();
+  const managerId = location.state?.account?.id; // Get manager ID from account state
+
 
   // Fetch locked accounts from the backend
   useEffect(() => {
@@ -85,8 +87,15 @@ const ManageRoles = () => {
 
   // Unlock a locked account
   const handleUnlock = async (id) => {
+    if (!managerId) {
+      alert("Manager ID is required to unlock accounts.");
+      return;
+    }
+
     try {
-      await axios.put(`http://localhost:8080/accounts/unlock/${id}`);
+      await axios.put(`http://localhost:8080/accounts/unlock/${id}`, null, {
+        params: { managerId },
+      });
       setLockedAccounts((prev) => prev.filter((account) => account.id !== id)); // Remove from locked accounts list
       alert("Account unlocked successfully!");
     } catch (error) {
