@@ -1,279 +1,93 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
-import "../styles/ExcelTableStyles.css";
+// src/pages/OrderMedicine.js
+import React, { useState } from "react";
+import { Container, Title, Description } from "../styles/PageStyles";
+import "../styles/TextboxAlignment.css"; // Import CSS for alignment
 
-const TrackMedications = () => {
-  const [medications, setMedications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const navigate = useNavigate();
-  const location = useLocation();
-  const account = location.state?.account;
+const OrderMedicine = () => {
+  const [medicineName, setMedicineName] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [supplier, setSupplier] = useState("");
+  const [message, setMessage] = useState("");
 
-  const [newMedication, setNewMedication] = useState({
-    name: "",
-    manufacturer: "",
-    startingExpirationDate: "",
-    startingQuantity: 0,
-    price: 0,
-    medicationInventory: [],
-    prescriptions: []
-  });
-  
-  // Fetch medications from the backend
-  const fetchMedications = async () => {
-    try {
-      const response = await axios.get('http://localhost:8080/inventory'); // Replace with actual endpoint
-      setMedications(response.data);
-    } catch (error) {
-      setError('Error fetching medications: ' + (error.response?.data.message || error.message));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  // Run fetchMedications on component mount
-  useEffect(() => {
-    fetchMedications();
-  }, [account, navigate]);
-
-  const handleAddMedication = async () => {
-    // Clear messages
-    setErrorMessage('');
-    setSuccessMessage('');
-  
-    // Validate input
-    if (!validateMedication(newMedication)) {
-      setErrorMessage('Not all fields have been filled or values are invalid.');
+    // Validate inputs (basic validation example)
+    if (!medicineName || !quantity || !supplier) {
+      setMessage("Please fill in all fields.");
       return;
     }
 
-    for(let medication of medications) {
-      if (medication.name === newMedication.name) {
-        setErrorMessage('Medication with this name already exists.');
-        return;
-      }
-    }
-  
+    // Example of using sample data instead of making an API call
     try {
-      // Create and submit medication data
-      const newMedicationData = createMedicationData(newMedication);
-      const medicationResponse = await axios.post('http://localhost:8080/inventory', newMedicationData);
-  
-      if (medicationResponse.status === 201) {
-        console.log("Medication created:", medicationResponse.data);
-        setSuccessMessage(`Medication created successfully.`);
-        await logInventoryChange(medicationResponse.data);
-  
-        // Update local state
-        updateMedicationsState(medicationResponse.data);
-      } else {
-        setErrorMessage('Error creating medication.');
-      }
-    } catch (error) {
-      console.error("Error submitting request:", error);
-      setErrorMessage('Error creating medication.');
-    }
-  };
-  
-  // Utility to validate the input
-  const validateMedication = (medication) => {
-    return (
-      medication.name &&
-      medication.manufacturer &&
-      medication.startingExpirationDate &&
-      medication.startingQuantity > 0 &&
-      medication.price > 0
-    );
-  };
-  
-  // Create new medication object
-  const createMedicationData = (medication) => ({
-    name: medication.name,
-    manufacturer: medication.manufacturer,
-    price: medication.price,
-    medicationInventory: [
-      { expirationDate: medication.startingExpirationDate, quantity: medication.startingQuantity },
-    ],
-    prescriptions: [],
-  });
-  
-  // Log inventory change
-  const logInventoryChange = async (medicationData) => {
-    try {
-      const now = new Date();
-      const newLogData = {
-        logType: "inventory",
-        date: formatDate(now),
-        time: formatTime(now),
-        userId: account.id,
-        medicationId: medicationData.id,
-        quantityChanged: medicationData.totalQuantity,
-        totalQuantity: medicationData.totalQuantity,
-        state: "CREATED",
+      // Sample data logic to simulate placing an order
+      const sampleResponse = {
+        status: 200, // Simulated successful response status
+        message: "Order placed successfully!", // Simulated response message
       };
-  
-      await axios.post('http://localhost:8080/reports/inventory', newLogData);
+
+      if (sampleResponse.status === 200) {
+        setMessage(sampleResponse.message);
+        // Clear form fields
+        setMedicineName("");
+        setQuantity("");
+        setSupplier("");
+      } else {
+        setMessage("Failed to place the order.");
+      }
     } catch (error) {
-      console.error("Error logging inventory change:", error);
-      setErrorMessage("Error logging inventory change");
-      setSuccessMessage("");
-      throw error; // Re-throw to ensure error state propagates
+      console.error("Error placing order:", error);
+      setMessage("An error occurred while placing the order.");
     }
   };
-  
-  // Update local state after successful creation
-  const updateMedicationsState = (medicationData) => {
-    setMedications((prevMedications) => [
-      ...prevMedications,
-      { ...medicationData, id: prevMedications.length + 1 },
-    ]);
-    resetNewMedication();
-  };
-  
-  // Reset form
-  const resetNewMedication = () => {
-    setNewMedication({
-      name: "",
-      manufacturer: "",
-      startingExpirationDate: "",
-      startingQuantity: 0,
-      price: 0,
-      medicationInventory: [],
-      prescriptions: [],
-    });
-  };
-  
-  // Utility functions for date and time formatting
-  const formatDate = (date) =>
-    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  
-  const formatTime = (date) =>
-    `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}`;
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewMedication({ ...newMedication, [name]: value });
-  };
-  
-
-  if (loading) {
-    return <p>Loading medications...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
 
   return (
-    <div className="excel-table-container">
-      <h1>Add Medications</h1>
-  
-      {/* Medication List Table */}
-      <table className="excel-table">
-        <thead>
-          <tr>
-            <th>Medication Name</th>
-            <th>Manufacturer</th>
-            <th>Total Quantity</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          {medications.length > 0 ? (
-            medications.map((medication) => (
-              <tr key={medication.id}>
-                <td>{medication.name}</td>
-                <td>{medication.manufacturer}</td>
-                <td>{medication.totalQuantity || 0}</td>
-                <td>${medication.price?.toFixed(2) || "0.00"}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="4" style={{ textAlign: "center" }}>
-                No medications available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-  
-      {/* Add Medication Form */}
-      <div className="add-medication-form">
-        <h3>Add New Medication</h3>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleAddMedication();
-          }}
-        >
-          <label>
-            Medication Name:
-            <input
-              type="text"
-              name="name"
-              value={newMedication.name}
-              onChange={handleInputChange}
-              required
-            />
-          </label>
-          <label>
-            Manufacturer:
-            <input
-              type="text"
-              name="manufacturer"
-              value={newMedication.manufacturer}
-              onChange={handleInputChange}
-              required
-            />
-          </label>
-          <label>
-            Expiration Date:
-            <input
-              type="date"
-              name="startingExpirationDate"
-              value={newMedication.startingExpirationDate}
-              onChange={handleInputChange}
-              required
-            />
-          </label>
-          <label>
-            Quantity:
-            <input
-              type="number"
-              name="startingQuantity"
-              value={newMedication.startingQuantity}
-              onChange={handleInputChange}
-              required
-              min="1"
-            />
-          </label>
-          <label>
-            Price:
-            <input
-              type="number"
-              name="price"
-              value={newMedication.price}
-              onChange={handleInputChange}
-              step="0.01"
-              min="0.01"
-              placeholder="Enter price"
-              required
-            />
-          </label>
-          <button type="submit">Add Medication</button>
-        </form>
-  
-        {/* Error and Success Messages */}
-        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
-        {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-      </div>
-    </div>
-  );  
+    <Container>
+      <Title>Order Medicine</Title>
+      <Description>
+        This page is accessible only by the Manager to order medicines for the pharmacy.
+      </Description>
+      <form onSubmit={handleSubmit} className="form-container">
+        <div className="form-group">
+          <label className="form-label">Medicine Name:</label>
+          <input
+            className="form-input"
+            type="text"
+            value={medicineName}
+            onChange={(e) => setMedicineName(e.target.value)}
+            placeholder="Enter medicine name"
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Quantity:</label>
+          <input
+            className="form-input"
+            type="number"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            placeholder="Enter quantity"
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Supplier:</label>
+          <input
+            className="form-input"
+            type="text"
+            value={supplier}
+            onChange={(e) => setSupplier(e.target.value)}
+            placeholder="Enter supplier name"
+            required
+          />
+        </div>
+        <button type="submit" className="form-button">
+          Place Order
+        </button>
+      </form>
+      {message && <p>{message}</p>}
+    </Container>
+  );
 };
 
-export default TrackMedications;
+export default OrderMedicine;
