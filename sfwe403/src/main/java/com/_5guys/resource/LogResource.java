@@ -59,6 +59,16 @@ public class LogResource {
         return ResponseEntity.ok(logService.getInventoryEntries());
     }
 
+    @GetMapping("/activity")
+    public ResponseEntity<List<ActivityLog>> getActivityEntries() {
+        return ResponseEntity.ok(logService.getActivityEntries());
+    }
+
+    @GetMapping("/transaction")
+    public ResponseEntity<List<TransactionLog>> getTransactionEntries() {
+        return ResponseEntity.ok(logService.getTransactionEntries());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Log> getLog(@PathVariable(value = "id") String id) {
         Log log = logService.getLog(id);

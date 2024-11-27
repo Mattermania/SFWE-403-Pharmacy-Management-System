@@ -14,7 +14,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import static com._5guys.constant.Constant.PHOTO_DIRECTORY;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
@@ -27,103 +27,131 @@ import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 public class AccountResource {
     private final AccountService accountService;
 
+    // Create a new account
     @PostMapping
     public ResponseEntity<Account> createAccount(@RequestBody Account account) {
         Account createdAccount = accountService.createAccount(account);
-        URI location = URI.create(String.format("/accounts/%s", createdAccount.getId())); // Corrected the URI creation
+        URI location = URI.create(String.format("/accounts/%s", createdAccount.getId()));
         return ResponseEntity.created(location).body(createdAccount);
     }
 
+    // Get all accounts with pagination
     @GetMapping
-    public ResponseEntity<Page<Account>> getAccounts(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<Page<Account>> getAccounts(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
         return ResponseEntity.ok(accountService.getAllAccounts(page, size));
     }
 
+    // Get account by ID
     @GetMapping("/{id}")
     public ResponseEntity<Account> getAccount(@PathVariable(value = "id") String id) {
         Account account = accountService.getAccount(id);
         return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
     }
 
+    // Search account by username, email, and password
     @GetMapping("/search")
-    public ResponseEntity<Optional<Account>> searchAccountByUsernameAndEmail(
+    public ResponseEntity<Account> searchAccountByUsernameEmailAndPassword(
             @RequestParam("username") String username,
-            @RequestParam("username") String email) {
-        
-        Optional<Account> account = accountService.findByUsername(username);
+            @RequestParam("email") String email,
+            @RequestParam("password") String password) {
+
+        Account account = accountService.findByUsername(username);
         if (account == null) {
             account = accountService.findByEmail(email);
         }
+
         if (account != null) {
-            if (account.get().isAccountLocked()) {
-                // Account is locked
+            if (account.isAccountLocked()) {
                 return ResponseEntity.status(423).body(null); // 423 Locked
             } else {
-                // Successful login
-                return ResponseEntity.ok(account);
+                if (!account.getPassword().equals(password)) {
+                    accountService.handleFailedLoginAttempt(username);
+                    return ResponseEntity.status(401).body(null); // 401 Unauthorized
+                } else {
+                    return ResponseEntity.ok(account); // Successful login
+                }
             }
         } else {
-            // Handle failed login attempt
-            accountService.handleFailedLoginAttempt(username);
             return ResponseEntity.status(401).body(null); // 401 Unauthorized
         }
-    
-        //return account != null ? ResponseEntity.ok(account) : ResponseEntity.notFound().build();
     }
 
+    // Delete account by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAccount(@PathVariable(value = "id") String id) {
         accountService.deleteAccount(id);
-        return ResponseEntity.noContent().build(); // Returns 204 No Content
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
+    // Upload profile photo for an account
     @PutMapping("/photo")
     public ResponseEntity<String> uploadPhoto(@RequestParam("id") String id, @RequestParam("file") MultipartFile file) {
-        // Consider adding error handling here (e.g., invalid file type, size too large)
         try {
             String responseMessage = accountService.uploadPhoto(id, file);
             return ResponseEntity.ok(responseMessage);
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                                 .body("Invalid request: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Invalid request: " + e.getMessage());
         }
     }
 
+    // Retrieve photo for an account
     @GetMapping(path = "/image/{filename}", produces = { IMAGE_PNG_VALUE, IMAGE_JPEG_VALUE })
     public ResponseEntity<byte[]> getPhoto(@PathVariable("filename") String filename) {
         try {
             byte[] imageBytes = Files.readAllBytes(Paths.get(PHOTO_DIRECTORY + filename));
             return ResponseEntity.ok(imageBytes);
         } catch (IOException e) {
-            // Handle the case where the file does not exist
             return ResponseEntity.notFound().build();
         }
     }
-    
-     // **New endpoint to unlock an account**
-     @PutMapping("/unlock/{id}")
-     public ResponseEntity<String> unlockAccount(@PathVariable("id") String id) {
-         accountService.unlockAccount(id);
-         return ResponseEntity.ok("Account unlocked successfully.");
-     }
 
+    // Unlock a locked account
+    @PutMapping("/unlock/{id}")
+    public ResponseEntity<String> unlockAccount(@PathVariable("id") String id, @RequestParam("managerId") String managerId) {
+        Account manager = accountService.getAccount(managerId);
+        if (manager.getRole() != Account.Role.MANAGER) {
+            return ResponseEntity.status(403).body("Only managers can unlock accounts."); // 403 Forbidden
+        }
+
+        accountService.unlockAccount(id);
+        return ResponseEntity.ok("Account unlocked successfully.");
+    }
+
+    // Update password for an account
     @PutMapping("/password/{id}")
     public ResponseEntity<String> updatePassword(@PathVariable(value = "id") String id, @RequestParam("password") String password) {
-        // Consider adding error handling here (e.g., invalid file type, size too large)
         try {
             String responseMessage = accountService.updatePassword(id, password);
             return ResponseEntity.ok(responseMessage);
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                                 .body("Invalid request: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Invalid request: " + e.getMessage());
         }
     }
 
+    // Get locked accounts
     @GetMapping("/locked")
-public ResponseEntity<List<Account>> getLockedAccounts() {
-    List<Account> lockedAccounts = accountService.getLockedAccounts();
-    return ResponseEntity.ok(lockedAccounts);
-}
-    
+    public ResponseEntity<List<Account>> getLockedAccounts() {
+        List<Account> lockedAccounts = accountService.getLockedAccounts();
+        return ResponseEntity.ok(lockedAccounts);
+    }
+
+    // Forgot password: flag account for reset
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        Account account = accountService.findByEmail(email);
+
+        account.setPasswordResetRequested(true); // Flag account for reset
+        accountService.saveAccount(account); // Save changes to the database
+        return ResponseEntity.ok("Password reset request submitted.");
+    }
+
+    // Get accounts flagged for password reset
+    @GetMapping("/reset-requests")
+    public ResponseEntity<List<Account>> getPasswordResetRequests() {
+        List<Account> resetRequests = accountService.getPasswordResetRequests();
+        return ResponseEntity.ok(resetRequests);
+    }
 }

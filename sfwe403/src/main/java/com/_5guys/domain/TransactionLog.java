@@ -47,7 +47,7 @@ public class TransactionLog extends Log {
 
     public Double getTotalCost() {
         Double totalCost = 0.0;
-        
+
         Iterator<Map.Entry<String, Double>> iterator = purchasedItems.entrySet().iterator();
         // Iterate through the map
         while (iterator.hasNext()) {

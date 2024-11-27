@@ -46,7 +46,7 @@ const AddCustomer = () => {
             policyEndDate: null
           }
         : {
-            provider: insurance,  
+            insuranceProvider: insurance,  
             policyNumber: policyNumber,
             memberId: memberId,
             groupNumber: groupNumber,

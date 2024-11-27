@@ -1,12 +1,7 @@
 package com._5guys.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +26,7 @@ public class Account {
     }
     
     public enum Role {
-        CASHIER,
+        STAFF,
         TECHNICIAN,
         PHARMACIST,
         MANAGER
@@ -41,69 +36,34 @@ public class Account {
     @UuidGenerator
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private String id;
-    @Column(name = "username", unique = true, updatable = true, nullable = false)
-    private String username;
-    @Column(name = "password", unique = true, updatable = true, nullable = false)
-    private String password;
-    @Column(name = "name", unique = false, updatable = true, nullable = false)
-    private String name;
-    @Column(name = "email", unique = true, updatable = true, nullable = false)
-    private String email;
-    @Column(name = "phone_number", unique = false, updatable = true, nullable = false)
-    private String phoneNumber;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", unique = false, updatable = false, nullable = false)
-    private Role role;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "state", unique = false, updatable = true, nullable = false)
-    private State state = State.INACTIVE;
 
-    
+    @Column(name = "username", unique = true, nullable = false)
+    private String username;
+
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "email", unique = true, nullable = false)
+    private String email;
+
+    @Column(name = "phone_number", nullable = false)
+    private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
+
     private String photoUrl;
 
-    // **New fields added for account lockout functionality**
-
-    // Field to track the number of failed login attempts
     @Column(name = "failed_login_attempts", nullable = false)
     private int failedLoginAttempts = 0;
 
-    // Field to indicate whether the account is locked
     @Column(name = "account_locked", nullable = false)
     private boolean accountLocked = false;
 
-    // Existing methods and fields remain unchanged
-    public void setState(String state) {
-        switch(state) {
-            case "LOCKED":
-                this.state = State.LOCKED;
-                break;
-            case "FORGOTPASSWORD":
-                this.state = State.FORGOTPASSWORD;
-                break;
-            case "ACTIVE":
-                this.state = State.ACTIVE;
-                break;
-            case "INACTIVE":
-                this.state = State.INACTIVE;
-                break;
-            default:
-                this.state = State.INACTIVE;
-                break;
-        }
-    }
-
-    public String getState() {
-        switch(this.state) {
-            case LOCKED:
-                return "LOCKED";
-            case FORGOTPASSWORD:
-                return "FORGOTPASSWORD";
-            case ACTIVE:
-                return "ACTIVE";
-            case INACTIVE:
-                return "INACTIVE";
-            default:
-                return "INACTIVE";
-        }
-    }
+    @Column(name = "password_reset_requested", nullable = false)
+    private boolean passwordResetRequested = false;
 }

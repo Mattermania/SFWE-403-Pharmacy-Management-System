@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com._5guys.domain.ActivityLog;
 import com._5guys.domain.InventoryLog;
 import com._5guys.domain.Log;
+import com._5guys.domain.TransactionLog;
 import com._5guys.repo.LogRepo;
 
 /**
@@ -38,6 +40,22 @@ public class LogService {
                     .stream()
                     .filter(log -> log instanceof InventoryLog)
                     .map(log -> (InventoryLog) log)
+                    .collect(Collectors.toList());
+    }
+
+    public List<ActivityLog> getActivityEntries() {
+        return logRepo.findAll(Sort.by("id"))
+                    .stream()
+                    .filter(log -> log instanceof ActivityLog)
+                    .map(log -> (ActivityLog) log)
+                    .collect(Collectors.toList());
+    }
+
+    public List<TransactionLog> getTransactionEntries() {
+        return logRepo.findAll(Sort.by("id"))
+                    .stream()
+                    .filter(log -> log instanceof TransactionLog)
+                    .map(log -> (TransactionLog) log)
                     .collect(Collectors.toList());
     }
 
