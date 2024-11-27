@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { usePendingAccounts } from "../context/PendingAccountsContext";
 import { Container, Title } from "../styles/PageStyles";
 import styled from "styled-components";
 import axios from "axios";
 
-// Custom buttons for actions
+// Custom styled button component
 const ActionButton = styled.button`
   background-color: ${(props) => props.color || "#4caf50"};
   color: white;
@@ -26,16 +27,20 @@ const ActionButton = styled.button`
 `;
 
 const ManageRoles = () => {
-  const { pendingAccounts, approveAccount } = usePendingAccounts();
-  const [lockedAccounts, setLockedAccounts] = useState([]);
+  const { pendingAccounts, approveAccount } = usePendingAccounts(); // Manage pending accounts
+  const [lockedAccounts, setLockedAccounts] = useState([]); // Locked accounts list
+  const [passwordResetAccounts, setPasswordResetAccounts] = useState([]); // Password reset requests
+  const location = useLocation();
+  const managerId = location.state?.account?.id; // Get manager ID from account state
+
 
   // Fetch locked accounts from the backend
   useEffect(() => {
     axios
-      .get("http://localhost:8080/accounts/locked") // Endpoint for locked accounts
+      .get("http://localhost:8080/accounts/locked")
       .then((response) => {
         if (Array.isArray(response.data)) {
-          setLockedAccounts(response.data); // Store locked accounts
+          setLockedAccounts(response.data);
         } else {
           console.error("Expected an array but got:", response.data);
         }
@@ -45,6 +50,23 @@ const ManageRoles = () => {
       });
   }, []);
 
+  // Fetch password reset requests
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/accounts/reset-requests") // Backend endpoint to fetch reset requests
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          setPasswordResetAccounts(response.data);
+        } else {
+          console.error("Expected an array but got:", response.data);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching password reset requests:", error);
+      });
+  }, []);
+
+  // Approve a pending account
   const handleApprove = async (account) => {
     try {
       await axios.post("http://localhost:8080/accounts", {
@@ -55,7 +77,7 @@ const ManageRoles = () => {
         name: account.name,
         role: account.role,
       });
-      approveAccount(account.username);
+      approveAccount(account.username); // Update pending accounts state
       alert(`Account for ${account.username} approved!`);
     } catch (error) {
       console.error("Error approving account:", error);
@@ -63,18 +85,44 @@ const ManageRoles = () => {
     }
   };
 
+  // Unlock a locked account
   const handleUnlock = async (id) => {
-    try {
-        await axios.put(`http://localhost:8080/accounts/unlock/${id}`);
-        setLockedAccounts((prev) =>
-            prev.filter((account) => account.id !== id)
-        );
-        alert("Account unlocked successfully!");
-    } catch (error) {
-        console.error("Error unlocking account:", error);
-        alert("Failed to unlock account. Please try again.");
+    if (!managerId) {
+      alert("Manager ID is required to unlock accounts.");
+      return;
     }
-};
+
+    try {
+      await axios.put(`http://localhost:8080/accounts/unlock/${id}`, null, {
+        params: { managerId },
+      });
+      setLockedAccounts((prev) => prev.filter((account) => account.id !== id)); // Remove from locked accounts list
+      alert("Account unlocked successfully!");
+    } catch (error) {
+      console.error("Error unlocking account:", error);
+      alert("Failed to unlock account. Please try again.");
+    }
+  };
+
+  // Reset password for an account
+  const handlePasswordReset = async (id) => {
+    const newPassword = prompt("Enter a new password:");
+    if (!newPassword) {
+      alert("Password reset canceled.");
+      return;
+    }
+
+    try {
+      await axios.put(`http://localhost:8080/accounts/password/${id}`, null, {
+        params: { password: newPassword },
+      });
+      setPasswordResetAccounts((prev) => prev.filter((account) => account.id !== id)); // Remove from reset requests
+      alert("Password reset successfully!");
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      alert("Failed to reset password. Please try again.");
+    }
+  };
 
   return (
     <Container>
@@ -118,6 +166,28 @@ const ManageRoles = () => {
                 hoverColor="#e64a19"
               >
                 Unlock
+              </ActionButton>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Password Reset Requests */}
+      <h2>Password Reset Requests</h2>
+      {passwordResetAccounts.length === 0 ? (
+        <p>No password reset requests.</p>
+      ) : (
+        <ul>
+          {passwordResetAccounts.map((account) => (
+            <li key={account.id}>
+              <strong>{account.name}</strong> ({account.email}) - Role:{" "}
+              {account.role}
+              <ActionButton
+                onClick={() => handlePasswordReset(account.id)}
+                color="#2196f3"
+                hoverColor="#1976d2"
+              >
+                Change Password
               </ActionButton>
             </li>
           ))}

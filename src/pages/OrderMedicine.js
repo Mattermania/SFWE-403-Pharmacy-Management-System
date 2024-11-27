@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";import { Container, Title, Description } from "../styles/PageStyles";
 import "../styles/ExcelTableStyles.css"; // Import CSS for the Excel-style table
 
@@ -9,6 +9,8 @@ const OrderMedication = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const account = location.state?.account;
 
   useEffect(() => {
     fetchInventory();
@@ -48,13 +50,13 @@ const OrderMedication = () => {
       const newQuantity = targetMedication.quantity + parseInt(quantity, 10);
 
       // Update inventory
-      await axios.post(
+      const response = await axios.post(
         `http://localhost:8080/inventory/addInventory/${targetMedication.id}`,
         updatedInventory
       );
 
       // Log the order
-      await logOrder(targetMedication.id, quantity, newQuantity);
+      await logOrder(response.data.id, quantity, response.data.totalQuantity);
 
       // Refresh inventory
       await fetchInventory();
@@ -76,13 +78,13 @@ const OrderMedication = () => {
         date: formatDate(now),
         time: formatTime(now),
         userId: account.id, // Replace with dynamic user ID if applicable
-        medicationId,
+        medicationId: medicationId,
         quantityChanged: quantityOrdered,
         totalQuantity,
-        state: "ORDERED",
+        state: "PURCHASED",
       };
 
-      await axios.post("http://localhost:8080/reports/orders", logData);
+      await axios.post("http://localhost:8080/reports/inventory", logData);
     } catch (error) {
       console.error("Error logging order:", error);
       throw error; // Re-throw for error handling

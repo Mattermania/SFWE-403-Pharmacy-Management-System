@@ -14,10 +14,12 @@ const SignUpForm = () => {
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState("customer");
+  const [role, setRole] = useState("STAFF");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const { addPendingAccount } = usePendingAccounts(); // Access context functions
 
-  const handleSignUp = async (event) => {
+  const handleSignUp = async(event) => {
     event.preventDefault();
 
     const newAccount = { username, password, email, phoneNumber, name, role };
@@ -29,7 +31,7 @@ const SignUpForm = () => {
     setEmail("");
     setPhoneNumber("");
     setName("");
-    setRole("customer");
+    setRole("STAFF");
 
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
@@ -47,7 +49,6 @@ const SignUpForm = () => {
     };
 
     try {
-      setIsSubmitting(true);
       const response = await axios.post("http://localhost:8080/accounts", accountData);
 
       if (response.status === 201) {
@@ -60,7 +61,7 @@ const SignUpForm = () => {
         setName("");
         setPhoneNumber("");
         setEmail("");
-        setRole("CASHIER");
+        setRole("STAFF");
       } else {
         setErrorMessage(`Error creating account: ${response.status}`);
         setSuccessMessage("");
@@ -69,8 +70,6 @@ const SignUpForm = () => {
       console.error("Error submitting request:", error);
       setErrorMessage(`Account with this username and/or email already exists`);
       setSuccessMessage("");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -134,10 +133,10 @@ const SignUpForm = () => {
         <label>
           Role:
           <select value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="customer">Customer</option>
-            <option value="pharmacist">Pharmacist</option>
-            <option value="staff">Staff Member</option>
-            <option value="manager">Manager</option>
+            <option value="TECHNICIAN">Technician</option>
+            <option value="PHARMACIST">Pharmacist</option>
+            <option value="STAFF">Staff Member</option>
+            <option value="MANAGER">Manager</option>
           </select>
         </label>
         <Button type="submit">Sign Up</Button>

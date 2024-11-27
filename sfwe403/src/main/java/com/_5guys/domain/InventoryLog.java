@@ -27,7 +27,7 @@ public class InventoryLog extends Log {
     }
 
     @Column(name = "medication_id", unique = false, updatable = true, nullable = true)
-    private String medication_id;
+    private String medicationId;
 
     @Column(name = "quantity_changed", unique = false, updatable = true, nullable = true)
     private int quantityChanged;

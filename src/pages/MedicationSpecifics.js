@@ -5,7 +5,7 @@ import "../styles/ExcelTableStyles.css"; // Optional: For table styling
 const MedicationSpecifics = () => {
   const location = useLocation();
   const { medication } = location.state || {}; // Get medication data passed from UpdateInventory
-  
+
   const [errorMessage, setErrorMessage] = useState("");
 
   // Use useMemo to compute expirationData with error handling
