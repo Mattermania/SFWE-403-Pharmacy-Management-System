@@ -170,5 +170,25 @@ public class InventoryService {
                         .anyMatch(stock -> stock.getExpirationDate().isBefore(currentDate)))
                 .count();
     }
+
+
+    public void removeStockById(String medicationId) {
+    Medication medication = inventoryRepo.findById(medicationId)
+            .orElseThrow(() -> new RuntimeException("Medication not found"));
+
+    List<Stock> inventory = medication.getMedicationInventory();
+
+    // Check if any stock exists
+    if (inventory.isEmpty()) {
+        throw new RuntimeException("No stock found for this medication.");
+    }
+
+    // Clear the inventory
+    inventory.clear();
+
+    // Save the updated medication
+    inventoryRepo.save(medication);
+    log.info("All stock removed for medication ID: {}", medicationId);
+}
     
 }

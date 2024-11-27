@@ -16,26 +16,28 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PrescriptionResource {
     private final PrescriptionService prescriptionService;
-    // private final PatientService patientService;
-    // private final InventoryService inventoryService;
 
     @PostMapping
     public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
         Prescription createdPrescription = prescriptionService.createPrescription(prescription);
-        URI location = URI.create(String.format("/prescriptions/%s", createdPrescription.getId())); // Corrected the URI creation
-
+        URI location = URI.create(String.format("/prescriptions/%s", createdPrescription.getId()));
         return ResponseEntity.created(location).body(createdPrescription);
     }
 
     @GetMapping
-    public ResponseEntity<List<Prescription>> getPrescriptions(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<List<Prescription>> getPrescriptions() {
         return ResponseEntity.ok(prescriptionService.getAllPrescriptions());
     }
 
+    // New endpoint to get PAID prescriptions
+    @GetMapping("/paid")
+    public ResponseEntity<List<Prescription>> getPaidPrescriptions() {
+        List<Prescription> paidPrescriptions = prescriptionService.getPrescriptionsByStatus("PAID");
+        return ResponseEntity.ok(paidPrescriptions);
+    }
+
     @PostMapping("/fill")
-    public ResponseEntity<String> fillPrescription(
-            @RequestParam("prescriptionId") String prescriptionId) {
+    public ResponseEntity<String> fillPrescription(@RequestParam("prescriptionId") String prescriptionId) {
         String result = prescriptionService.fillPrescription(prescriptionId);
         if (result.equals("Prescription filled successfully.")) {
             return ResponseEntity.ok(result);

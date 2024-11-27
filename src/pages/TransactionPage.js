@@ -3,71 +3,31 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const TransactionPage = () => {
+  const [paidPrescriptions, setPaidPrescriptions] = useState([]);
   const [cartItems, setCartItems] = useState([]);
-  const [inventory, setInventory] = useState([]);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Fetch PAID prescriptions on load
   useEffect(() => {
-    // Fetch inventory
     axios
-      .get("http://localhost:8080/inventory")
+      .get("http://localhost:8080/prescriptions/paid")
       .then((response) => {
-        console.log("Inventory data:", response.data); // Debug log
-        setInventory(response.data);
+        setPaidPrescriptions(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching inventory:", error);
-        setError("Failed to load inventory. Please try again.");
+        console.error("Error fetching paid prescriptions:", error);
+        alert("Failed to load paid prescriptions. Please try again.");
       });
   }, []);
 
-  const addItemToCart = (item) => {
-    const quantity = parseInt(
-      prompt(`Enter the quantity for ${item.name}:`, "1"),
-      10
-    );
-
-    if (isNaN(quantity) || quantity <= 0) {
-      alert("Invalid quantity. Please try again.");
-      return;
-    }
-
-    if (quantity > (item.totalQuantity || 0)) {
-      alert(
-        `Insufficient stock for ${item.name}. Only ${
-          item.totalQuantity || 0
-        } available.`
-      );
-      return;
-    }
-
-    setCartItems((prevCart) => {
-      const existingItem = prevCart.find((cartItem) => cartItem.id === item.id);
-      if (existingItem) {
-        return prevCart.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + quantity }
-            : cartItem
-        );
-      }
-      return [
-        ...prevCart,
-        { ...item, quantity, price: parseFloat(item.price) || 0 }, // Ensure price is a valid number
-      ];
-    });
-
-    // Update inventory quantity
-    setInventory((prevInventory) =>
-      prevInventory.map((inventoryItem) =>
-        inventoryItem.id === item.id
-          ? {
-              ...inventoryItem,
-              totalQuantity: inventoryItem.totalQuantity - quantity,
-            }
-          : inventoryItem
-      )
-    );
+  const addPrescriptionToCart = (prescription) => {
+    const newCartItems = prescription.medications.map((medicationEntry) => ({
+      name: medicationEntry.medication.name,
+      quantity: medicationEntry.quantity,
+      price: parseFloat(medicationEntry.medication.price) || 0,
+      id: medicationEntry.medication.id,
+    }));
+    setCartItems((prevCart) => [...prevCart, ...newCartItems]);
   };
 
   const handleCheckout = () => {
@@ -75,24 +35,33 @@ const TransactionPage = () => {
       alert("Your cart is empty. Add items before proceeding to checkout.");
       return;
     }
+
     navigate("/order-confirmation", { state: { cartItems } });
   };
 
   return (
     <div>
       <h1>Transaction Page</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <h2>Available Inventory</h2>
+      <h2>Paid Prescriptions</h2>
       <ul>
-        {inventory.map((item) => (
-          <li key={item.id}>
-            {item.name} - $
-            {typeof item.price === "number"
-              ? item.price.toFixed(2)
-              : parseFloat(item.price || 0).toFixed(2)}{" "}
-            (Stock: {item.totalQuantity || 0})
-            <button onClick={() => addItemToCart(item)}>Add to Cart</button>
+        {paidPrescriptions.map((prescription) => (
+          <li key={prescription.id}>
+            {prescription.name} - {prescription.patient.name}
+            <button
+              onClick={() => addPrescriptionToCart(prescription)}
+              style={{
+                marginLeft: "10px",
+                padding: "5px 10px",
+                backgroundColor: "green",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+            >
+              Add to Cart
+            </button>
           </li>
         ))}
       </ul>
@@ -104,8 +73,7 @@ const TransactionPage = () => {
         <ul>
           {cartItems.map((item, index) => (
             <li key={index}>
-              {item.name} - $
-              {item.price.toFixed(2)} x {item.quantity} = $
+              {item.name} - ${item.price.toFixed(2)} x {item.quantity} = $
               {(item.price * item.quantity).toFixed(2)}
             </li>
           ))}
