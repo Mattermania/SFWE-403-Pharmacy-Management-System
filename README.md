@@ -1,3 +1,4 @@
+
 # SFWE-403 Pharmacy Management System
 
 This is the **SFWE-403 Pharmacy Management System** project. The system is designed to manage prescriptions, medications, patients, and inventory for a pharmacy.
@@ -110,87 +111,162 @@ SFWE-403-Pharmacy-Management-System
 │       └── test-classes
 ├── src
 └── styles
+```
 
+## Overview
 
----
+This project is a comprehensive system for managing medication prescriptions, inventories, and patient data, with integrated logging and notification services. It includes functionalities for managing accounts, prescriptions, medications, activity logs, and notifications for expiring medications.
 
-## Descriptions of Java Files
+## Setup and Configuration
+
+1. **Dependencies**:
+   - Spring Boot
+   - Spring Data JPA
+   - Hibernate (for database interactions)
+   - Lombok (for reducing boilerplate code)
+   - Jakarta Transaction API (for transaction management)
+   
+2. **Database**:
+   - This project uses JPA repositories for persistence, and it requires a configured database to store patient, prescription, inventory, and log data.
+
+3. **Running the Backend Application**:
+   - Navigate to the root directory of the backend project (`sfwe403`).
+   - Run the following command to start the Spring Boot application:
+     ```bash
+     mvn spring-boot:run
+     ```
+   - Once the application is running, it can be accessed via the embedded web server (e.g., Tomcat) at `http://localhost:8080`.
+
+4. **Running the Frontend Application**:
+   - Navigate to the `sfwe403-frontend` directory.
+   - Install the required dependencies using npm:
+     ```bash
+     npm install
+     ```
+   - After the dependencies are installed, start the frontend server with the following command:
+     ```bash
+     npm start
+     ```
+   - The frontend application will be accessible at `http://localhost:3000`.
+
+5. **Accessing the Application**:
+   - With both the backend and frontend servers running, you can access the full application through your browser at `http://localhost:3000`.
+
+## File Descriptions
 
 ### `Application.java`
-This is the main entry point for the Spring Boot application. It starts the application and configures the base packages to scan for components.
+- **Purpose**: The main entry point for the Spring Boot application.
+- **Key Features**:
+  - Annotated with `@SpringBootApplication` to initialize the application.
+  - Configured with `@EntityScan` and `@EnableJpaRepositories` to automatically scan for entities and repositories in the `com._5guys` package.
+  - Runs the Spring Boot application on startup.
 
-### `config/CorsConfig.java`
-Configures Cross-Origin Resource Sharing (CORS) settings to allow or restrict access from different origins.
+### `CorsConfig.java`
+- **Purpose**: Configures Cross-Origin Resource Sharing (CORS) settings for the application to allow or restrict client-side communication with the backend from different origins.
 
-### `constant/Constant.java`
-This file holds any constant values used across the system, like status codes, error messages, etc.
+### `Constant.java`
+- **Purpose**: Defines constants used throughout the application, such as error codes, status messages, and other configuration values.
 
-### `domain/` (Entities)
-These classes represent the core data entities in the application:
+### Domain Models
+- **Purpose**: Contains entity classes for the application's core data model. These classes are mapped to database tables via JPA.
+  - **`Account.java`**: Represents a user account in the system, including user-specific details.
+  - **`ActivityLog.java`**: Represents a log entry for activities performed in the system.
+  - **`Insurance.java`**: Represents an insurance plan or details linked to patients.
+  - **`InventoryLog.java`**: Represents logs related to inventory changes, including stock updates and medication inventory.
+  - **`InventoryUpdateResponse.java`**: Represents a response object for inventory update operations.
+  - **`Log.java`**: Represents general logging of operations or events in the system.
+  - **`Medication.java`**: Represents medication records, including names, dosage, and related information.
+  - **`Patient.java`**: Represents a patient’s details, including personal information and medical history.
+  - **`Prescription.java`**: Represents a prescription, including the doctor’s instructions for medications.
+  - **`PrescriptionMedication.java`**: Represents the relationship between prescriptions and medications.
+  - **`Stock.java`**: Represents the stock levels of medications in the inventory.
+  - **`TransactionLog.java`**: Represents a log entry of transaction-based activities like prescription fills.
 
-- **Account.java**: Defines an account entity representing users in the system (e.g., Manager, Pharmacist).
-- **ActivityLog.java**: Logs activities such as system events, actions performed, etc.
-- **Insurance.java**: Stores insurance information linked to patients.
-- **InventoryLog.java**: Records inventory updates and logs.
-- **InventoryUpdateResponse.java**: Defines the response structure for inventory updates.
-- **Log.java**: Abstract log class that other logs (Activity, Transaction, etc.) inherit from.
-- **Medication.java**: Represents a medication, including its details such as name, quantity, and stock level.
-- **Patient.java**: Represents a patient, including their personal and medical information.
-- **Prescription.java**: Represents a prescription, linking patients to medications.
-- **PrescriptionMedication.java**: A join table that associates medications with prescriptions, including the quantity prescribed.
-- **Stock.java**: Represents stock inventory related to medications.
-- **TransactionLog.java**: Records transactions within the system such as inventory changes.
+### Repositories
+- **Purpose**: Contains repository interfaces for managing entity persistence, extending Spring Data JPA's `JpaRepository`.
+  - **`AccountRepo.java`**: Repository interface for managing `Account` entities.
+  - **`InventoryRepo.java`**: Repository interface for managing `InventoryLog` entities.
+  - **`LogRepo.java`**: Repository interface for managing `Log` entities.
+  - **`PatientRepo.java`**: Repository interface for managing `Patient` entities.
+  - **`PrescriptionMedicationRepo.java`**: Repository interface for managing `PrescriptionMedication` entities.
+  - **`PrescriptionRepo.java`**: Repository interface for managing `Prescription` entities.
 
-### `repo/` (Repositories)
-These interfaces extend `JpaRepository` and provide CRUD operations for the domain entities:
+### Resources
+- **Purpose**: Contains RESTful resource classes for handling HTTP requests related to the entities. Each resource class corresponds to a specific domain entity.
+  - **`AccountResource.java`**: Exposes APIs for managing `Account` entities.
+  - **`InventoryResource.java`**: Exposes APIs for managing `InventoryLog` entities.
+  - **`LogResource.java`**: Exposes APIs for managing `Log` entities.
+  - **`PatientResource.java`**: Exposes APIs for managing `Patient` entities.
+  - **`PrescriptionMedicationResource.java`**: Exposes APIs for managing `PrescriptionMedication` entities.
+  - **`PrescriptionResource.java`**: Exposes APIs for managing `Prescription` entities.
 
-- **AccountRepo.java**: Repository interface for `Account` entities.
-- **InventoryRepo.java**: Repository interface for `Medication` entities and related inventory.
-- **LogRepo.java**: Repository interface for `Log` entities.
-- **PatientRepo.java**: Repository interface for `Patient` entities.
-- **PrescriptionMedicationRepo.java**: Repository interface for `PrescriptionMedication` entities.
-- **PrescriptionRepo.java**: Repository interface for `Prescription` entities.
+### Services
+- **Purpose**: Contains business logic related to entities, managing operations like creating, updating, and retrieving entities.
+  - **`AccountService.java`**: Service class that handles business logic for `Account` entities.
+  - **`InventoryService.java`**: Service class that handles business logic for `InventoryLog` entities.
+  - **`LogService.java`**: Service class that handles business logic for `Log` entries, including activity and transaction logs.
+  - **`NotificationService.java`**: Service class for managing notifications, specifically for notifying managers of expiring medications.
+  - **`PatientService.java`**: Service class that handles business logic for `Patient` entities.
+  - **`PrescriptionMedicationService.java`**: Service class for managing business logic related to `PrescriptionMedication` entities.
+  - **`PrescriptionService.java`**: Service class that handles business logic for `Prescription` entities.
 
-### `resource/` (Controllers)
-These classes define the REST APIs for interacting with the system:
+### Animations
+- **Purpose**: Contains files related to animations in the application.
+  - **`pharmacy_animation.json`**: A JSON file containing animation data for pharmacy-related UI elements, likely used for transitions or effects in the user interface.
 
-- **AccountResource.java**: Provides endpoints for managing user accounts.
-- **InventoryResource.java**: Provides endpoints for managing medications and inventory.
-- **LogResource.java**: Provides endpoints for accessing system logs.
-- **PatientResource.java**: Provides endpoints for managing patient information.
-- **PrescriptionMedicationResource.java**: Provides endpoints for managing prescription medications.
-- **PrescriptionResource.java**: Provides endpoints for managing prescriptions.
+### Components
+- **Purpose**: Contains React component files used to build different parts of the user interface.
+  - **`Layout.js`**: A component that provides the general layout structure for the application, likely including navigation, headers, and footers.
+  - **`SignOutButton.js`**: A button component that handles the user sign-out functionality, likely invoking an authentication service to log the user out.
 
-### `service/` (Services)
-These classes handle the business logic and interact with the repositories:
+### Context
+- **Purpose**: Contains React context files for managing global state across the application.
+  - **`PendingAccountsContext.js`**: A context provider that likely manages and provides the state related to pending user accounts, such as approval or status.
 
-- **AccountService.java**: Manages account-related operations.
-- **InventoryService.java**: Manages inventory-related operations, including stock updates and queries.
-- **LogService.java**: Handles logging functionality and fetches log entries.
-- **NotificationService.java**: Sends notifications to managers about important events like expiring medications.
-- **PatientService.java**: Manages patient records.
-- **PrescriptionMedicationService.java**: Manages prescription medications and their associations with prescriptions.
-- **PrescriptionService.java**: Handles prescription creation, updates, and the filling process.
+### Pages
+- **Purpose**: Contains React component files for individual pages or views in the application.
+  - **`ActivityLog.js`**: A page that displays a log of activities performed in the system.
+  - **`AddCustomer.js`**: A page that allows users to add new customer details to the system.
+  - **`AddMedication.js`**: A page where users can add new medication records to the system.
+  - **`FinancialReportPage.js`**: A page displaying financial reports, likely summarizing transactions or financial activities.
+  - **`Forgot.js`**: A page for handling the "forgot password" functionality.
+  - **`GenerateReportPage.js`**: A page that allows users to generate reports based on the data in the system.
+  - **`HomePage.js`**: The landing or home page of the application.
+  - **`InventoryReportPage.js`**: A page for displaying inventory-related reports.
+  - **`ManagePrescriptions.js`**: A page that allows users to manage prescriptions in the system.
+  - **`ManageRoles.js`**: A page for managing user roles and permissions within the system.
+  - **`MedicationSpecifics.js`**: A page that displays detailed information about a specific medication.
+  - **`OrderConfirmationPage.js`**: A page that confirms an order has been placed, likely showing order details.
+  - **`OrderMedicine.js`**: A page for ordering medications from the pharmacy system.
+  - **`PrescriptionSpecifics.js`**: A page that displays details about a specific prescription.
+  - **`Signup.js`**: A page that handles the user registration or sign-up process.
+  - **`TransactionPage.js`**: A page that displays transaction-related information and activities.
+  - **`UnlockAccounts.js`**: A page for unlocking or enabling user accounts that may have been locked or disabled.
+  - **`ViewCustomers.js`**: A page that allows users to view customer information.
+  - **`ViewInventory.js`**: A page that displays the current inventory of medications in the system.
 
----
+### Styles
+- **Purpose**: Contains CSS and JS files related to styling the application.
+  - **`ExcelTableStyles.css`**: A CSS file containing styles for displaying tables, possibly for exporting or viewing Excel-style data.
+  - **`HomePageStyles.js`**: A JavaScript file that contains styles specific to the `HomePage` component, using JavaScript-based styling solutions (like styled-components).
+  - **`LayoutStyles.css`**: A CSS file containing styles for the general layout, including grids, spacing, or other layout-related styling.
+  - **`LoginFormStyles.js`**: A JavaScript file with styles specific to the login form, using JavaScript-based styling solutions.
+  - **`ManageRolesStyles.js`**: A JavaScript file containing styles specific to the `ManageRoles` page.
+  - **`PageStyles.js`**: A JavaScript file containing common styles used across different pages of the application.
+  - **`ReportTableStyles.css`**: A CSS file with styles for displaying report tables, likely used on pages that generate or view reports.
+  - **`TextboxAlignment.css`**: A CSS file that likely contains styles for aligning textboxes and form inputs across the application.
 
-## How It Works
-
-1. **Account Management**: The `AccountService` and `AccountResource` provide functionality to manage user accounts and roles. Managers and other users can be added, modified, and deleted.
-
-2. **Inventory Management**: The `InventoryService` and `InventoryResource` handle the medications' inventory, including adding, updating, and removing medications.
-
-3. **Prescription Management**: The `PrescriptionService` and `PrescriptionResource` handle prescription creation, viewing, and status updates. It also handles the process of filling prescriptions by checking stock availability.
-
-4. **Notification System**: The `NotificationService` notifies managers about expiring or low-stock medications.
-
-5. **Logging**: The `LogService` and `LogResource` manage activity logs, inventory logs, and transaction logs. These logs provide insight into the system's operations.
-
-6. **Patient Management**: The `PatientService` and `PatientResource` manage patient records, including their personal and medical details.
-
----
-
-## Running the Application
-
-To run the application locally, use the following command:
-
+### Root Files
+- **Purpose**: Contains the main entry point and global files for the React application.
+  - **`App.css`**: The CSS file that contains global styles for the `App.js` component.
+  - **`App.js`**: The main entry JavaScript file for the application that likely contains the root component and routing logic.
+  - **`App.test.js`**: A test file for `App.js`, used for unit testing and verifying the functionality of the root application component.
+  - **`Forgot.js`**: A page for handling the "forgot password" functionality (duplicate, as it also appears under `pages`).
+  - **`GlobalStyles.js`**: A JavaScript file that defines global styles to be applied across the application, possibly using styled-components or similar libraries.
+  - **`Header.js`**: A component that renders the header for the application, likely containing navigation links or branding.
+  - **`index.css`**: A global CSS file applied throughout the entire application.
+  - **`index.js`**: The entry point for the React application that renders the root component (`App.js`) and manages application-wide settings.
+  - **`Login.js`**: A page or component for handling user login functionality.
+  - **`logo.svg`**: An SVG file that likely contains the logo for the application, used in headers or other branding areas.
+  - **`project_structure.txt`**: A text file that likely describes the structure of the project or provides an overview of the application’s folder hierarchy.
+  - **`UserService.js`**: A service file that likely manages user-related functionality, such as authentication, profile updates, or user data retrieval.
