@@ -6,9 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import com._5guys.domain.Prescription;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface PrescriptionRepo extends JpaRepository<Prescription, String> {
     @NonNull Optional<Prescription> findById(@NonNull String id);
+
+    // New method to find prescriptions by status
+    List<Prescription> findByStatus(String status);
 }

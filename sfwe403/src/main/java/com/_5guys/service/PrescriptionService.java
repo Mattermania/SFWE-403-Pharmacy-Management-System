@@ -31,6 +31,10 @@ public class PrescriptionService {
         return prescriptionRepo.findAll(Sort.by("name"));
     }
 
+    public List<Prescription> getPrescriptionsByStatus(String status) {
+        return prescriptionRepo.findByStatus(status);
+    }
+
     public String fillPrescription(String id) {
         Prescription prescription = prescriptionRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prescription not found"));

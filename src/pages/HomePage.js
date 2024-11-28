@@ -9,13 +9,14 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import SignOutButton from "../components/SignOutButton"; // Import the SignOutButton
+import SignOutButton from "../components/SignOutButton";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const account = location.state?.account;
   const [lowInventory, setLowInventory] = useState([]);
+  const [expiringInventory, setExpiringInventory] = useState([]);
 
   // Redirect to login page if account is not available
   useEffect(() => {
@@ -24,28 +25,48 @@ const HomePage = () => {
     }
   }, [account, navigate]);
 
-  // Debugging to check account state
-  useEffect(() => {
-    console.log("Account state:", account);
-    if (!account) {
-      navigate("/");
-    }
-  }, [account, navigate]);
-
-  // Fetch low inventory data
+  // Fetch inventory data (both low inventory and expiring inventory)
   useEffect(() => {
     axios
       .get("http://localhost:8080/inventory") // Replace with your API endpoint
       .then((response) => {
         const lowStockItems = response.data.filter(
-          (item) => item.totalQuantity <= 10 // Include items with zero stock
+          (item) => item.totalQuantity <= 120
         );
-        setLowInventory(lowStockItems); // Set state with filtered items
+        const expiringItems = response.data.filter((item) =>
+          item.medicationInventory.some((stock) => {
+            const expirationDate = new Date(stock.expirationDate);
+            const today = new Date();
+            const daysUntilExpiration =
+              (expirationDate - today) / (1000 * 60 * 60 * 24);
+            return daysUntilExpiration > 0 && daysUntilExpiration <= 14;
+          })
+        );
+
+        setLowInventory(lowStockItems);
+        setExpiringInventory(expiringItems);
       })
       .catch((error) => {
         console.error("Error fetching inventory:", error);
       });
   }, []);
+
+  const handleRemoveStock = (medicationId) => {
+      axios
+        .delete(`http://localhost:8080/inventory/remove/${medicationId}`)
+        .then(() => {
+          setExpiringInventory((prev) =>
+            prev.filter((medication) => medication.id !== medicationId)
+          );
+          alert("Medication stock removed successfully.");
+        })
+        .catch((error) => {
+          console.error("Error removing medication stock:", error);
+          alert(
+            error.response?.data || "Failed to remove medication stock. Please try again."
+          );
+        });
+    };
 
   // Navigate to specific routes
   const handleNavigation = (route) => {
@@ -54,7 +75,7 @@ const HomePage = () => {
 
   return (
     <Container>
-      <SignOutButton /> {/* Add the SignOutButton */}
+      <SignOutButton />
       {/* Alert Banner for Low Inventory */}
       {lowInventory.length > 0 && (
         <AlertBox>
@@ -72,7 +93,44 @@ const HomePage = () => {
         </AlertBox>
       )}
 
-      <Title>Pharmacy Management System</Title>
+      {/* Alert Banner for Expiring Inventory */}
+      {expiringInventory.length > 0 && (
+        <AlertBox>
+          <strong>Expiring Soon:</strong>
+          <ul>
+            {expiringInventory.map((medication) => (
+              <li key={medication.id}>
+                {medication.name}:{" "}
+                {medication.medicationInventory.map((stock, index) => {
+                  const expirationDate = new Date(stock.expirationDate);
+                  return (
+                    <span key={index}>
+                      {stock.quantity} units expire on{" "}
+                      {expirationDate.toLocaleDateString()}
+                    </span>
+                  );
+                })}
+                <button
+                  style={{
+                    marginLeft: "10px",
+                    padding: "5px 10px",
+                    backgroundColor: "red",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleRemoveStock(medication.id)}
+                >
+                  Remove Expired
+                </button>
+              </li>
+            ))}
+          </ul>
+        </AlertBox>
+      )}
+
+<Title>Pharmacy Management System</Title>
       {account ? (
         <>
           <Description>
@@ -94,7 +152,6 @@ const HomePage = () => {
               Complete a Transaction
             </Button> {/* Transaction button */}
 
-            {/* Role-specific buttons */}
             {/* Role-specific buttons */}
             {account.role.toLowerCase() === "manager" && (
               <>
