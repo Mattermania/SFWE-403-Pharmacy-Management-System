@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import {
   Container,
@@ -7,66 +9,45 @@ import {
   TableRow,
   TableHeader,
   TableData,
-  WarningText,
 } from "../styles/HomePageStyles";
-
-import React, { useState, useEffect } from "react";
 
 const InventoryReportPage = () => {
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching inventory data from the backend
-    const fetchInventory = async () => {
-      try {
-        // Uncomment the line below if you want to actually fetch from an API
-        // const response = await axios.get("http://localhost:8080/inventory");
-        // setInventory(response.data);
-
-        // Dummy data for testing
-        const dummyData = [
-          {
-            accountName: "HealthCare Clinic",
-            medicationName: "Ibuprofen",
-            quantityChange: "+20",
-            totalQuantity: "100",
-            timestamp: "2024-11-23 10:30 AM",
-          },
-          {
-            accountName: "General Hospital",
-            medicationName: "Paracetamol",
-            quantityChange: "-10",
-            totalQuantity: "50",
-            timestamp: "2024-11-22 2:45 PM",
-          },
-          {
-            accountName: "City Pharmacy",
-            medicationName: "Amoxicillin",
-            quantityChange: "+5",
-            totalQuantity: "30",
-            timestamp: "2024-11-21 1:15 PM",
-          },
-          {
-            accountName: "Wellness Center",
-            medicationName: "Aspirin",
-            quantityChange: "-5",
-            totalQuantity: "60",
-            timestamp: "2024-11-20 9:00 AM",
-          },
-        ];
-
-        // Use dummy data for testing
-        setInventory(dummyData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching inventory data:", error);
-        setLoading(false); // Handle loading state
-      }
-    };
-
     fetchInventory();
   }, []);
+
+  // Fetch inventory data
+  const fetchInventory = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/reports/inventory");
+      const inventoryData = response.data;
+
+      // Fetch user names and medication names in parallel for each inventory item
+      const updatedInventory = await Promise.all(
+        inventoryData.map(async (item) => {
+          const [userResponse, medicationResponse] = await Promise.all([
+            axios.get(`http://localhost:8080/accounts/${item.userId}`),
+            axios.get(`http://localhost:8080/inventory/${item.medicationId}`)
+          ]);
+
+          return {
+            ...item,
+            userName: userResponse.data.name, // Assuming the API returns `name` for user
+            medicationName: medicationResponse.data.name // Assuming the API returns `name` for medication
+          };
+        })
+      );
+
+      setInventory(updatedInventory);
+      setLoading(false); // Handle loading state
+    } catch (error) {
+      console.error("Error fetching inventory data:", error);
+      setLoading(false); // Handle loading state
+    }
+  };
 
   // Render loading state
   if (loading) {
@@ -85,32 +66,36 @@ const InventoryReportPage = () => {
         pharmacy.
       </Description>
 
-      {inventory.length >= 0 ? (
-        <Table>
-          <thead>
-            <TableRow>
-              <TableHeader>Account Name</TableHeader>
-              <TableHeader>Medication Name</TableHeader>
-              <TableHeader>Quantity Change</TableHeader>
-              <TableHeader>Total Quantity</TableHeader>
-              <TableHeader>Time and Date</TableHeader>
+      <Table>
+      <thead>
+        <TableRow key="header-row">
+          <TableHeader>Account Name</TableHeader>
+          <TableHeader>Medication Name</TableHeader>
+          <TableHeader>Quantity Changed</TableHeader>
+          <TableHeader>Total Quantity</TableHeader>
+          <TableHeader>Time and Date</TableHeader>
+        </TableRow>
+      </thead>
+      <tbody>
+        {inventory.length > 0 ? (
+          inventory.map((item, index) => (
+            <TableRow key={index}>
+              <TableData>{item.userName}</TableData>
+              <TableData>{item.medicationName}</TableData>
+              <TableData>{item.quantityChanged}</TableData>
+              <TableData>{item.totalQuantity}</TableData>
+              <TableData>{item.date} {item.time}</TableData>
             </TableRow>
-          </thead>
-          <tbody>
-            {inventory.map((item, index) => (
-              <TableRow key={index}>
-                <TableData>{item.accountName}</TableData>
-                <TableData>{item.medicationName}</TableData>
-                <TableData>{item.quantityChange}</TableData>
-                <TableData>{item.totalQuantity}</TableData>
-                <TableData>{item.timestamp}</TableData>
-              </TableRow>
-            ))}
-          </tbody>
-        </Table>
-      ) : (
-        <p>No medications found in the inventory.</p>
-      )}
+          ))
+        ) : (
+          <TableRow key="empty-row">
+            <TableData colSpan="5" style={{ textAlign: "center" }}>
+              No inventory logs found.
+            </TableData>
+          </TableRow>
+        )}
+      </tbody>
+    </Table>
     </Container>
   );
 };

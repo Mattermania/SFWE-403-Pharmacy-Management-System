@@ -4,8 +4,8 @@ import "../styles/ExcelTableStyles.css"; // Optional: For table styling
 
 const MedicationSpecifics = () => {
   const location = useLocation();
-  const { medication } = location.state || {}; // Get medication data passed from UpdateInventory
-  
+  const { medication } = location.state || {}; // Get medication data passed from ViewInventory
+
   const [errorMessage, setErrorMessage] = useState("");
 
   // Use useMemo to compute expirationData with error handling
@@ -15,12 +15,11 @@ const MedicationSpecifics = () => {
       return [];
     }
 
-    if (!medication.medication_inventory) {
-      setErrorMessage("Inventory map not found.");
+    if (!medication.medicationInventory) {
       return [];
     }
 
-    return medication.medication_inventory;
+    return medication.medicationInventory;
   }, [medication]);
 
   return (
@@ -35,12 +34,20 @@ const MedicationSpecifics = () => {
           </tr>
         </thead>
         <tbody>
-          {expirationData.map((entry, index) => (
-            <tr key={index}>
-              <td>{entry.quantity}</td>
-              <td>{entry.expirationDate}</td>
+          {expirationData.length > 0 ? (
+            expirationData.map((entry, index) => (
+              <tr key={index}>
+                <td>{entry.quantity}</td>
+                <td>{entry.expirationDate}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="2" style={{ textAlign: "center" }}>
+                No stock available
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

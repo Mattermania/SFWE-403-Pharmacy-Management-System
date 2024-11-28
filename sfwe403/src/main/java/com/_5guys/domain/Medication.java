@@ -43,10 +43,12 @@ public class Medication {
     private String name;
     @Column(name = "manufacturer", unique = false, updatable = true, nullable = false)
     private String manufacturer;
+    @Column(name = "price", unique = false, updatable = true, nullable = false)
+    private Double price;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "medication_inventory", joinColumns = @JoinColumn(name = "medication_id"))
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<Stock> medication_inventory = new ArrayList<>(); 
+    private List<Stock> medicationInventory = new ArrayList<>(); 
     @OneToMany(mappedBy = "medication", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonBackReference("medicationReference")
     private Set<PrescriptionMedication> prescriptions = new HashSet<>();
@@ -54,15 +56,15 @@ public class Medication {
     public boolean removeInventory(int quantity) {
         int remainingQuantity = quantity;
     
-        // Check if medication_inventory is empty
-        if (medication_inventory.isEmpty()) {
+        // Check if medicationInventory is empty
+        if (medicationInventory.isEmpty()) {
             return false; // or throw an exception, depending on your use case
         }
     
         // Loop over the entries sorted by date (oldest first)
-        for (int i = 0; i < medication_inventory.size(); i++) {
-            int currentQuantity = medication_inventory.get(i).getQuantity();
-            Stock updatedStock = medication_inventory.get(i);
+        for (int i = 0; i < medicationInventory.size(); i++) {
+            int currentQuantity = medicationInventory.get(i).getQuantity();
+            Stock updatedStock = medicationInventory.get(i);
             updatedStock.setQuantity(currentQuantity - remainingQuantity);
     
             if (remainingQuantity < 0) {
@@ -71,10 +73,10 @@ public class Medication {
             else if (currentQuantity <= remainingQuantity) {
                 // Remove entire quantity for this date
                 remainingQuantity -= currentQuantity;
-                medication_inventory.remove(i); // Remove the entry as quantity reaches zero
+                medicationInventory.remove(i); // Remove the entry as quantity reaches zero
             } else {
                 // Partially remove quantity from this date
-                medication_inventory.set(i, updatedStock);
+                medicationInventory.set(i, updatedStock);
                 remainingQuantity = 0;
             }
         }
@@ -84,15 +86,15 @@ public class Medication {
     }
 
     public void removeExpired(LocalDate currentDate) {
-        // Check if medication_inventory is empty
-        if (medication_inventory.isEmpty()) {
+        // Check if medicationInventory is empty
+        if (medicationInventory.isEmpty()) {
             return;
         }
     
         // Loop over the entries sorted by date (oldest first)
-        for (int i = 0; i < medication_inventory.size(); i++) {
-            if (currentDate.isAfter(medication_inventory.get(i).getExpirationDate())) {
-                medication_inventory.remove(i); // Remove the entry as medications have expired
+        for (int i = 0; i < medicationInventory.size(); i++) {
+            if (currentDate.isAfter(medicationInventory.get(i).getExpirationDate())) {
+                medicationInventory.remove(i); // Remove the entry as medications have expired
             } else {
                 return;
             }
@@ -101,9 +103,9 @@ public class Medication {
     
     public void addInventory(LocalDate expirationDate, int quantity) {
         // Loop over the entries sorted by date (oldest first)
-        for (int i = 0; i < medication_inventory.size(); i++) {
-            if (expirationDate.equals(medication_inventory.get(i).getExpirationDate())) {
-                medication_inventory.get(i).setQuantity(medication_inventory.get(i).getQuantity() + quantity); // Remove the entry as medications have expired
+        for (int i = 0; i < medicationInventory.size(); i++) {
+            if (expirationDate.equals(medicationInventory.get(i).getExpirationDate())) {
+                medicationInventory.get(i).setQuantity(medicationInventory.get(i).getQuantity() + quantity); // Remove the entry as medications have expired
                 return;
             }
         }
@@ -112,7 +114,7 @@ public class Medication {
         newStock.setExpirationDate(expirationDate);
         newStock.setQuantity(quantity);
 
-        medication_inventory.add(newStock);
+        medicationInventory.add(newStock);
 
         return;
     }
@@ -121,8 +123,8 @@ public class Medication {
     public int getTotalQuantity() {
         int totalQuantity = 0;
         // Loop over the entries sorted by date (oldest first)
-        for (int i = 0; i < medication_inventory.size(); i++) {
-            totalQuantity += medication_inventory.get(i).getQuantity();
+        for (int i = 0; i < medicationInventory.size(); i++) {
+            totalQuantity += medicationInventory.get(i).getQuantity();
         }
         return totalQuantity;
     }

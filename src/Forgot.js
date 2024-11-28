@@ -1,35 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { FormContainer, Form, Button, Input } from "./styles/LoginFormStyles";
 
-const ForgotForm = () => {
-    const[email,setEmail] = useState('');
+const ForgotPassword = () => {
+  const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
-    const handleForgot =(event) => { 
-        event.preventDefault();
-        console.log('Password Change sent to ' + email);
+  const handleForgotPassword = async (event) => {
+    event.preventDefault();
+
+    try {
+      // Explicitly flag the account for password reset
+      const response = await axios.post("http://localhost:8080/accounts/forgot-password", {
+        email,
+      });
+
+      if (response.status === 200) {
+        setSuccessMessage("Your request has been sent. A manager will review it shortly.");
+        setErrorMessage("");
+
+        // Display confirmation popup
+        setTimeout(() => {
+          alert("Password reset request sent successfully!");
+          navigate("/");
+        }, 500);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        setErrorMessage("No account found with that email.");
+      } else {
+        setErrorMessage("An error occurred. Please try again.");
+      }
+      setSuccessMessage("");
     }
+  };
 
-    return(
-        <div>
-            <form onSubmit={handleForgot} style={{ display: 'flex', flexDirection: 'column', width: '300px' }} >
-                <h2>
-                    Reset your Password
-                </h2>
-                <label>
-                    Email:
-                    <input 
-                        type="text"
-                        value = {email}
-                        onChange ={(e) => setEmail(e.target.value)}
-                        style={{ marginBottom: '1rem', padding: '0.5rem', width: '100%' }}
-                        placeholder='Enter your email'>
-                    </input>
-                </label>
-                <button type="submit" style={{ padding: '0.5rem 1rem' }}>
-                    Send Reset Link
-                </button>
-            </form>
-        </div>
-)
+  return (
+    <FormContainer>
+      <Form onSubmit={handleForgotPassword}>
+        <h2>Forgot Password</h2>
+        <label>
+          Enter Your Email:
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
 
-}
-export default ForgotForm;
+        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+        {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
+
+        <Button type="submit">Submit</Button>
+        <Button type="button" onClick={() => navigate("/")}>
+          Back to Login
+        </Button>
+      </Form>
+    </FormContainer>
+  );
+};
+
+export default ForgotPassword;

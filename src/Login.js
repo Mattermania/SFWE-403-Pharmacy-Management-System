@@ -53,14 +53,6 @@ const LoginForm = () => {
     event.preventDefault();
     let userRole = "";
 
-    if (username === "manager" && password === "1234") {
-      userRole = "manager";
-    } else if (username === "pharmacist" && password === "1234") {
-      userRole = "pharmacist";
-    } else if (username === "staff" && password === "1234") {
-      userRole = "staff";
-    }
-
     if (userRole) {
       navigate("/beforepharm", { state: { role: userRole } });
       setLoginMessage("Login successful!");
@@ -73,7 +65,7 @@ const LoginForm = () => {
             params: {
               username: username,
               email: username,
-              password: password,
+              password: password
             },
           }
         );

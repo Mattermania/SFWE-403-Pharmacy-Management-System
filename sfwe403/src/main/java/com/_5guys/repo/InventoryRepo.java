@@ -11,4 +11,5 @@ import java.util.Optional;
 @Repository
 public interface InventoryRepo extends JpaRepository<Medication, String> {
     @NonNull Optional<Medication> findById(@NonNull String id);
+    @NonNull Optional<Medication> findByName(@NonNull String name);
 }

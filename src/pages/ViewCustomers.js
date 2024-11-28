@@ -16,14 +16,6 @@ const ViewCustomers = () => {
 
   // Fetch the patients from the backend
   const fetchPatients = async () => {
-    if (!account || account.role !== "manager") {
-      navigate("/"); // Redirect if the role is not manager
-      return; // Exit early if not manager
-    }
-
-    // You can replace this mock data with the actual API call when the backend is ready
-    // setCustomers(mockCustomers);
-    
     try {
       const response = await axios.get('http://localhost:8080/patients'); // Replace with actual endpoint
       setCustomers(response.data); // Set the patient data from response
@@ -66,7 +58,6 @@ const ViewCustomers = () => {
             <th>Date of Birth</th>
             <th>Insurance</th>
             <th>Member ID</th>
-            <th>Status</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -76,10 +67,9 @@ const ViewCustomers = () => {
               <tr key={customer.id}>
                 <td>{customer.name}</td>
                 <td>{customer.email}</td>
-                <td>{customer.dob}</td> {/* Corrected from dateOfBirth to dob */}
+                <td>{customer.dateOfBirth}</td>
                 <td>{customer.insurance.insuranceProvider}</td>
                 <td>{customer.insurance.memberId}</td>
-                <td>{customer.prescriptionStatus}</td>
                 <td>
                   <button onClick={() => removeCustomer(customer.id)}>
                     Remove

@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Service;
 import com._5guys.domain.Medication;
 import com._5guys.domain.Stock;
 import com._5guys.repo.InventoryRepo;
-import com._5guys.domain.ActivityLog;
-import com._5guys.repo.ActivityLogRepo;
 
 /**
  * @author Junior RT
@@ -36,7 +33,6 @@ import com._5guys.repo.ActivityLogRepo;
 @RequiredArgsConstructor
 public class InventoryService {
     private final InventoryRepo inventoryRepo;
-    private final ActivityLogRepo activityLogRepo;
     private final NotificationService notificationService;
     
 
@@ -46,6 +42,10 @@ public class InventoryService {
 
     public Medication getMedication(String id) {
         return inventoryRepo.findById(id).orElseThrow(() -> new RuntimeException("Medication not found"));
+    }
+
+    public Medication getMedicationByName(String name) {
+        return inventoryRepo.findByName(name).orElseThrow(() -> new RuntimeException("Medication not found"));
     }
 
     public Medication addInventory(String id, List<Stock> newInventory) {
@@ -74,7 +74,7 @@ public class InventoryService {
     public boolean updateInventoryAfterPrescriptionFill(String medicationId, int quantity) {
         Medication medication = inventoryRepo.findById(medicationId)
                 .orElseThrow(() -> new RuntimeException("Medication not found"));
-        List<Stock> inventory = medication.getMedication_inventory();
+        List<Stock> inventory = medication.getMedicationInventory();
         int totalAvailable = inventory.stream().mapToInt(Stock::getQuantity).sum();
 
 
@@ -104,7 +104,7 @@ public class InventoryService {
         Medication medication = inventoryRepo.findById(medicationId)
                 .orElseThrow(() -> new RuntimeException("Medication not found"));
 
-        List<Stock> inventory = medication.getMedication_inventory();
+        List<Stock> inventory = medication.getMedicationInventory();
 
         // Update or add the new stock to the existing inventory
         for (Stock stock : newStock) {
@@ -135,21 +135,13 @@ public class InventoryService {
         Map<String, List<LocalDate>> expiringMedicines = new HashMap<>();
 
         for (Medication medication : medications) {
-            List<Stock> inventory = medication.getMedication_inventory();
+            List<Stock> inventory = medication.getMedicationInventory();
             List<Stock> expiredStocks = new ArrayList<>();
 
             for (Stock stock : inventory) {
                 if (stock.getExpirationDate().isBefore(today)) {
                     expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(stock.getExpirationDate());
                     expiredStocks.add(stock);
-
-                    ActivityLog logEntry = new ActivityLog();
-                    logEntry.setPharmacistName("System");
-                    logEntry.setPrescriptionNumber("N/A");
-                    logEntry.setPatientDetails("N/A");
-                    logEntry.setAction("Removed expired medication: " + medication.getName());
-                    logEntry.setTimestamp(LocalDateTime.now());
-                    activityLogRepo.save(logEntry);
                 } else if (!stock.getExpirationDate().isAfter(thresholdDate)) {
                     expiringMedicines.computeIfAbsent(medication.getName(), k -> new ArrayList<>()).add(stock.getExpirationDate());
                 }
@@ -174,9 +166,51 @@ public class InventoryService {
     public int getExpiredMedicationsCount() {
         LocalDate currentDate = LocalDate.now();
         return (int) inventoryRepo.findAll().stream()
-                .filter(medication -> medication.getMedication_inventory().stream()
+                .filter(medication -> medication.getMedicationInventory().stream()
                         .anyMatch(stock -> stock.getExpirationDate().isBefore(currentDate)))
                 .count();
+    }
+
+
+    public void removeStockById(String medicationId) {
+        Medication medication = inventoryRepo.findById(medicationId)
+                .orElseThrow(() -> new RuntimeException("Medication not found"));
+
+        List<Stock> inventory = medication.getMedicationInventory();
+
+        // Check if any stock exists
+        if (inventory.isEmpty()) {
+            throw new RuntimeException("No stock found for this medication.");
+        }
+
+        // Clear the inventory
+        inventory.clear();
+
+        // Save the updated medication
+        inventoryRepo.save(medication);
+        log.info("All stock removed for medication ID: {}", medicationId);
+    }
+
+    public void removeExpiredMedicationQuantities() {
+        List<Medication> medications = inventoryRepo.findAll();
+        LocalDate today = LocalDate.now();
+
+        for (Medication medication : medications) {
+            List<Stock> inventory = medication.getMedicationInventory();
+
+            for (Stock stock : inventory) {
+                // Check for expired stock
+                if (stock.getExpirationDate().isBefore(today)) {
+                    if (stock.getQuantity() > 0) {
+                    }
+                    // Set the expired stock quantity to 0
+                    stock.setQuantity(0);
+                }
+            }
+
+            // Save the updated medication inventory
+            inventoryRepo.save(medication);
+        }
     }
     
 }

@@ -34,10 +34,6 @@ public class PrescriptionMedication {
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private String id;
 
-    // @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    // // @MapsId("prescriptionId")
-    // @JoinColumn(name = "prescription_id", nullable = false)
-    // @JsonBackReference("prescriptionMedicationReference")
     @ManyToOne
     @JoinColumn(name = "prescription_id", unique = false, updatable = true, nullable = false)
     @JsonBackReference("prescriptionReference")
