@@ -31,7 +31,7 @@ const HomePage = () => {
       .get("http://localhost:8080/inventory") // Replace with your API endpoint
       .then((response) => {
         const lowStockItems = response.data.filter(
-          (item) => item.totalQuantity <= 10
+          (item) => item.totalQuantity <= 120
         );
         const expiringItems = response.data.filter((item) =>
           item.medicationInventory.some((stock) => {
@@ -152,7 +152,6 @@ const HomePage = () => {
               Complete a Transaction
             </Button> {/* Transaction button */}
 
-            {/* Role-specific buttons */}
             {/* Role-specific buttons */}
             {account.role.toLowerCase() === "manager" && (
               <>

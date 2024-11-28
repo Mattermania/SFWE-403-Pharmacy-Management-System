@@ -6,6 +6,8 @@ const OrderConfirmationPage = () => {
   const navigate = useNavigate();
   const order = location.state?.cartItems || [];
   const account = location.state?.account;
+  const paymentMethod = location.state?.paymentMethod || "Not specified"; // Default value if not provided
+  const signature = location.state?.signature || "Not provided"; // Default value if not provided
   const timestamp = new Date().toLocaleString();
 
   const pharmacyInfo = {
@@ -120,6 +122,29 @@ const OrderConfirmationPage = () => {
           <strong>Total:</strong> ${calculateTotal()}
         </h3>
       </div>
+
+      {/* Display Payment Method */}
+      <div style={{ marginBottom: "20px" }}>
+        <h3>Payment Method</h3>
+        <p>{paymentMethod}</p>
+      </div>
+
+      {/* Display Signature if Present */}
+      {signature !== "Not provided" && (
+        <div style={{ marginBottom: "20px" }}>
+          <h3>Customer Signature</h3>
+          <p
+            style={{
+              border: "1px solid #ddd",
+              padding: "10px",
+              fontStyle: "italic",
+            }}
+          >
+            {signature}
+          </p>
+        </div>
+      )}
+
       <div style={{ textAlign: "center", marginTop: "20px" }}>
         <button
           onClick={printReceipt}
