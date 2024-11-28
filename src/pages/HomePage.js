@@ -150,7 +150,14 @@ const HomePage = () => {
             </Button>
             <Button onClick={() => handleNavigation("/transaction")}>
               Complete a Transaction
-            </Button> {/* Transaction button */}
+            </Button>
+            <Button onClick={() => handleNavigation("/view-customers")}>
+              View Customers
+            </Button>
+            <Button onClick={() => handleNavigation("/view-inventory")}>
+              View Inventory
+            </Button>
+            {/* Transaction button */}
 
             {/* Role-specific buttons */}
             {account.role.toLowerCase() === "manager" && (
@@ -164,9 +171,6 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/add-medication")}>
                   Add Medication
                 </Button>
-                <Button onClick={() => handleNavigation("/view-inventory")}>
-                  View Inventory
-                </Button>
                 <Button onClick={() => handleNavigation("/manage-roles")}>
                   Manage User Roles
                 </Button>
@@ -176,11 +180,8 @@ const HomePage = () => {
             {/* Pharmacist Buttons */}
             {account.role.toLowerCase() === "pharmacist" && (
               <>
-                <Button onClick={() => handleNavigation("/pharmacist")}>
-                  Get Inventory
-                </Button>
-                <Button onClick={() => handleNavigation("/order-medicine")}>
-                  Order Medicine
+                <Button onClick={() => handleNavigation("/manage-prescriptions")}>
+                  Manage Prescriptions
                 </Button>
               </>
             )}
@@ -188,19 +189,6 @@ const HomePage = () => {
             {/* Staff-only buttons */}
             {account.role.toLowerCase() === "staff" && (
               <>
-              </>
-            )}
-
-            {/* Staff-specific buttons */}
-            {(
-              <>
-                <Button
-                  onClick={() => handleNavigation("/manage-prescriptions")}>
-                  Manage Prescriptions
-                </Button>
-                <Button onClick={() => handleNavigation("/view-customers")}>
-                  View Customers
-                </Button>
               </>
             )}
           </Section>

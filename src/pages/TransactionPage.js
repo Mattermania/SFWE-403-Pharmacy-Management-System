@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const TransactionPage = () => {
@@ -11,6 +11,8 @@ const TransactionPage = () => {
   const [signature, setSignature] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const account = location.state?.account;
 
   useEffect(() => {
     fetchUpdatedInventory();
@@ -156,6 +158,7 @@ const TransactionPage = () => {
           quantitySold: item.quantity,
         })
         .then(() => {
+          logOrder(item.id, item.quantity);
           console.log(`Updated inventory for item ID ${item.id}`);
         })
         .catch((error) => {
@@ -163,6 +166,8 @@ const TransactionPage = () => {
           throw new Error(`Failed to update inventory for ${item.name}.`);
         })
     );
+
+    logTransaction(paymentMethod);
 
     Promise.all(updateRequests)
       .then(() => {
@@ -177,6 +182,55 @@ const TransactionPage = () => {
         alert(error.message || "Checkout failed. Please try again.");
       });
   };
+
+  const logTransaction = async (paymentMethod, payment) => {
+    try {
+      const now = new Date();
+      const logData = {
+        logType: "transaction",
+        date: formatDate(now),
+        time: formatTime(now),
+        userId: account.id, // Replace with dynamic user ID if applicable
+        paymentMethod: paymentMethod,
+        payment: paymentMethod,
+        purchasedItems: {"ALL": cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)},
+      };
+
+      await axios.post("http://localhost:8080/reports/transaction", logData);
+    } catch (error) {
+      console.error("Error logging transaction:", error);
+      throw error; // Re-throw for error handling
+    }
+  };
+
+  const logOrder = async (medicationId, quantityOrdered) => {
+    const response = await axios.get(`http://localhost:8080/inventory/${medicationId}`);
+    
+    try {
+      const now = new Date();
+      const logData = {
+        logType: "inventory",
+        date: formatDate(now),
+        time: formatTime(now),
+        userId: account.id, // Replace with dynamic user ID if applicable
+        medicationId: medicationId,
+        quantityChanged: quantityOrdered,
+        totalQuantity: response.data.totalQuantity,
+        state: "SOLD"
+      };
+
+      await axios.post("http://localhost:8080/reports/inventory", logData);
+    } catch (error) {
+      console.error("Error logging order:", error);
+      throw error; // Re-throw for error handling
+    }
+  };
+
+  const formatDate = (date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+  const formatTime = (date) =>
+    `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}`;
 
   const hasPrescriptionInCart = () => {
       if (!prescriptionItems || prescriptionItems.length === 0) {
@@ -263,8 +317,8 @@ const TransactionPage = () => {
       <label>
         <input
           type="radio"
-          value="Credit"
-          checked={paymentMethod === "Credit"}
+          value="CREDIT"
+          checked={paymentMethod === "CREDIT"}
           onChange={(e) => setPaymentMethod(e.target.value)}
         />
         Credit
@@ -272,8 +326,8 @@ const TransactionPage = () => {
       <label>
         <input
           type="radio"
-          value="Debit"
-          checked={paymentMethod === "Debit"}
+          value="DEBIT"
+          checked={paymentMethod === "DEBIT"}
           onChange={(e) => setPaymentMethod(e.target.value)}
         />
         Debit
@@ -281,8 +335,8 @@ const TransactionPage = () => {
       <label>
         <input
           type="radio"
-          value="Cash"
-          checked={paymentMethod === "Cash"}
+          value="CASH"
+          checked={paymentMethod === "CASH"}
           onChange={(e) => setPaymentMethod(e.target.value)}
         />
         Cash
