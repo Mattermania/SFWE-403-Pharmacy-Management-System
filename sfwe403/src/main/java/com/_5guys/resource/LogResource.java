@@ -11,6 +11,7 @@ import com._5guys.domain.InventoryLog;
 import com._5guys.domain.Log;
 import com._5guys.domain.TransactionLog;
 import com._5guys.service.LogService;
+import org.springframework.data.domain.Page;
 
 import java.net.URI;
 
@@ -58,11 +59,15 @@ public class LogResource {
     public ResponseEntity<List<InventoryLog>> getInventoryEntries() {
         return ResponseEntity.ok(logService.getInventoryEntries());
     }
-
+    
     @GetMapping("/activity")
-    public ResponseEntity<List<ActivityLog>> getActivityEntries() {
-        return ResponseEntity.ok(logService.getActivityEntries());
+    public ResponseEntity<Page<ActivityLog>> getActivityEntries(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<ActivityLog> activityLogs = logService.getPaginatedActivityEntries(page, size);
+        return ResponseEntity.ok(activityLogs);
     }
+
 
     @GetMapping("/transaction")
     public ResponseEntity<List<TransactionLog>> getTransactionEntries() {

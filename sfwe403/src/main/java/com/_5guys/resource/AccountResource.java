@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com._5guys.domain.Account;
+import com._5guys.domain.ActivityLog;
 import com._5guys.service.AccountService;
+import com._5guys.service.LogService;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,11 +28,13 @@ import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 @RequiredArgsConstructor
 public class AccountResource {
     private final AccountService accountService;
+    private final LogService logService;
 
     // Create a new account
     @PostMapping
     public ResponseEntity<Account> createAccount(@RequestBody Account account) {
         Account createdAccount = accountService.createAccount(account);
+        logService.logActivity(createdAccount.getId(), ActivityLog.Activity.CREATED);
         URI location = URI.create(String.format("/accounts/%s", createdAccount.getId()));
         return ResponseEntity.created(location).body(createdAccount);
     }
@@ -64,12 +68,14 @@ public class AccountResource {
 
         if (account != null) {
             if (account.isAccountLocked()) {
+                logService.logActivity(account.getId(), ActivityLog.Activity.LOCKED);
                 return ResponseEntity.status(423).body(null); // 423 Locked
             } else {
                 if (!account.getPassword().equals(password)) {
                     accountService.handleFailedLoginAttempt(username);
                     return ResponseEntity.status(401).body(null); // 401 Unauthorized
                 } else {
+                    logService.logActivity(account.getId(), ActivityLog.Activity.LOGGEDIN);
                     return ResponseEntity.ok(account); // Successful login
                 }
             }
@@ -116,6 +122,7 @@ public class AccountResource {
         }
 
         accountService.unlockAccount(id);
+        logService.logActivity(id, ActivityLog.Activity.UNLOCKED);
         return ResponseEntity.ok("Account unlocked successfully.");
     }
 
@@ -124,6 +131,7 @@ public class AccountResource {
     public ResponseEntity<String> updatePassword(@PathVariable(value = "id") String id, @RequestParam("password") String password) {
         try {
             String responseMessage = accountService.updatePassword(id, password);
+            logService.logActivity(id, ActivityLog.Activity.UPDATEDPASSWORD);
             return ResponseEntity.ok(responseMessage);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid request: " + e.getMessage());
@@ -145,6 +153,7 @@ public class AccountResource {
 
         account.setPasswordResetRequested(true); // Flag account for reset
         accountService.saveAccount(account); // Save changes to the database
+        logService.logActivity(account.getId(), ActivityLog.Activity.SENTREQUEST);
         return ResponseEntity.ok("Password reset request submitted.");
     }
 

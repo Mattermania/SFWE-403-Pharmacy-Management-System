@@ -24,6 +24,7 @@ import ManageRoles from "./pages/ManageRoles";
 import TransactionPage from "./pages/TransactionPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import { PendingAccountsProvider } from "./context/PendingAccountsContext"; // Import the provider
+import ActivityLog from "./pages/ActivityLog";
 
 function App() {
   return (
@@ -52,7 +53,8 @@ function App() {
             <Route path="/unlock-accounts" element={<UnlockAccounts />} />
             <Route path="/manage-roles" element={<ManageRoles />} />
             <Route path="/transaction" element={<TransactionPage />} />
-            <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+            <Route path="/order-confirmation" element={<OrderConfirmationPage />}/>
+             <Route path="/activity-log" element={<ActivityLog />} />
           </Route>
         </Routes>
       </BrowserRouter>

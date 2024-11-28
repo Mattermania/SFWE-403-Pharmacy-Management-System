@@ -25,6 +25,22 @@ const HomePage = () => {
     }
   }, [account, navigate]);
 
+  // Debugging to check account state
+  useEffect(() => {
+    console.log("Account state:", account);
+    if (!account) {
+      navigate("/");
+    }
+  }, [account, navigate]);
+
+  // Debugging to check account state
+  useEffect(() => {
+    console.log("Account state:", account);
+    if (!account) {
+      navigate("/");
+    }
+  }, [account, navigate]);
+
   // Fetch inventory data (both low inventory and expiring inventory)
   useEffect(() => {
     axios
@@ -174,6 +190,9 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/manage-roles")}>
                   Manage User Roles
                 </Button>
+                <Button onClick={() => handleNavigation("/activity-log")}>
+                  View Activity Log
+                </Button> {/* Add this button */}
               </>
             )}
 

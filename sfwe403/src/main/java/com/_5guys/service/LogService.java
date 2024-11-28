@@ -3,10 +3,16 @@ package com._5guys.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com._5guys.domain.ActivityLog;
@@ -30,6 +36,19 @@ import com._5guys.repo.LogRepo;
 public class LogService {
     private final LogRepo logRepo;
 
+    public void logActivity(String userId, ActivityLog.Activity activity) {
+        ActivityLog log = new ActivityLog();
+        log.setId(UUID.randomUUID().toString());
+        log.setDate(LocalDate.now());
+        log.setTime(LocalTime.now());
+        log.setUserId(userId);
+        log.setActivity(activity);
+        logRepo.save(log);
+    }
+    // Paginated activity logs
+    public Page<ActivityLog> getPaginatedActivityEntries(int page, int size) {
+        return logRepo.findAllByActivityNotNull(PageRequest.of(page, size, Sort.by("date").descending()));
+    }
 
     public List<Log> getAllReportEntries() {
         return logRepo.findAll(Sort.by("id"));

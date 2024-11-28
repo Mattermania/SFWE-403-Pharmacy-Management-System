@@ -26,7 +26,12 @@ public class ActivityLog extends Log {
         ACTIVATED,
         DEACTIVATED,
         LOCKED,
-        UPDATED
+        UNLOCKED,
+        SENTREQUEST,
+        UPDATEDPASSWORD,
+        ACTIVATEDPENDINGNEWACCOUNT,
+        ACTIVATEDLOCKEDACCOUNT,
+        SENTNEWPASSWORD
     }
 
     @Column(name = "activity", unique = false, updatable = true, nullable = true)
