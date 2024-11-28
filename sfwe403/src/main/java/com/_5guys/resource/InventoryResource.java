@@ -90,4 +90,14 @@ public class InventoryResource {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/expired-quantities")
+    public ResponseEntity<String> removeExpiredMedicationQuantities() {
+        try {
+            inventoryService.removeExpiredMedicationQuantities();
+            return ResponseEntity.ok("Expired medication quantities removed successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error removing expired medication quantities: " + e.getMessage());
+        }
+    }
 }

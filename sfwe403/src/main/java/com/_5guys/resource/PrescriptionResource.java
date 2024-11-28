@@ -33,6 +33,13 @@ public class PrescriptionResource {
         return ResponseEntity.ok(prescriptionService.getAllPrescriptions());
     }
 
+    // Get prescription by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Prescription> getPrescription(@PathVariable(value = "id") String id) {
+        Prescription prescription = prescriptionService.getPrescription(id);
+        return prescription != null ? ResponseEntity.ok(prescription) : ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/fill")
     public ResponseEntity<String> fillPrescription(
             @RequestParam("prescriptionId") String prescriptionId) {

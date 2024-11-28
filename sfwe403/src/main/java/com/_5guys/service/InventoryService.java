@@ -170,5 +170,27 @@ public class InventoryService {
                         .anyMatch(stock -> stock.getExpirationDate().isBefore(currentDate)))
                 .count();
     }
-    
+
+    public void removeExpiredMedicationQuantities() {
+        List<Medication> medications = inventoryRepo.findAll();
+        LocalDate today = LocalDate.now();
+
+        for (Medication medication : medications) {
+            List<Stock> inventory = medication.getMedicationInventory();
+
+            for (Stock stock : inventory) {
+                // Check for expired stock
+                if (stock.getExpirationDate().isBefore(today)) {
+                    if (stock.getQuantity() > 0) {
+                    }
+                    // Set the expired stock quantity to 0
+                    stock.setQuantity(0);
+                }
+            }
+
+            // Save the updated medication inventory
+            inventoryRepo.save(medication);
+        }
+    }
+
 }

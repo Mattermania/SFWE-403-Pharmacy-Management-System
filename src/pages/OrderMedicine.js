@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from "axios";import { Container, Title, Description } from "../styles/PageStyles";
 import "../styles/ExcelTableStyles.css"; // Import CSS for the Excel-style table
 
@@ -8,7 +8,6 @@ const OrderMedication = () => {
   const [orderDetails, setOrderDetails] = useState({ name: "", quantity: 0, expirationDate: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const navigate = useNavigate();
   const location = useLocation();
   const account = location.state?.account;
 

@@ -1,39 +1,120 @@
-import React from "react";
-import { Container, Title, Description } from "../styles/HomePageStyles";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 import "../styles/ReportTableStyles.css"; // Import the table styling
+import {
+  Container,
+  Title,
+  Description,
+} from "../styles/HomePageStyles";
 
 const FinancialReportPage = () => {
-  // Sample data for financial report
-  const financialData = [
-    {
-      productName: "Ibuprofen",
-      amountSold: 150,
-      amountWasted: 5,
-      totalSales: 450.0,
-      profitMargin: 20,
-    },
-    {
-      productName: "Paracetamol",
-      amountSold: 200,
-      amountWasted: 10,
-      totalSales: 600.0,
-      profitMargin: 25,
-    },
-    {
-      productName: "Amoxicillin",
-      amountSold: 100,
-      amountWasted: 2,
-      totalSales: 300.0,
-      profitMargin: 15,
-    },
-    {
-      productName: "Aspirin",
-      amountSold: 180,
-      amountWasted: 8,
-      totalSales: 540.0,
-      profitMargin: 18,
-    },
-  ];
+  const [financialData, setFinancialData] = useState([]);
+  const [transactionData, setTransactionData] = useState([]);
+  const [financialSummary, setFinancialSummary] = useState({
+    totalQuantity: 0,
+    totalSold: 0,
+    totalExpired: 0,
+  });
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFinancialData();
+    fetchTransactionData();
+  }, []);
+
+  // Fetch and process transaction logs
+  const fetchTransactionData = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/reports/inventory");
+      const data = response.data;
+
+      // Group transactions by unique medicationId
+      const groupedData = data.reduce((acc, log) => {
+        const key = log.medicationId;
+
+        if (!acc[key]) {
+          acc[key] = {
+            medicationId: key,
+            totalQuantity: 0,
+            totalSold: 0,
+            totalExpired: 0,
+          };
+        }
+
+        // Accumulate totals based on the state
+        if (log.state === "CREATED" || log.state === "PURCHASED") {
+          acc[key].totalQuantity += log.quantityChanged;
+        } else if (log.state === "SOLD") {
+          acc[key].totalSold += log.quantityChanged;
+        } else if (log.state === "EXPIRED") {
+          acc[key].totalExpired += log.quantityChanged;
+        }
+
+        return acc;
+      }, {});
+
+      // Fetch additional data (medication details) and append it to the grouped data
+      const updatedGroupedData = await Promise.all(
+        Object.keys(groupedData).map(async (key) => {
+          // Fetch medication details for each medicationId
+          const medicationResponse = await axios.get(`http://localhost:8080/inventory/${key}`);
+          const medicationData = medicationResponse.data;
+
+          // Add medication details to the grouped data
+          return {
+            ...groupedData[key],
+            medicationName: medicationData.name || 'N/A', // Assuming 'name' is available
+            price: medicationData.price || 0,           // Assuming 'price' is available
+          };
+        })
+      );
+
+      // Set the processed data to the state
+      setTransactionData(updatedGroupedData);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching transaction data:", error);
+      setLoading(false);
+    }
+  };
+
+  // Fetch inventory data
+  const fetchFinancialData = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/reports/transaction");
+      const responseData = response.data;
+
+      // Fetch user names and medication names in parallel for each inventory item
+      const financialData = await Promise.all(
+        responseData.map(async (item) => {
+          try {
+            // Fetch user data using userId
+            const userResponse = await axios.get(`http://localhost:8080/accounts/${item.userId}`);
+            
+            // Return the item with additional userName
+            return {
+              ...item,
+              userName: userResponse.data.name, // Assuming the API returns `name` for the user
+            };
+          } catch (error) {
+            return {
+              ...item,
+              userName: "N/A",
+            }
+          }
+        })
+      );
+      
+
+      setFinancialData(financialData);
+      setLoading(false); // Handle loading state
+    } catch (error) {
+      console.error("Error fetching financial data:", error);
+      setLoading(false); // Handle loading state
+    }
+  };
 
   // Sample data for expenses
   const expenses = [
@@ -45,11 +126,11 @@ const FinancialReportPage = () => {
   ];
 
   // Calculate total sales and total transactions
-  const totalSales = financialData.reduce((sum, item) => sum + item.totalSales, 0).toFixed(2);
-  const totalTransactions = financialData.reduce((sum, item) => sum + item.amountSold, 0);
+  const totalSales = 0; // financialData.reduce((sum, item) => sum + item.totalSales, 0).toFixed(2);
+  const totalTransactions = 0; // financialData.reduce((sum, item) => sum + item.amountSold, 0);
 
   // Calculate total expenses
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0).toFixed(2);
+  const totalExpenses = 0; // expenses.reduce((sum, expense) => sum + expense.amount, 0).toFixed(2);
 
   // Timestamp for the report generation
   const reportDate = new Date().toLocaleString();
@@ -70,35 +151,47 @@ const FinancialReportPage = () => {
       <table className="report-table">
         <thead>
           <tr>
-            <th>Product Name</th>
-            <th>Amount Sold</th>
-            <th>Amount Wasted</th>
+            <th>Medication Name</th>
+            <th>Price</th>
+            <th>Total Sold</th>
+            <th>Total Expired</th>
             <th>Total Sales</th>
-            <th>Profit Margin</th>
           </tr>
         </thead>
         <tbody>
-          {financialData.map((item, index) => (
+          {transactionData.map((item, index) => (
             <tr key={index}>
-              <td>{item.productName}</td>
-              <td className="center">{item.amountSold}</td>
-              <td className="center">{item.amountWasted}</td>
-              <td className="center">${item.totalSales.toFixed(2)}</td>
-              <td className="center">{item.profitMargin}%</td>
+              <td className="center">{item.medicationName}</td>
+              <td className="center">${item.price}</td>
+              <td className="center">{item.totalSold}</td>
+              <td className="center">{item.totalExpired}</td>
+              <td className="center">${item.price * item.totalSold}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Summary Section */}
-      <div style={{ textAlign: "right", marginTop: "20px" }}>
-        <p>
-          <strong>Total Sales:</strong> ${totalSales}
-        </p>
-        <p>
-          <strong>Total Transactions:</strong> {totalTransactions}
-        </p>
-      </div>
+      {/* Financial Data Table */}
+      <table className="report-table">
+        <thead>
+          <tr>
+            <th>Account Name</th>
+            <th>Payment Method</th>
+            <th>Total Cost</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {financialData.map((item, index) => (
+            <tr key={index}>
+              <td className="center">{item.userName}</td>
+              <td className="center">{item.payment}</td>
+              <td className="center">${item.totalCost}</td>
+              <td className="center">{item.date} {item.time}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       {/* Expenses Table */}
       <h3 style={{ marginTop: "40px" }}>Expenses Breakdown</h3>

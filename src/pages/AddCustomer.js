@@ -19,7 +19,6 @@ const AddCustomer = () => {
   const [policyEndDate, setPolicyEndDate] = useState("");
   const [noInsurance, setNoInsurance] = useState(false);
 
-  const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 

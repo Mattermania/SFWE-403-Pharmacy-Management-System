@@ -4,7 +4,7 @@ import "../styles/ExcelTableStyles.css"; // Optional: For table styling
 
 const MedicationSpecifics = () => {
   const location = useLocation();
-  const { medication } = location.state || {}; // Get medication data passed from UpdateInventory
+  const { medication } = location.state || {}; // Get medication data passed from ViewInventory
 
   const [errorMessage, setErrorMessage] = useState("");
 

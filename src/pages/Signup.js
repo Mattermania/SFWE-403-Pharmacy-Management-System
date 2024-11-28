@@ -15,8 +15,6 @@ const SignUpForm = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("STAFF");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const { addPendingAccount } = usePendingAccounts(); // Access context functions
 
   const handleSignUp = async(event) => {
@@ -52,8 +50,6 @@ const SignUpForm = () => {
       const response = await axios.post("http://localhost:8080/accounts", accountData);
 
       if (response.status === 201) {
-        setSuccessMessage("Account created successfully.");
-        setErrorMessage("");
         // Reset form
         setUsername("");
         setPassword("");
@@ -62,14 +58,9 @@ const SignUpForm = () => {
         setPhoneNumber("");
         setEmail("");
         setRole("STAFF");
-      } else {
-        setErrorMessage(`Error creating account: ${response.status}`);
-        setSuccessMessage("");
       }
     } catch (error) {
       console.error("Error submitting request:", error);
-      setErrorMessage(`Account with this username and/or email already exists`);
-      setSuccessMessage("");
     }
   };
 

@@ -3,10 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../styles/ExcelTableStyles.css"; // Import CSS for the Excel-style table
 
-const UpdateInventory = () => {
+const ViewInventory = () => {
   const [inventory, setInventory] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +29,7 @@ const UpdateInventory = () => {
 
   return (
     <div className="excel-table-container">
-      <h1>Inventory</h1>
+      <h1>View Inventory</h1>
 
       {/* Inventory Table */}
       <table className="excel-table">
@@ -75,9 +74,8 @@ const UpdateInventory = () => {
 
       {/* Status Messages */}
       {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
     </div>
   );
 };
 
-export default UpdateInventory;
+export default ViewInventory;

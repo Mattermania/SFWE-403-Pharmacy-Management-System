@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import {
   Container,
@@ -9,12 +9,10 @@ import {
   TableRow,
   TableHeader,
   TableData,
-  WarningText,
 } from "../styles/HomePageStyles";
 
 const InventoryReportPage = () => {
   const [inventory, setInventory] = useState([]);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

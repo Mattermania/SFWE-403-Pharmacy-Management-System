@@ -98,9 +98,6 @@ const HomePage = () => {
             {/* Role-specific buttons */}
             {account.role.toLowerCase() === "manager" && (
               <>
-                <Button onClick={() => handleNavigation("/view-customers")}>
-                  View Customers
-                </Button>
                 <Button onClick={() => handleNavigation("/generate-report")}>
                   Generate Report
                 </Button>
@@ -110,8 +107,8 @@ const HomePage = () => {
                 <Button onClick={() => handleNavigation("/add-medication")}>
                   Add Medication
                 </Button>
-                <Button onClick={() => handleNavigation("/update-inventory")}>
-                  Update Inventory
+                <Button onClick={() => handleNavigation("/view-inventory")}>
+                  View Inventory
                 </Button>
                 <Button onClick={() => handleNavigation("/manage-roles")}>
                   Manage User Roles
@@ -141,9 +138,11 @@ const HomePage = () => {
             {(
               <>
                 <Button
-                  onClick={() => handleNavigation("/track-prescriptions")}
-                >
-                  Track Prescriptions
+                  onClick={() => handleNavigation("/manage-prescriptions")}>
+                  Manage Prescriptions
+                </Button>
+                <Button onClick={() => handleNavigation("/view-customers")}>
+                  View Customers
                 </Button>
               </>
             )}
